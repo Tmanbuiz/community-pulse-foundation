@@ -1,5 +1,5 @@
 name = "community-pulse-foundation"
-type = "javascript"
+main = "src/index.js"
 compatibility_date = "2024-01-01"
 
 [env.production]
@@ -8,5 +8,8 @@ routes = [
 ]
 
 [build]
-command = "echo 'Static site'"
-cwd = "./"
+command = "echo 'Ready'"
+
+[[assets.bindings]]
+path = "/"
+directory = "./"

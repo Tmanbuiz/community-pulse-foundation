@@ -11,12 +11,12 @@
    ========================================================= */
 
 const SUPABASE_URL = "https://gbpJyfhbniqbapcdlph.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo";
+const SUPABASE_ANON_KEY = "sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf";
 
 const CPF_DB_READY =
-  !SUPABASE_URL.startsWith("https://gbpJyfhbniqbapcdlph.supabase.co") && !SUPABASE_ANON_KEY.startsWith("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo");
+  !SUPABASE_URL.startsWith("https://gbpJyfhbniqbapcdlph.supabase.co") && !SUPABASE_ANON_KEY.startsWith("sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf");
 
 const cpfDb =
   CPF_DB_READY && window.supabase
-    ? window.supabase.createClient(https://gbpJyfhbniqbapcdlph.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo)
+    ? window.supabase.createClient(https://gbpJyfhbniqbapcdlph.supabase.co, sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf)
     : null;

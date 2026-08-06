@@ -1,0 +1,12 @@
+name = "community-pulse-foundation"
+type = "javascript"
+compatibility_date = "2024-01-01"
+
+[env.production]
+routes = [
+  { pattern = "community-pulse-foundation.atoyejet.workers.dev/*", zone_name = "atoyejet.workers.dev" }
+]
+
+[build]
+command = "echo 'Static site'"
+cwd = "./"

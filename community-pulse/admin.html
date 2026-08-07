@@ -111,6 +111,30 @@ input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 
 #toast.bad{background:var(--danger)}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
 
+/* ---------- role badge ---------- */
+.role-badge{background:rgba(255,255,255,.2);color:#fff;font-size:.72rem;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px}
+
+/* ---------- access list ---------- */
+.person{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.person:last-child{border-bottom:none}
+.person-avatar{width:42px;height:42px;flex:none;border-radius:50%;background:var(--teal-soft);
+  color:var(--teal-dark);display:flex;align-items:center;justify-content:center;font-weight:700}
+.person-main{flex:1;min-width:160px}
+.person-main strong{display:block;font-size:.95rem;color:var(--ink)}
+.person-main span{font-size:.82rem;color:var(--muted)}
+select{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:inherit;font-size:.88rem;background:#fff;color:var(--text)}
+select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,115,119,.13)}
+.role-help{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;padding:18px}
+.role-help div{background:#fafcfc;border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.role-help strong{display:block;font-size:.86rem;color:var(--teal-dark)}
+.role-help span{font-size:.8rem;color:var(--muted)}
+
+/* ---------- import bar ---------- */
+.import-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:#fdf8f1;border:1px solid #f3ddc0;border-radius:12px;padding:14px 18px;margin-bottom:16px}
+.import-bar p{font-size:.88rem;color:#8a5a12;margin:0}
+
 /* ---------- login ---------- */
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
   background:linear-gradient(150deg,var(--teal) 0%,var(--teal-dark) 60%,#083f42 100%)}
@@ -154,7 +178,8 @@ input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 
         <img src="assets/images/logo-clean.jpg" alt="" />
         <div>Community Pulse<small>Site Manager</small></div>
       </div>
-      <div style="display:flex;gap:8px">
+      <div style="display:flex;gap:8px;align-items:center">
+        <span id="roleBadge" class="role-badge hidden"></span>
         <button id="viewSiteBtn">View site</button>
         <button id="signOutBtn">Sign out</button>
       </div>
@@ -196,6 +221,7 @@ input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 
 <div id="toast"></div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="assets/js/data.js"></script>
 <script>
 window.SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
 window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo";
@@ -290,8 +316,27 @@ const SECTIONS = {
     ]
   },
 
-  settings: { label:'Site text', settings:true, title:'Home page text & contact details',
-    blurb:'Headline, contact information and donation details shown across the site.' }
+  settings: { label:'Site text & photos', settings:true, title:'Site text, contact details & photos',
+    blurb:'Headline, contact information, and the main photos used across the site.' },
+
+  access: { label:'Team access', access:true, title:'Who can manage this site',
+    blurb:'Owner has full control. Admin can manage content and people. Editor can change content. Viewer can look but not change.' }
+};
+
+const ROLES = {
+  owner:  { label:'Owner',  desc:'Full control, including removing people' },
+  admin:  { label:'Admin',  desc:'Manage all content and team access' },
+  editor: { label:'Editor', desc:'Add and edit content, no access changes' },
+  viewer: { label:'Viewer', desc:'Can sign in and look, cannot change anything' }
+};
+
+const IMAGE_SETTINGS = {
+  imgHero:       'Home page background photo',
+  imgLogo:       'Logo (header and footer)',
+  imgAbout:      'About section photo',
+  imgActionPlan: 'Programme action plan image',
+  imgImpact:     'Impact section photo',
+  imgVolunteer:  'Get Involved photo'
 };
 
 const SETTING_LABELS = {
@@ -312,6 +357,12 @@ let current = 'pages';
 let rows = [];
 let editingId = null;
 let draftImage = null;
+let myRole = 'viewer';
+let myId = null;
+
+const canEdit = () => ['owner','admin','editor'].includes(myRole);
+const canManageUsers = () => ['owner','admin'].includes(myRole);
+const isOwner = () => myRole === 'owner';
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -347,9 +398,24 @@ function loginNote(msg) {
   n.classList.remove('hidden');
 }
 
-function start() {
+async function start() {
   $('loginPage').classList.add('hidden');
   $('app').classList.remove('hidden');
+
+  const { data: sess } = await cpfDb.auth.getSession();
+  myId = sess.session ? sess.session.user.id : null;
+
+  if (myId) {
+    const { data: me } = await cpfDb.from('profiles').select('role').eq('id', myId).maybeSingle();
+    myRole = me ? me.role : 'viewer';
+  }
+
+  const badge = $('roleBadge');
+  if (badge) {
+    badge.textContent = (ROLES[myRole] || {}).label || myRole;
+    badge.classList.remove('hidden');
+  }
+
   buildTabs();
   openSection('pages');
 }
@@ -359,6 +425,7 @@ function start() {
    ===================================================== */
 function buildTabs() {
   $('tabs').innerHTML = Object.entries(SECTIONS)
+    .filter(([k, s]) => !(s.access && !canManageUsers()))
     .map(([k, s]) => `<button class="tab" data-tab="${k}">${s.label}</button>`).join('');
 }
 
@@ -374,9 +441,11 @@ function openSection(key) {
   $('secTitle').textContent = s.title;
   $('secBlurb').textContent = s.blurb;
   $('editor').classList.add('hidden');
-  $('addBtn').classList.toggle('hidden', !!s.settings);
+  $('addBtn').classList.toggle('hidden', !!s.settings || !!s.access || !canEdit());
 
-  s.settings ? loadSettings() : loadRows();
+  if (s.access)        loadAccess();
+  else if (s.settings) loadSettings();
+  else                 loadRows();
 }
 
 /* =====================================================
@@ -392,9 +461,20 @@ async function loadRows() {
 
 function renderList() {
   const s = SECTIONS[current];
+
+  const importable = IMPORTABLE[current] && canEdit();
+  const importBar = importable ? `
+    <div class="import-bar">
+      <p>The ${s.label.toLowerCase()} currently on your website are built in and not editable.
+         Copy them here once and you can edit them from now on.</p>
+      <button class="btn-sm btn-out" id="importBtn">Import from website</button>
+    </div>` : '';
+
   if (!rows.length) {
     $('listCard').innerHTML =
-      `<div class="empty"><strong>Nothing here yet</strong>Use “Add new” to create your first entry.</div>`;
+      importBar +
+      `<div class="empty"><strong>Nothing here yet</strong>Use “Add new” to create your first entry, or import what is already on the site.</div>`;
+    const ib = $('importBtn'); if (ib) ib.addEventListener('click', importBuiltIn);
     return;
   }
   $('listCard').innerHTML = rows.map(r => {
@@ -411,8 +491,8 @@ function renderList() {
           <span><span class="chip ${on?'chip-live':'chip-draft'}">${on?s.flagLabels[0]:s.flagLabels[1]}</span>${esc(s.sub(r))}</span>
         </div>
         <div class="item-actions">
-          <button class="btn-sm btn-out" data-edit="${r.id}">Edit</button>
-          <button class="btn-sm btn-red" data-del="${r.id}">Delete</button>
+          ${canEdit() ? `<button class="btn-sm btn-out" data-edit="${r.id}">Edit</button>
+          <button class="btn-sm btn-red" data-del="${r.id}">Delete</button>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -530,38 +610,189 @@ async function remove(id) {
 }
 
 /* =====================================================
+   TEAM ACCESS TAB
+   ===================================================== */
+async function loadAccess() {
+  const { data, error } = await cpfDb.from('profiles').select('*').order('created_at');
+  if (error) { $('listCard').innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+
+  const help = `<div class="role-help">` + Object.entries(ROLES)
+    .map(([k, r]) => `<div><strong>${r.label}</strong><span>${r.desc}</span></div>`).join('') + `</div>`;
+
+  const people = (data || []).map(p => {
+    const name = p.full_name || p.email || 'Unknown';
+    const me = p.id === myId;
+    // you cannot change your own role, and only the owner can touch an owner
+    const locked = me || (p.role === 'owner' && !isOwner());
+    const options = Object.entries(ROLES).map(([k, r]) =>
+      `<option value="${k}" ${p.role === k ? 'selected' : ''}>${r.label}</option>`).join('');
+
+    return `<div class="person">
+      <div class="person-avatar">${esc(name.charAt(0).toUpperCase())}</div>
+      <div class="person-main">
+        <strong>${esc(name)}${me ? ' (you)' : ''}</strong>
+        <span>${esc(p.email || '')}</span>
+      </div>
+      ${locked
+        ? `<span class="chip chip-live">${(ROLES[p.role]||{}).label || p.role}</span>`
+        : `<select data-role-for="${p.id}">${options}</select>`}
+      ${(isOwner() && !me && p.role !== 'owner')
+        ? `<button class="btn-sm btn-red" data-remove="${p.id}">Remove</button>` : ''}
+    </div>`;
+  }).join('');
+
+  $('listCard').innerHTML = people + help +
+    `<div class="card-pad" style="border-top:1px solid var(--line);color:var(--muted);font-size:.86rem">
+       To add someone new: in Supabase go to <strong>Authentication &rarr; Users &rarr; Add user</strong>,
+       tick <em>Auto Confirm User</em>, then come back here and give them a role.
+       New people start as <strong>Viewer</strong> until you change it.
+     </div>`;
+
+  $('listCard').querySelectorAll('[data-role-for]').forEach(sel => {
+    sel.addEventListener('change', async () => {
+      const { error } = await cpfDb.from('profiles')
+        .update({ role: sel.value }).eq('id', sel.dataset.roleFor);
+      toast(error ? error.message : 'Role updated.', !!error);
+      if (error) loadAccess();
+    });
+  });
+
+  $('listCard').querySelectorAll('[data-remove]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Remove this person\'s access? They will no longer be able to sign in and manage the site.')) return;
+      const { error } = await cpfDb.from('profiles').delete().eq('id', btn.dataset.remove);
+      toast(error ? error.message : 'Access removed.', !!error);
+      loadAccess();
+    });
+  });
+}
+
+/* =====================================================
+   IMPORT THE SITE'S BUILT-IN CONTENT
+   ===================================================== */
+const IMPORTABLE = {
+  programs: () => (siteData.programs || []).map((p, i) => ({
+    title_en: p.title.en, title_fr: p.title.fr,
+    subtitle_en: p.subtitle ? p.subtitle.en : null,
+    subtitle_fr: p.subtitle ? p.subtitle.fr : null,
+    description_en: p.description ? p.description.en : null,
+    description_fr: p.description ? p.description.fr : null,
+    image_url: p.image || null, sort_order: i + 1, visible: true
+  })),
+  events: () => (siteData.events || []).map((e, i) => ({
+    title_en: e.title.en, title_fr: e.title.fr,
+    date_en: e.date ? e.date.en : null, date_fr: e.date ? e.date.fr : null,
+    location_en: e.location ? e.location.en : null,
+    location_fr: e.location ? e.location.fr : null,
+    summary_en: e.summary ? e.summary.en : null,
+    summary_fr: e.summary ? e.summary.fr : null,
+    details_en: e.details ? e.details.en : null,
+    details_fr: e.details ? e.details.fr : null,
+    image_url: e.image || null, sort_order: i + 1, visible: true
+  })),
+  team: () => (siteData.team || []).map((m, i) => ({
+    name: m.name,
+    role_en: m.role ? m.role.en : null, role_fr: m.role ? m.role.fr : null,
+    bio_en: m.bio ? m.bio.en : null, bio_fr: m.bio ? m.bio.fr : null,
+    image_url: m.image || null, sort_order: i + 1, visible: true
+  }))
+};
+
+async function importBuiltIn() {
+  if (typeof siteData === 'undefined' || !IMPORTABLE[current]) return;
+  const items = IMPORTABLE[current]();
+  if (!items.length) return toast('Nothing to import.', true);
+  if (!confirm(`Copy the ${items.length} ${current} currently on the website into the database so you can edit them?`)) return;
+
+  const { error } = await cpfDb.from(SECTIONS[current].table).insert(items);
+  if (error) return toast(error.message, true);
+  toast(`${items.length} imported. You can edit them now.`);
+  loadRows();
+}
+
+/* =====================================================
    SETTINGS TAB
    ===================================================== */
 async function loadSettings() {
   const { data, error } = await cpfDb.from('settings').select('*');
   if (error) { $('listCard').innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
 
-  const order = Object.keys(SETTING_LABELS);
-  const sorted = (data||[]).sort((a,b) => order.indexOf(a.key) - order.indexOf(b.key));
+  const textRows  = (data||[]).filter(r => !IMAGE_SETTINGS[r.key]);
+  const imageRows = (data||[]).filter(r =>  IMAGE_SETTINGS[r.key]);
 
-  $('listCard').innerHTML = `<div class="card-pad">` + sorted.map(s => {
-    const label = SETTING_LABELS[s.key] || s.key;
-    const long = (s.value_en || '').length > 70;
+  const order = Object.keys(SETTING_LABELS);
+  textRows.sort((a,b) => order.indexOf(a.key) - order.indexOf(b.key));
+
+  const textHtml = textRows.map(r => {
+    const label = SETTING_LABELS[r.key] || r.key;
+    const long = (r.value_en || '').length > 70;
     const input = (id, val) => long
       ? `<textarea id="${id}" style="min-height:90px">${esc(val)}</textarea>`
       : `<input type="text" id="${id}" value="${esc(val)}" />`;
     return `<div class="field">
       <label>${esc(label)}</label>
       <div class="pair">
-        <div><span class="lang-tag">EN</span>${input('set_en_'+s.key, s.value_en)}</div>
-        <div><span class="lang-tag">FR</span>${input('set_fr_'+s.key, s.value_fr)}</div>
+        <div><span class="lang-tag">EN</span>${input('set_en_'+r.key, r.value_en)}</div>
+        <div><span class="lang-tag">FR</span>${input('set_fr_'+r.key, r.value_fr)}</div>
       </div></div>`;
-  }).join('') +
-  `<div class="form-actions"><button class="btn btn-teal" id="saveSettings">Save site text</button></div></div>`;
+  }).join('');
 
-  $('saveSettings').addEventListener('click', async () => {
-    const updates = sorted.map(s => ({
-      key: s.key,
-      value_en: $('set_en_' + s.key).value,
-      value_fr: $('set_fr_' + s.key).value
+  const imageHtml = imageRows.map(r => `
+    <div class="field">
+      <label>${esc(IMAGE_SETTINGS[r.key])}</label>
+      <div class="upload">
+        <img class="upload-preview" id="prev_${r.key}" src="${esc(r.value_en)}" alt="" />
+        <div class="upload-info" id="info_${r.key}">JPG or PNG, up to 5 MB.</div>
+        <input type="file" id="file_${r.key}" accept="image/*" style="display:none" />
+        <button type="button" class="btn-sm btn-out" data-pick="${r.key}">Change photo</button>
+      </div>
+    </div>`).join('');
+
+  $('listCard').innerHTML = `<div class="card-pad">
+      ${textHtml}
+      <h3 style="font-size:1.05rem;color:var(--ink);margin:26px 0 14px;padding-top:20px;border-top:1px solid var(--line)">Site photos</h3>
+      ${imageHtml}
+      <div class="form-actions">
+        <button class="btn btn-teal" id="saveSettings" ${canEdit() ? '' : 'disabled'}>Save changes</button>
+      </div>
+      ${canEdit() ? '' : '<p style="color:var(--muted);font-size:.86rem;margin-top:10px">Your role can view these but not change them.</p>'}
+    </div>`;
+
+  // photo pickers
+  $('listCard').querySelectorAll('[data-pick]').forEach(btn => {
+    const key = btn.dataset.pick;
+    btn.addEventListener('click', () => $('file_' + key).click());
+    $('file_' + key).addEventListener('change', async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) return toast('That photo is larger than 5 MB.', true);
+      $('info_' + key).textContent = 'Uploading...';
+
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const path = `site/${key}-${Date.now()}.${ext}`;
+      const { error: upErr } = await cpfDb.storage.from('site-images').upload(path, file);
+      if (upErr) { $('info_' + key).textContent = upErr.message; return toast(upErr.message, true); }
+
+      const { data: pub } = cpfDb.storage.from('site-images').getPublicUrl(path);
+      const { error: dbErr } = await cpfDb.from('settings')
+        .update({ value_en: pub.publicUrl, value_fr: pub.publicUrl }).eq('key', key);
+
+      if (dbErr) return toast(dbErr.message, true);
+      $('prev_' + key).src = pub.publicUrl;
+      $('info_' + key).textContent = 'Updated. It is live on the site now.';
+      toast('Photo updated.');
+    });
+  });
+
+  const saveBtn = $('saveSettings');
+  if (saveBtn) saveBtn.addEventListener('click', async () => {
+    const updates = textRows.map(r => ({
+      key: r.key,
+      value_en: $('set_en_' + r.key).value,
+      value_fr: $('set_fr_' + r.key).value
     }));
     const { error } = await cpfDb.from('settings').upsert(updates);
-    toast(error ? error.message : 'Site text saved.', !!error);
+    toast(error ? error.message : 'Saved.', !!error);
   });
 }
 

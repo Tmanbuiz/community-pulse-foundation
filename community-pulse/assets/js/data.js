@@ -6,46 +6,46 @@
    ========================================================= */
 
 const siteData = {
-  // ==================== OBJECTIVES ====================
+  // ==================== CORE VALUES ====================
   objectives: [
     {
-      icon: "🤝",
-      title: { en: "Foster Friendship & Belonging", fr: "Favoriser l'amitié et l'appartenance" },
+      icon: "\ud83e\udec2",
+      title: { en: "Inclusion", fr: "Inclusion" },
       text: {
-        en: "Build meaningful connections among newcomers and long-term residents across New Brunswick.",
-        fr: "Créer des liens significatifs entre les nouveaux arrivants et les résidents de longue date au Nouveau-Brunswick."
+        en: "We believe everyone deserves to feel welcomed, respected, and valued.",
+        fr: "Nous croyons que chacun mérite de se sentir accueilli, respecté et valorisé."
       }
     },
     {
-      icon: "🕊️",
-      title: { en: "Promote Peace & Understanding", fr: "Promouvoir la paix et la compréhension" },
+      icon: "\ud83c\udfd8\ufe0f",
+      title: { en: "Community", fr: "Communauté" },
       text: {
-        en: "Encourage mutual respect and dialogue across cultural, racial, and faith communities.",
-        fr: "Encourager le respect mutuel et le dialogue entre les communautés culturelles, raciales et religieuses."
+        en: "We build relationships that strengthen belonging and collective responsibility.",
+        fr: "Nous bâtissons des relations qui renforcent l'appartenance et la responsabilité collective."
       }
     },
     {
-      icon: "📢",
-      title: { en: "Highlight Community Stories", fr: "Mettre en valeur les histoires communautaires" },
+      icon: "\ud83c\udf0d",
+      title: { en: "Diversity", fr: "Diversité" },
       text: {
-        en: "Celebrate achievements, growth, and stories of resilience from people across the province.",
-        fr: "Célébrer les réussites, la croissance et les histoires de résilience des gens de la province."
+        en: "We celebrate different cultures, experiences, perspectives, and identities.",
+        fr: "Nous célébrons les différentes cultures, expériences, perspectives et identités."
       }
     },
     {
-      icon: "💬",
-      title: { en: "Safe Digital Space", fr: "Espace numérique sécuritaire" },
+      icon: "\ud83c\udf31",
+      title: { en: "Empowerment", fr: "Autonomisation" },
       text: {
-        en: "Provide a welcoming platform for conversations on life, faith, relationships, business, and personal development.",
-        fr: "Offrir une plateforme accueillante pour des conversations sur la vie, la foi, les relations, les affaires et le développement personnel."
+        en: "We create opportunities for individuals and communities to grow and thrive.",
+        fr: "Nous créons des occasions pour les individus et les communautés de grandir et de s'épanouir."
       }
     },
     {
-      icon: "🌉",
-      title: { en: "Bridge Communities", fr: "Relier les communautés" },
+      icon: "\ud83e\udd1d",
+      title: { en: "Collaboration", fr: "Collaboration" },
       text: {
-        en: "Connect communities, schools, and organizations through storytelling and meaningful outreach.",
-        fr: "Relier les communautés, les écoles et les organisations par le biais de récits et de sensibilisation significative."
+        en: "We work together with individuals, organizations, and partners to create meaningful impact.",
+        fr: "Nous travaillons avec des individus, des organismes et des partenaires pour créer un impact significatif."
       }
     }
   ],
@@ -55,51 +55,51 @@ const siteData = {
     {
       id: "podcast",
       image: "assets/images/podcast-setup.jpg",
-      title: { en: "Personality Show / Podcast", fr: "Émission de personnalité / Balado" },
-      subtitle: { en: "The Big Conversation", fr: "La Grande Conversation" },
+      title: { en: "Community Personality Show & Podcast", fr: "\u00c9mission et balado Personnalit\u00e9 communautaire" },
+      subtitle: { en: "Sharing Stories. Inspiring Change.", fr: "Partager des histoires. Inspirer le changement." },
       description: {
-        en: "Featuring inspiring individuals making a positive impact. Real people. Real talk. Real impact. Covering family values, career success, immigration journeys, faith, relationships, and more.",
-        fr: "Mettant en vedette des personnes inspirantes qui ont un impact positif. Des gens réels. Des conversations authentiques. Un impact réel. Couvrant les valeurs familiales, la réussite professionnelle, les parcours d'immigration, la foi, les relations et plus encore."
+        en: "We highlight individuals creating positive change within their communities. Through interviews, storytelling, and meaningful conversations, we celebrate achievements and inspire leadership, resilience, and social responsibility. Guests include community leaders, youth changemakers, newcomer success stories, Indigenous voices, entrepreneurs, and volunteers.",
+        fr: "Nous mettons en lumi\u00e8re des personnes qui cr\u00e9ent un changement positif dans leur communaut\u00e9. Par des entrevues, des r\u00e9cits et des conversations significatives, nous c\u00e9l\u00e9brons les r\u00e9ussites et inspirons le leadership, la r\u00e9silience et la responsabilit\u00e9 sociale. Nos invit\u00e9s comprennent des leaders communautaires, de jeunes acteurs de changement, des nouveaux arrivants, des voix autochtones, des entrepreneurs et des b\u00e9n\u00e9voles."
       }
     },
     {
       id: "outreach",
       image: "assets/images/volunteers-packing.jpg",
       title: { en: "Community Service & Outreach", fr: "Service communautaire et sensibilisation" },
-      subtitle: { en: "Supporting Neighbors in Need", fr: "Soutenir nos voisins dans le besoin" },
+      subtitle: { en: "Serving Communities Through Action", fr: "Servir la communaut\u00e9 par l'action" },
       description: {
-        en: "Volunteer drives, newcomer support, food bank collaborations, charity campaigns, and targeted support for the homeless and families in need across Fredericton and beyond.",
-        fr: "Campagnes de bénévolat, soutien aux nouveaux arrivants, collaborations avec les banques alimentaires, campagnes de charité et soutien ciblé pour les personnes sans abri et les familles dans le besoin à Fredericton et ailleurs."
+        en: "Communities become stronger when people support and care for one another. Our outreach creates practical support systems and opportunities to take part: volunteer engagement programs, newcomer support, food bank collaborations, charity campaigns, community resource navigation, social inclusion programs, and seasonal outreach activities.",
+        fr: "Les communaut\u00e9s se renforcent lorsque les gens s'entraident. Notre travail cr\u00e9e des syst\u00e8mes de soutien concrets et des occasions de participer : programmes de b\u00e9n\u00e9volat, soutien aux nouveaux arrivants, collaborations avec les banques alimentaires, campagnes de charit\u00e9, orientation vers les ressources, programmes d'inclusion sociale et activit\u00e9s saisonni\u00e8res."
       }
     },
     {
       id: "family",
       image: "assets/images/family-talk.jpg",
-      title: { en: "Relationship & Family Talk", fr: "Discussions sur les relations et la famille" },
-      subtitle: { en: "Strengthening Homes", fr: "Renforcer les foyers" },
+      title: { en: "Relationship & Family Conversations", fr: "Conversations sur les relations et la famille" },
+      subtitle: { en: "Strengthening Families. Building Healthy Relationships.", fr: "Renforcer les familles. B\u00e2tir des relations saines." },
       description: {
-        en: "Conversations on family life, multicultural relationships, parenting, and building healthy homes in a diverse society.",
-        fr: "Conversations sur la vie familiale, les relations multiculturelles, la parentalité et la construction de foyers sains dans une société diversifiée."
+        en: "Families are the foundation of strong communities. Through conversations, education, and community discussions we explore family relationships, parenting support, marriage and partnerships, intercultural relationships, family wellness, and communication and conflict resolution.",
+        fr: "Les familles sont le fondement de communaut\u00e9s fortes. Par des conversations, de l'\u00e9ducation et des discussions communautaires, nous abordons les relations familiales, le soutien \u00e0 la parentalit\u00e9, le mariage et les partenariats, les relations interculturelles, le bien-\u00eatre familial ainsi que la communication et la r\u00e9solution de conflits."
       }
     },
     {
       id: "health",
       image: "assets/images/hero-community.jpg",
-      title: { en: "Community Health Talk", fr: "Discussions sur la santé communautaire" },
-      subtitle: { en: "Wellness for All", fr: "Le bien-être pour tous" },
+      title: { en: "Community Health Talk", fr: "Discussions sur la sant\u00e9 communautaire" },
+      subtitle: { en: "Promoting Health, Wellness, and Awareness", fr: "Promouvoir la sant\u00e9, le bien-\u00eatre et la sensibilisation" },
       description: {
-        en: "Health awareness and wellness education sessions designed to support the physical and mental well-being of community members.",
-        fr: "Séances de sensibilisation à la santé et d'éducation au bien-être conçues pour soutenir le bien-être physique et mental des membres de la communauté."
+        en: "Healthier communities are created through awareness, education, and access to reliable information. We bring together healthcare professionals, community leaders, and people with lived experience around physical health awareness, mental health education, preventive healthcare, community wellness, and health equity and accessibility.",
+        fr: "Des communaut\u00e9s en meilleure sant\u00e9 se b\u00e2tissent par la sensibilisation, l'\u00e9ducation et l'acc\u00e8s \u00e0 une information fiable. Nous r\u00e9unissons des professionnels de la sant\u00e9, des leaders communautaires et des personnes ayant un v\u00e9cu autour de la sant\u00e9 physique, de la sant\u00e9 mentale, des soins pr\u00e9ventifs, du mieux-\u00eatre collectif et de l'\u00e9quit\u00e9 en sant\u00e9."
       }
     },
     {
       id: "children",
       image: "assets/images/family-talk.jpg",
-      title: { en: "Children’s Corner", fr: "Le coin des enfants" },
-      subtitle: { en: "Nurturing the Next Generation", fr: "Nourrir la prochaine génération" },
+      title: { en: "Children's Corner", fr: "Le coin des enfants" },
+      subtitle: { en: "Inspiring Young Minds Through Learning and Creativity", fr: "Inspirer les jeunes esprits par l'apprentissage et la cr\u00e9ativit\u00e9" },
       description: {
-        en: "Storytelling, moral lessons, and creative activities designed to inspire and educate children in a safe and engaging environment.",
-        fr: "Contes, leçons morales et activités créatives conçues pour inspirer et éduquer les enfants dans un environnement sécuritaire et engageant."
+        en: "Children are the future of every community. The Children's Corner offers storytelling sessions, educational activities, character development lessons, creative challenges, cultural learning, and family-friendly entertainment. Every child deserves the chance to learn, grow, express themselves, and thrive.",
+        fr: "Les enfants sont l'avenir de chaque communaut\u00e9. Le coin des enfants propose des s\u00e9ances de contes, des activit\u00e9s \u00e9ducatives, des le\u00e7ons sur le d\u00e9veloppement du caract\u00e8re, des d\u00e9fis cr\u00e9atifs, des apprentissages culturels et des divertissements familiaux. Chaque enfant m\u00e9rite d'apprendre, de grandir, de s'exprimer et de s'\u00e9panouir."
       }
     }
   ],

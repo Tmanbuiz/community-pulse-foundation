@@ -196,7 +196,14 @@ input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 
 <div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="assets/js/supabase-config.js"></script>
+<script>
+const SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf";
+const CPF_DB_READY = true;
+const cpfDb = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+</script>
 <script>
 /* =====================================================
    SECTION DEFINITIONS — everything is driven by this
@@ -324,7 +331,7 @@ function slugify(s) {
    AUTH
    ===================================================== */
 async function signIn() {
-  if (!window.cpfDb) return loginNote('Add your Supabase keys in assets/js/supabase-config.js first.');
+  if (!window.cpfDb) return loginNote('Database connection error. Please try again.');
   const { error } = await cpfDb.auth.signInWithPassword({
     email: $('email').value.trim(), password: $('password').value
   });
@@ -599,11 +606,13 @@ $('formFields').addEventListener('blur', e => {
 
 /* ---------- boot ---------- */
 (async () => {
-  if (!window.cpfDb) return loginNote('Add your Supabase keys in assets/js/supabase-config.js to start.');
+  if (!window.cpfDb) return loginNote('Database connection error. Please try again.');
   const { data } = await cpfDb.auth.getSession();
   if (data.session) start();
 })();
 </script>
+  <div style="text-align:center;padding:18px;font-size:.75rem;letter-spacing:.08em;color:#94a3b8;font-weight:600">
+    DESIGNED &amp; POWERED BY <span style="color:#0d7377">WIANTRIBE INC.</span>
+  </div>
 </body>
 </html>
-

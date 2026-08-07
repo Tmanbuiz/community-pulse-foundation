@@ -171,6 +171,23 @@ function cpfApplySettings() {
   if (cpfSettings.volunteerForm) {
     document.querySelectorAll(".volunteer-link").forEach(a => { a.href = cpfSettings.volunteerForm.en; });
   }
+
+  // photos chosen in the Site Manager
+  const swap = (id, key) => {
+    const el = document.getElementById(id);
+    if (el && cpfSettings[key] && cpfSettings[key].en) el.src = cpfSettings[key].en;
+  };
+  swap("imgLogo", "imgLogo");
+  swap("imgLogoFooter", "imgLogo");
+  swap("imgAbout", "imgAbout");
+  swap("imgActionPlan", "imgActionPlan");
+  swap("imgImpact", "imgImpact");
+  swap("imgVolunteer", "imgVolunteer");
+
+  if (cpfSettings.imgHero && cpfSettings.imgHero.en) {
+    document.documentElement.style.setProperty(
+      "--cpf-hero", `url('${cpfSettings.imgHero.en}')`);
+  }
 }
 
 /* ---------- keep everything in sync with the EN / FR switcher ---------- */

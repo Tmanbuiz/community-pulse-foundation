@@ -1,7 +1,3 @@
-/* =========================================================
-   SUPABASE CONNECTION — FILL THESE IN ONCE
-   ========================================================= */
-
 const SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf";
 

@@ -85,7 +85,14 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
+  <script>
+const SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf";
+const CPF_DB_READY = true;
+const cpfDb = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+</script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/script.js"></script>
   <script src="assets/js/dynamic-pages.js"></script>
@@ -122,7 +129,7 @@
         return cpfRenderPage();
       }
       if (!window.cpfDb) {
-        cpfPageError = 'The database is not connected yet. Add your Supabase keys in assets/js/supabase-config.js.';
+        cpfPageError = 'Database connection error. Please contact the site admin.';
         return cpfRenderPage();
       }
 

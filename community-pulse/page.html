@@ -86,12 +86,14 @@
 
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script>
-const SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo";
-const CPF_DB_READY = true;
-const cpfDb = window.supabase
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+window.SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
+window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo";
+window.CPF_DB_READY = true;
+// NOTE: must be window.cpfDb (not const) so other scripts can see it
+window.cpfDb = window.supabase
+  ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
   : null;
+var cpfDb = window.cpfDb;
 </script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/script.js"></script>

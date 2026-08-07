@@ -70,6 +70,17 @@
   </section>
 
   <!-- About Section -->
+  <!-- Welcome -->
+  <section class="section welcome">
+    <div class="container">
+      <div class="welcome-inner">
+        <h2 class="welcome-title" data-i18n="welcomeTitle">Welcome to The Community Pulse Foundation Inc.</h2>
+        <p data-i18n="welcomeP1">We believe strong communities are built when individuals and families feel seen, heard, valued, and connected.</p>
+        <p class="welcome-belief" data-i18n="welcomeP2">Our work is guided by the belief that every person has a story, every community has a voice, and every connection has the power to create positive change.</p>
+      </div>
+    </div>
+  </section>
+
   <section class="section about" id="about">
     <div class="container">
       <div class="section-header">
@@ -85,14 +96,19 @@
           <p data-i18n="aboutP2">
             Our work focuses on strengthening connection, belonging, and community resilience among newcomers, Indigenous peoples, long-term residents, youth, families, and marginalized populations.
           </p>
+          <p data-i18n="aboutP3">
+            Whether supporting newcomers, amplifying Indigenous voices, empowering youth, strengthening families, or fostering multicultural understanding, we are committed to building bridges that create lasting community resilience and belonging.
+          </p>
           
           <div class="mission-vision">
             <div class="mv-card">
               <h3 data-i18n="missionTitle">Our Mission</h3>
+              <p class="mv-tagline" data-i18n="missionTagline">Creating Meaningful Community Connections</p>
               <p data-i18n="missionText">To foster friendship, belonging, and collaboration among newcomers and residents while promoting love, peace, and mutual understanding across cultural, racial, and faith communities.</p>
             </div>
             <div class="mv-card">
               <h3 data-i18n="visionTitle">Our Vision</h3>
+              <p class="mv-tagline" data-i18n="visionTagline">Connecting People. Inspiring Communities.</p>
               <p data-i18n="visionText">A stronger, more connected, and inclusive New Brunswick where every individual and family feels a true sense of belonging and has the opportunity to thrive.</p>
             </div>
           </div>
@@ -142,6 +158,11 @@
         <h2 class="section-title" data-i18n="eventsTitle">Past Outreaches & Initiatives</h2>
       </div>
       
+      <div class="impact-commitments">
+        <p class="impact-intro" data-i18n="impactIntro">The Community Pulse Foundation is committed to:</p>
+        <ul class="impact-list" id="impactPoints"></ul>
+      </div>
+
       <div class="events-list" id="eventsList">
         <!-- Populated by JS -->
       </div>
@@ -210,6 +231,9 @@
           <img src="assets/images/volunteers-packing.jpg" alt="Volunteers packing donations" />
         </div>
       </div>
+
+      <h3 class="involved-title" data-i18n="involvedTitle">Ways to Support Our Mission</h3>
+      <div class="involved-grid" id="involvedGrid"></div>
     </div>
   </section>
 
@@ -331,7 +355,14 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/supabase-config.js"></script>
+  <script>
+const SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_dT3A1FyJx0Kqgpl96Wcg8Q_Tr88o1zf";
+const CPF_DB_READY = true;
+const cpfDb = window.supabase
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+</script>
   <script src="assets/js/data.js"></script>
   <script src="assets/js/script.js"></script>
   <script src="assets/js/dynamic-pages.js"></script>

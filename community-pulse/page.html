@@ -76,6 +76,10 @@
       <div class="footer-bottom">
         <p>© <span id="year"></span> The Community Pulse Foundation Inc. <span data-i18n="rights">All rights reserved.</span></p>
         <p class="footer-note" data-i18n="footerNote">A registered non-profit organization in New Brunswick, Canada.</p>
+        <p class="powered-by">
+          <span data-i18n="poweredBy">Designed &amp; powered by</span>
+          <strong>WianTribe&nbsp;Inc.</strong>
+        </p>
       </div>
     </div>
   </footer>
@@ -104,7 +108,9 @@
       const body  = (l === 'fr' && cpfPageData.body_fr)  ? cpfPageData.body_fr  : cpfPageData.body_en;
 
       document.title = title + ' | The Community Pulse Foundation';
-      el.innerHTML = `<h1 class="page-title">${cpfEscape(title)}</h1>` + cpfFormatBody(body);
+      const banner = cpfPageData.image_url
+        ? `<img class="page-banner" src="${cpfEscape(cpfPageData.image_url)}" alt="" />` : '';
+      el.innerHTML = `<h1 class="page-title">${cpfEscape(title)}</h1>` + banner + cpfFormatBody(body);
     }
 
     async function cpfLoadPage() {
@@ -122,7 +128,7 @@
 
       const { data, error } = await cpfDb
         .from('pages')
-        .select('slug, title_en, title_fr, body_en, body_fr')
+        .select('slug, title_en, title_fr, body_en, body_fr, image_url')
         .eq('slug', slug)
         .eq('published', true)
         .maybeSingle();

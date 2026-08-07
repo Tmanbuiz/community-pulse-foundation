@@ -1,287 +1,608 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex" />
-  <title>Admin — The Community Pulse Foundation</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="icon" type="image/jpeg" href="assets/images/logo-clean.jpg" />
-  <style>
-    :root{
-      --primary:#0d7377; --primary-dark:#0a5c5f; --accent:#e67e22;
-      --text:#2d3436; --muted:#636e72; --border:#e2e8f0; --bg:#f8fafb;
-      --danger:#c0392b; --radius:12px;
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
-    .bar{background:var(--primary);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-    .bar h1{font-size:1.05rem;font-weight:700;display:flex;align-items:center;gap:10px}
-    .bar img{height:32px;width:32px;border-radius:8px;object-fit:cover}
-    .wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
-    .card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:18px}
-    h2{font-size:1.15rem;margin-bottom:14px}
-    label{display:block;font-weight:600;font-size:.85rem;margin:14px 0 5px}
-    .hint{font-weight:400;color:var(--muted);font-size:.8rem}
-    input[type=text],input[type=email],input[type=password],input[type=number],textarea{
-      width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;
-      font-family:inherit;font-size:.95rem;background:#fff;color:var(--text)}
-    textarea{min-height:170px;resize:vertical;line-height:1.55}
-    input:focus,textarea:focus{outline:2px solid var(--primary);outline-offset:1px;border-color:var(--primary)}
-    .row{display:flex;gap:14px;flex-wrap:wrap}
-    .row>div{flex:1;min-width:200px}
-    .checks{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px}
-    .checks label{display:flex;align-items:center;gap:8px;margin:0;cursor:pointer}
-    .checks input{width:18px;height:18px;accent-color:var(--primary)}
-    button{font-family:inherit;font-size:.92rem;font-weight:600;border:none;border-radius:9px;
-      padding:11px 18px;cursor:pointer;transition:opacity .2s}
-    button:hover{opacity:.88}
-    button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-    .btn-primary{background:var(--primary);color:#fff}
-    .btn-ghost{background:#fff;color:var(--primary);border:1px solid var(--primary)}
-    .btn-light{background:rgba(255,255,255,.15);color:#fff}
-    .btn-danger{background:#fff;color:var(--danger);border:1px solid var(--danger)}
-    .btn-sm{padding:7px 12px;font-size:.82rem}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-    .page-item{display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:14px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
-    .page-item:last-child{border-bottom:none}
-    .page-item strong{display:block}
-    .page-item small{color:var(--muted)}
-    .chip{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:99px;margin-right:6px;text-transform:uppercase;letter-spacing:.4px}
-    .chip-live{background:#e6f4ea;color:#1a7f43}
-    .chip-draft{background:#fdf1e3;color:#b35c00}
-    .msg{padding:12px 14px;border-radius:9px;margin-bottom:16px;font-size:.9rem;display:none}
-    .msg-ok{background:#e6f4ea;color:#1a7f43;display:block}
-    .msg-err{background:#fdecea;color:var(--danger);display:block}
-    .empty{color:var(--muted);padding:8px 0}
-    .login{max-width:400px;margin:60px auto}
-    .hidden{display:none}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>Site Manager — The Community Pulse Foundation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/jpeg" href="assets/images/logo-clean.jpg" />
+<style>
+:root{
+  --teal:#0d7377; --teal-dark:#0a5c5f; --teal-soft:#e6f2f2;
+  --amber:#e67e22; --danger:#c0392b; --green:#1a7f43;
+  --ink:#16232b; --text:#2d3436; --muted:#6b7a80;
+  --line:#e3e9ec; --bg:#f4f7f8; --card:#fff;
+  --r:14px; --shadow:0 1px 3px rgba(16,42,50,.06),0 8px 24px rgba(16,42,50,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+img{max-width:100%;display:block}
+.hidden{display:none !important}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:var(--teal);color:#fff}
+.topbar-inner{max-width:1080px;margin:0 auto;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;font-size:.98rem;letter-spacing:-.01em}
+.brand img{height:34px;width:34px;border-radius:9px;object-fit:cover}
+.brand small{display:block;font-weight:400;font-size:.72rem;opacity:.8;letter-spacing:.02em}
+.topbar button{background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:8px;padding:8px 14px;font:inherit;font-size:.85rem;font-weight:600;cursor:pointer}
+.topbar button:hover{background:rgba(255,255,255,.24)}
+
+/* ---------- tabs ---------- */
+.tabs{background:var(--teal-dark);overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs-inner{max-width:1080px;margin:0 auto;display:flex;gap:2px;padding:0 12px}
+.tab{background:none;border:none;color:rgba(255,255,255,.72);font:inherit;font-size:.88rem;font-weight:600;
+  padding:13px 16px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent}
+.tab:hover{color:#fff}
+.tab.active{color:#fff;border-bottom-color:var(--amber)}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:26px 18px 90px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.head h2{font-family:'Playfair Display',Georgia,serif;font-size:1.6rem;color:var(--ink);line-height:1.2}
+.head p{color:var(--muted);font-size:.9rem;max-width:52ch}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.card+.card{margin-top:16px}
+.card-pad{padding:20px}
+
+/* ---------- list ---------- */
+.item{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.thumb{width:60px;height:60px;flex:none;border-radius:10px;object-fit:cover;background:var(--teal-soft);
+  display:flex;align-items:center;justify-content:center;color:var(--teal);font-weight:700;font-size:1.15rem}
+.item-main{flex:1;min-width:0}
+.item-main strong{display:block;font-size:.98rem;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item-main span{font-size:.82rem;color:var(--muted)}
+.item-actions{display:flex;gap:8px;flex:none}
+.chip{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;
+  padding:2px 9px;border-radius:99px;margin-right:7px;vertical-align:1px}
+.chip-live{background:#e6f4ea;color:var(--green)}
+.chip-draft{background:#fdf1e3;color:#b35c00}
+.empty{padding:42px 20px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--ink);font-size:1rem;margin-bottom:4px}
+
+/* ---------- buttons ---------- */
+button{font-family:inherit;cursor:pointer;border:none;border-radius:9px;font-weight:600;transition:opacity .18s,background .18s}
+button:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.btn{padding:11px 18px;font-size:.9rem}
+.btn-sm{padding:7px 13px;font-size:.8rem}
+.btn-teal{background:var(--teal);color:#fff}
+.btn-teal:hover{background:var(--teal-dark)}
+.btn-out{background:#fff;color:var(--teal);border:1px solid var(--teal)}
+.btn-out:hover{background:var(--teal-soft)}
+.btn-red{background:#fff;color:var(--danger);border:1px solid #f0c4bf}
+.btn-red:hover{background:#fdecea}
+.btn-grey{background:#fff;color:var(--muted);border:1px solid var(--line)}
+
+/* ---------- form ---------- */
+.field{margin-bottom:16px}
+.field label{display:block;font-weight:600;font-size:.84rem;color:var(--ink);margin-bottom:6px}
+.field .hint{font-weight:400;color:var(--muted)}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=url],textarea{
+  width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;
+  font:inherit;font-size:.94rem;background:#fff;color:var(--text)}
+textarea{min-height:130px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,115,119,.13)}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:680px){.pair{grid-template-columns:1fr}}
+.lang-tag{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.06em;background:var(--teal-soft);
+  color:var(--teal-dark);padding:1px 6px;border-radius:4px;margin-right:6px}
+.toggles{display:flex;gap:20px;flex-wrap:wrap;padding:14px 0 4px}
+.toggles label{display:flex;align-items:center;gap:9px;font-weight:600;font-size:.88rem;cursor:pointer;margin:0}
+.toggles input{width:19px;height:19px;accent-color:var(--teal);cursor:pointer}
+.form-actions{display:flex;gap:10px;flex-wrap:wrap;padding-top:18px;margin-top:14px;border-top:1px solid var(--line)}
+
+/* ---------- image upload ---------- */
+.upload{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding:14px;border:1px dashed var(--line);border-radius:12px;background:#fafcfc}
+.upload-preview{width:96px;height:70px;border-radius:9px;object-fit:cover;border:1px solid var(--line);background:var(--teal-soft)}
+.upload-none{width:96px;height:70px;border-radius:9px;border:1px solid var(--line);background:var(--teal-soft);
+  display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:.72rem;text-align:center;padding:6px}
+.upload-info{flex:1;min-width:150px;font-size:.82rem;color:var(--muted)}
+
+/* ---------- toast ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);z-index:200;
+  background:var(--ink);color:#fff;padding:13px 20px;border-radius:11px;font-size:.9rem;font-weight:500;
+  box-shadow:0 12px 32px rgba(0,0,0,.22);max-width:90vw;transition:transform .3s cubic-bezier(.2,.9,.3,1)}
+#toast.show{transform:translate(-50%,0)}
+#toast.bad{background:var(--danger)}
+@media(prefers-reduced-motion:reduce){#toast{transition:none}}
+
+/* ---------- login ---------- */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(150deg,var(--teal) 0%,var(--teal-dark) 60%,#083f42 100%)}
+.login-box{width:100%;max-width:400px;background:#fff;border-radius:18px;padding:34px 30px;box-shadow:0 24px 60px rgba(0,0,0,.25)}
+.login-box img{height:52px;width:52px;border-radius:12px;object-fit:cover;margin-bottom:16px}
+.login-box h1{font-family:'Playfair Display',Georgia,serif;font-size:1.5rem;color:var(--ink);margin-bottom:4px}
+.login-box .sub{color:var(--muted);font-size:.88rem;margin-bottom:22px}
+.credit{margin-top:30px;text-align:center;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.credit strong{color:var(--teal-dark);font-weight:700;letter-spacing:.11em}
+.login-box .credit{margin-top:22px}
+.note{background:#fdf1e3;color:#8a4b00;font-size:.84rem;padding:11px 13px;border-radius:9px;margin-bottom:16px}
+</style>
 </head>
 <body>
 
-<div class="bar">
-  <h1><img src="assets/images/logo-clean.jpg" alt="">Community Pulse — Page Admin</h1>
-  <button id="signOutBtn" class="btn-light hidden" onclick="signOut()">Sign out</button>
-</div>
-
-<!-- LOGIN -->
-<div class="wrap login" id="loginView">
-  <div class="card">
-    <h2>Admin sign in</h2>
-    <div id="loginMsg" class="msg"></div>
-    <label for="email">Email</label>
-    <input id="email" type="email" autocomplete="username" />
-    <label for="password">Password</label>
-    <input id="password" type="password" autocomplete="current-password" />
-    <div class="actions">
-      <button class="btn-primary" onclick="signIn()">Sign in</button>
+<!-- ========== LOGIN ========== -->
+<div class="login-page" id="loginPage">
+  <div class="login-box">
+    <img src="assets/images/logo-clean.jpg" alt="" />
+    <h1>Site Manager</h1>
+    <p class="sub">Sign in to manage The Community Pulse Foundation website.</p>
+    <div id="loginNote" class="note hidden"></div>
+    <div class="field">
+      <label for="email">Email</label>
+      <input id="email" type="email" autocomplete="username" />
     </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <input id="password" type="password" autocomplete="current-password" />
+    </div>
+    <button class="btn btn-teal" style="width:100%" id="signInBtn">Sign in</button>
+    <p class="credit">Designed &amp; powered by <strong>WianTribe&nbsp;Inc.</strong></p>
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div class="wrap hidden" id="adminView">
-  <div id="adminMsg" class="msg"></div>
+<!-- ========== APP ========== -->
+<div id="app" class="hidden">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <img src="assets/images/logo-clean.jpg" alt="" />
+        <div>Community Pulse<small>Site Manager</small></div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button id="viewSiteBtn">View site</button>
+        <button id="signOutBtn">Sign out</button>
+      </div>
+    </div>
+  </header>
 
-  <div class="card">
-    <h2 id="formTitle">Add a new page</h2>
+  <nav class="tabs">
+    <div class="tabs-inner" id="tabs"></div>
+  </nav>
 
-    <label for="titleEn">Page title (English)</label>
-    <input id="titleEn" type="text" placeholder="Our History" />
-
-    <label for="titleFr">Page title (French) <span class="hint">— optional</span></label>
-    <input id="titleFr" type="text" placeholder="Notre histoire" />
-
-    <label for="slug">Web address <span class="hint">— lowercase, dashes instead of spaces</span></label>
-    <input id="slug" type="text" placeholder="our-history" />
-
-    <label for="bodyEn">Content (English)</label>
-    <textarea id="bodyEn" placeholder="Write normally. Leave a blank line between paragraphs.&#10;&#10;Start a line with ## for a heading.&#10;Start a line with - for a bullet point."></textarea>
-
-    <label for="bodyFr">Content (French) <span class="hint">— optional, English is shown if this is empty</span></label>
-    <textarea id="bodyFr"></textarea>
-
-    <div class="row">
+  <main class="wrap">
+    <div class="head">
       <div>
-        <label for="menuOrder">Menu position <span class="hint">— lower numbers come first</span></label>
-        <input id="menuOrder" type="number" value="1" />
+        <h2 id="secTitle"></h2>
+        <p id="secBlurb"></p>
+      </div>
+      <button class="btn btn-teal" id="addBtn">+ Add new</button>
+    </div>
+
+    <!-- editor -->
+    <div class="card hidden" id="editor">
+      <div class="card-pad">
+        <h3 id="editorTitle" style="font-size:1.1rem;color:var(--ink);margin-bottom:16px"></h3>
+        <div id="formFields"></div>
+        <div class="form-actions">
+          <button class="btn btn-teal" id="saveBtn">Save</button>
+          <button class="btn btn-grey" id="cancelBtn">Cancel</button>
+        </div>
       </div>
     </div>
 
-    <div class="checks">
-      <label><input id="showInMenu" type="checkbox" checked /> Show in the website menu</label>
-      <label><input id="published" type="checkbox" /> Published (visible to visitors)</label>
-    </div>
+    <!-- list -->
+    <div class="card" id="listCard"><div class="empty">Loading…</div></div>
 
-    <div class="actions">
-      <button class="btn-primary" onclick="savePage()">Save page</button>
-      <button class="btn-ghost hidden" id="cancelBtn" onclick="resetForm()">Cancel edit</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Your pages</h2>
-    <div id="pageList"><p class="empty">Loading…</p></div>
-  </div>
+    <p class="credit">Designed &amp; powered by <strong>WianTribe&nbsp;Inc.</strong></p>
+  </main>
 </div>
+
+<div id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="assets/js/supabase-config.js"></script>
 <script>
-  let editingId = null;
+/* =====================================================
+   SECTION DEFINITIONS — everything is driven by this
+   ===================================================== */
+const SECTIONS = {
+  pages: {
+    label: 'Pages', table: 'pages', title: 'Custom pages',
+    blurb: 'Pages you create here get their own web address and can appear in the site menu.',
+    display: r => r.title_en, order: 'menu_order', flag: 'published',
+    flagLabels: ['Live', 'Draft'],
+    sub: r => `/page.html?slug=${r.slug}${r.show_in_menu ? '' : ' · hidden from menu'}`,
+    fields: [
+      { k:'title_en', t:'text', l:'Page title', lang:'EN', req:true },
+      { k:'title_fr', t:'text', l:'Page title', lang:'FR' },
+      { k:'slug', t:'text', l:'Web address', hint:'lowercase, dashes instead of spaces', auto:'title_en' },
+      { k:'image_url', t:'image', l:'Banner photo' },
+      { k:'body_en', t:'textarea', l:'Content', lang:'EN' },
+      { k:'body_fr', t:'textarea', l:'Content', lang:'FR' },
+      { k:'menu_order', t:'number', l:'Menu position', hint:'lower numbers come first', def:1 },
+      { k:'show_in_menu', t:'check', l:'Show in the website menu', def:true },
+      { k:'published', t:'check', l:'Published (visitors can see it)', def:false }
+    ]
+  },
 
-  const $ = (id) => document.getElementById(id);
+  programs: {
+    label: 'Programs', table: 'programs', title: 'Programs',
+    blurb: 'The programme cards shown in the "Our Core Programs" section of the home page.',
+    display: r => r.title_en, order: 'sort_order', flag: 'visible',
+    flagLabels: ['Shown', 'Hidden'],
+    sub: r => r.subtitle_en || '',
+    fields: [
+      { k:'title_en', t:'text', l:'Programme name', lang:'EN', req:true },
+      { k:'title_fr', t:'text', l:'Programme name', lang:'FR' },
+      { k:'subtitle_en', t:'text', l:'Short tagline', lang:'EN' },
+      { k:'subtitle_fr', t:'text', l:'Short tagline', lang:'FR' },
+      { k:'image_url', t:'image', l:'Programme photo' },
+      { k:'description_en', t:'textarea', l:'Description', lang:'EN' },
+      { k:'description_fr', t:'textarea', l:'Description', lang:'FR' },
+      { k:'sort_order', t:'number', l:'Display order', def:1 },
+      { k:'visible', t:'check', l:'Show on the website', def:true }
+    ]
+  },
 
-  function show(el, text, ok) {
-    el.textContent = text;
-    el.className = 'msg ' + (ok ? 'msg-ok' : 'msg-err');
-    if (ok) setTimeout(() => { el.className = 'msg'; }, 4000);
-  }
+  events: {
+    label: 'Events', table: 'events', title: 'Events & outreaches',
+    blurb: 'Past and upcoming work shown in the "Our Impact" section.',
+    display: r => r.title_en, order: 'sort_order', flag: 'visible',
+    flagLabels: ['Shown', 'Hidden'],
+    sub: r => [r.date_en, r.location_en].filter(Boolean).join(' · '),
+    fields: [
+      { k:'title_en', t:'text', l:'Event title', lang:'EN', req:true },
+      { k:'title_fr', t:'text', l:'Event title', lang:'FR' },
+      { k:'date_en', t:'text', l:'Date', lang:'EN', hint:'e.g. June 2025' },
+      { k:'date_fr', t:'text', l:'Date', lang:'FR', hint:'e.g. Juin 2025' },
+      { k:'location_en', t:'text', l:'Location', lang:'EN' },
+      { k:'location_fr', t:'text', l:'Location', lang:'FR' },
+      { k:'image_url', t:'image', l:'Event photo' },
+      { k:'summary_en', t:'textarea', l:'Short summary', lang:'EN' },
+      { k:'summary_fr', t:'textarea', l:'Short summary', lang:'FR' },
+      { k:'details_en', t:'textarea', l:'Full details', lang:'EN' },
+      { k:'details_fr', t:'textarea', l:'Full details', lang:'FR' },
+      { k:'sort_order', t:'number', l:'Display order', def:1 },
+      { k:'visible', t:'check', l:'Show on the website', def:true }
+    ]
+  },
 
-  function slugify(s) {
-    return s.toLowerCase().trim()
-      .replace(/[^a-z0-9\s-]/g, '')
-      .replace(/\s+/g, '-')
-      .replace(/-+/g, '-');
-  }
+  team: {
+    label: 'Team', table: 'team', title: 'Team members',
+    blurb: 'People shown in the "Meet the Team" section. Add a photo or leave it blank for an initial.',
+    display: r => r.name, order: 'sort_order', flag: 'visible',
+    flagLabels: ['Shown', 'Hidden'],
+    sub: r => r.role_en || '',
+    fields: [
+      { k:'name', t:'text', l:'Full name', req:true },
+      { k:'image_url', t:'image', l:'Photo' },
+      { k:'role_en', t:'text', l:'Role or title', lang:'EN' },
+      { k:'role_fr', t:'text', l:'Role or title', lang:'FR' },
+      { k:'bio_en', t:'textarea', l:'Short bio', lang:'EN' },
+      { k:'bio_fr', t:'textarea', l:'Short bio', lang:'FR' },
+      { k:'sort_order', t:'number', l:'Display order', def:1 },
+      { k:'visible', t:'check', l:'Show on the website', def:true }
+    ]
+  },
 
-  /* ---------- Auth ---------- */
-  async function signIn() {
-    if (!cpfDb) return show($('loginMsg'), 'Add your Supabase keys in assets/js/supabase-config.js first.', false);
-    const { error } = await cpfDb.auth.signInWithPassword({
-      email: $('email').value.trim(),
-      password: $('password').value
-    });
-    if (error) return show($('loginMsg'), error.message, false);
-    openDashboard();
-  }
+  settings: { label:'Site text', settings:true, title:'Home page text & contact details',
+    blurb:'Headline, contact information and donation details shown across the site.' }
+};
 
-  async function signOut() {
-    await cpfDb.auth.signOut();
-    location.reload();
-  }
+const SETTING_LABELS = {
+  heroTitle1:   'Headline — first line',
+  heroTitle2:   'Headline — second line',
+  heroSubtitle: 'Headline paragraph',
+  contactEmail: 'Contact email',
+  contactPhone: 'Contact phone',
+  contactPlace: 'Location',
+  donateEmail:  'Interac e-Transfer email',
+  volunteerForm:'Volunteer form link'
+};
 
-  function openDashboard() {
-    $('loginView').classList.add('hidden');
-    $('adminView').classList.remove('hidden');
-    $('signOutBtn').classList.remove('hidden');
-    loadPages();
-  }
+/* =====================================================
+   STATE + HELPERS
+   ===================================================== */
+let current = 'pages';
+let rows = [];
+let editingId = null;
+let draftImage = null;
 
-  /* ---------- Read ---------- */
-  async function loadPages() {
-    const list = $('pageList');
-    const { data, error } = await cpfDb.from('pages')
-      .select('*').order('menu_order', { ascending: true });
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 
-    if (error) { list.innerHTML = `<p class="empty">${error.message}</p>`; return; }
-    if (!data.length) { list.innerHTML = '<p class="empty">No pages yet. Add your first one above.</p>'; return; }
+function toast(msg, bad) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show' + (bad ? ' bad' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = ''; }, 3600);
+}
 
-    list.innerHTML = data.map(p => `
-      <div class="page-item">
-        <div>
-          <strong>${p.title_en}</strong>
-          <small>
-            <span class="chip ${p.published ? 'chip-live' : 'chip-draft'}">${p.published ? 'Live' : 'Draft'}</span>
-            /page.html?slug=${p.slug}${p.show_in_menu ? '' : ' · hidden from menu'}
-          </small>
-        </div>
-        <div style="display:flex;gap:8px">
-          <button class="btn-ghost btn-sm" onclick='editPage(${JSON.stringify(p.id)})'>Edit</button>
-          <button class="btn-danger btn-sm" onclick='deletePage(${JSON.stringify(p.id)}, ${JSON.stringify(p.title_en)})'>Delete</button>
-        </div>
-      </div>`).join('');
+function slugify(s) {
+  return String(s||'').toLowerCase().trim()
+    .replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-');
+}
 
-    window.cpfPages = data;
-  }
-
-  /* ---------- Create / update ---------- */
-  async function savePage() {
-    const msg = $('adminMsg');
-    const titleEn = $('titleEn').value.trim();
-    if (!titleEn) return show(msg, 'Add a page title in English before saving.', false);
-
-    if (!$('slug').value.trim()) $('slug').value = slugify(titleEn);
-
-    const row = {
-      slug: slugify($('slug').value),
-      title_en: titleEn,
-      title_fr: $('titleFr').value.trim() || null,
-      body_en: $('bodyEn').value,
-      body_fr: $('bodyFr').value || null,
-      show_in_menu: $('showInMenu').checked,
-      menu_order: parseInt($('menuOrder').value, 10) || 0,
-      published: $('published').checked
-    };
-
-    const { error } = editingId
-      ? await cpfDb.from('pages').update(row).eq('id', editingId)
-      : await cpfDb.from('pages').insert(row);
-
-    if (error) {
-      const dup = error.message.includes('duplicate');
-      return show(msg, dup ? 'A page already uses that web address. Pick a different one.' : error.message, false);
-    }
-
-    show(msg, editingId ? 'Page updated.' : 'Page created.', true);
-    resetForm();
-    loadPages();
-  }
-
-  function editPage(id) {
-    const p = (window.cpfPages || []).find(x => x.id === id);
-    if (!p) return;
-    editingId = id;
-    $('formTitle').textContent = 'Edit page';
-    $('titleEn').value = p.title_en || '';
-    $('titleFr').value = p.title_fr || '';
-    $('slug').value = p.slug || '';
-    $('bodyEn').value = p.body_en || '';
-    $('bodyFr').value = p.body_fr || '';
-    $('menuOrder').value = p.menu_order;
-    $('showInMenu').checked = p.show_in_menu;
-    $('published').checked = p.published;
-    $('cancelBtn').classList.remove('hidden');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function deletePage(id, title) {
-    if (!confirm(`Delete "${title}"? This cannot be undone.`)) return;
-    const { error } = await cpfDb.from('pages').delete().eq('id', id);
-    if (error) return show($('adminMsg'), error.message, false);
-    show($('adminMsg'), 'Page deleted.', true);
-    if (editingId === id) resetForm();
-    loadPages();
-  }
-
-  function resetForm() {
-    editingId = null;
-    $('formTitle').textContent = 'Add a new page';
-    ['titleEn','titleFr','slug','bodyEn','bodyFr'].forEach(id => $(id).value = '');
-    $('menuOrder').value = 1;
-    $('showInMenu').checked = true;
-    $('published').checked = false;
-    $('cancelBtn').classList.add('hidden');
-  }
-
-  /* ---------- Start ---------- */
-  $('titleEn').addEventListener('blur', () => {
-    if (!$('slug').value.trim()) $('slug').value = slugify($('titleEn').value);
+/* =====================================================
+   AUTH
+   ===================================================== */
+async function signIn() {
+  if (!window.cpfDb) return loginNote('Add your Supabase keys in assets/js/supabase-config.js first.');
+  const { error } = await cpfDb.auth.signInWithPassword({
+    email: $('email').value.trim(), password: $('password').value
   });
+  if (error) return loginNote(error.message);
+  start();
+}
 
-  $('password').addEventListener('keydown', (e) => { if (e.key === 'Enter') signIn(); });
+function loginNote(msg) {
+  const n = $('loginNote');
+  n.textContent = msg;
+  n.classList.remove('hidden');
+}
 
-  (async () => {
-    if (!cpfDb) {
-      show($('loginMsg'), 'Add your Supabase keys in assets/js/supabase-config.js to start.', false);
-      return;
-    }
-    const { data } = await cpfDb.auth.getSession();
-    if (data.session) openDashboard();
-  })();
+function start() {
+  $('loginPage').classList.add('hidden');
+  $('app').classList.remove('hidden');
+  buildTabs();
+  openSection('pages');
+}
+
+/* =====================================================
+   TABS
+   ===================================================== */
+function buildTabs() {
+  $('tabs').innerHTML = Object.entries(SECTIONS)
+    .map(([k, s]) => `<button class="tab" data-tab="${k}">${s.label}</button>`).join('');
+}
+
+function openSection(key) {
+  current = key;
+  editingId = null;
+  draftImage = null;
+  const s = SECTIONS[key];
+
+  document.querySelectorAll('.tab').forEach(t =>
+    t.classList.toggle('active', t.dataset.tab === key));
+
+  $('secTitle').textContent = s.title;
+  $('secBlurb').textContent = s.blurb;
+  $('editor').classList.add('hidden');
+  $('addBtn').classList.toggle('hidden', !!s.settings);
+
+  s.settings ? loadSettings() : loadRows();
+}
+
+/* =====================================================
+   LIST
+   ===================================================== */
+async function loadRows() {
+  const s = SECTIONS[current];
+  const { data, error } = await cpfDb.from(s.table).select('*').order(s.order, { ascending:true });
+  if (error) { $('listCard').innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+  rows = data || [];
+  renderList();
+}
+
+function renderList() {
+  const s = SECTIONS[current];
+  if (!rows.length) {
+    $('listCard').innerHTML =
+      `<div class="empty"><strong>Nothing here yet</strong>Use “Add new” to create your first entry.</div>`;
+    return;
+  }
+  $('listCard').innerHTML = rows.map(r => {
+    const on = r[s.flag];
+    const name = esc(s.display(r) || 'Untitled');
+    const thumb = r.image_url
+      ? `<img class="thumb" src="${esc(r.image_url)}" alt="" />`
+      : `<div class="thumb">${esc((s.display(r)||'?').charAt(0).toUpperCase())}</div>`;
+    return `
+      <div class="item">
+        ${thumb}
+        <div class="item-main">
+          <strong>${name}</strong>
+          <span><span class="chip ${on?'chip-live':'chip-draft'}">${on?s.flagLabels[0]:s.flagLabels[1]}</span>${esc(s.sub(r))}</span>
+        </div>
+        <div class="item-actions">
+          <button class="btn-sm btn-out" data-edit="${r.id}">Edit</button>
+          <button class="btn-sm btn-red" data-del="${r.id}">Delete</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* =====================================================
+   EDITOR
+   ===================================================== */
+function openEditor(id) {
+  const s = SECTIONS[current];
+  const row = id ? rows.find(r => r.id === id) : null;
+  editingId = id || null;
+  draftImage = row ? row.image_url : null;
+
+  $('editorTitle').textContent = row ? `Edit “${s.display(row)}”` : `Add to ${s.label.toLowerCase()}`;
+  $('formFields').innerHTML = s.fields.map(f => fieldHtml(f, row)).join('');
+  $('editor').classList.remove('hidden');
+  $('editor').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function fieldHtml(f, row) {
+  const v = row ? row[f.k] : (f.def !== undefined ? f.def : '');
+  const tag = f.lang ? `<span class="lang-tag">${f.lang}</span>` : '';
+  const hint = f.hint ? ` <span class="hint">— ${f.hint}</span>` : '';
+  const label = `<label for="f_${f.k}">${tag}${f.l}${hint}</label>`;
+
+  if (f.t === 'check') {
+    return `<div class="toggles"><label><input type="checkbox" id="f_${f.k}" ${v ? 'checked':''} /> ${f.l}</label></div>`;
+  }
+  if (f.t === 'textarea') {
+    return `<div class="field">${label}<textarea id="f_${f.k}" placeholder="Leave a blank line between paragraphs. Start a line with ## for a heading, or - for a bullet.">${esc(v)}</textarea></div>`;
+  }
+  if (f.t === 'number') {
+    return `<div class="field">${label}<input type="number" id="f_${f.k}" value="${esc(v||0)}" /></div>`;
+  }
+  if (f.t === 'image') {
+    const prev = v
+      ? `<img class="upload-preview" id="imgPrev" src="${esc(v)}" alt="" />`
+      : `<div class="upload-none" id="imgPrev">No photo</div>`;
+    return `<div class="field">${label}
+      <div class="upload">
+        ${prev}
+        <div class="upload-info" id="imgInfo">JPG or PNG, up to 5 MB. Landscape photos look best.</div>
+        <input type="file" id="imgFile" accept="image/*" style="display:none" />
+        <button type="button" class="btn-sm btn-out" id="imgPick">Choose photo</button>
+        <button type="button" class="btn-sm btn-grey" id="imgClear">Remove</button>
+      </div></div>`;
+  }
+  return `<div class="field">${label}<input type="text" id="f_${f.k}" value="${esc(v)}" /></div>`;
+}
+
+/* ---------- image upload ---------- */
+async function uploadImage(file) {
+  if (file.size > 5 * 1024 * 1024) return toast('That photo is larger than 5 MB. Please choose a smaller one.', true);
+  $('imgInfo').textContent = 'Uploading…';
+
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${current}/${Date.now()}-${Math.random().toString(36).slice(2,8)}.${ext}`;
+
+  const { error } = await cpfDb.storage.from('site-images').upload(path, file, { upsert:false });
+  if (error) { $('imgInfo').textContent = error.message; return toast('Upload failed: ' + error.message, true); }
+
+  const { data } = cpfDb.storage.from('site-images').getPublicUrl(path);
+  draftImage = data.publicUrl;
+
+  const prev = $('imgPrev');
+  const img = document.createElement('img');
+  img.className = 'upload-preview'; img.id = 'imgPrev'; img.src = draftImage;
+  prev.replaceWith(img);
+  $('imgInfo').textContent = 'Photo ready. Click Save to apply it.';
+}
+
+/* ---------- save ---------- */
+async function save() {
+  const s = SECTIONS[current];
+  const body = {};
+
+  for (const f of s.fields) {
+    if (f.t === 'image') { body[f.k] = draftImage || null; continue; }
+    const el = $('f_' + f.k);
+    if (!el) continue;
+    if (f.t === 'check') body[f.k] = el.checked;
+    else if (f.t === 'number') body[f.k] = parseInt(el.value, 10) || 0;
+    else body[f.k] = el.value.trim() || null;
+  }
+
+  const required = s.fields.find(f => f.req && !body[f.k]);
+  if (required) return toast(`${required.l} is required.`, true);
+
+  if (current === 'pages') body.slug = slugify(body.slug || body.title_en);
+
+  const { error } = editingId
+    ? await cpfDb.from(s.table).update(body).eq('id', editingId)
+    : await cpfDb.from(s.table).insert(body);
+
+  if (error) {
+    return toast(error.message.includes('duplicate')
+      ? 'Another page already uses that web address.' : error.message, true);
+  }
+
+  toast(editingId ? 'Changes saved.' : 'Added.');
+  $('editor').classList.add('hidden');
+  editingId = null; draftImage = null;
+  loadRows();
+}
+
+async function remove(id) {
+  const s = SECTIONS[current];
+  const row = rows.find(r => r.id === id);
+  if (!confirm(`Delete “${s.display(row)}”? This cannot be undone.`)) return;
+  const { error } = await cpfDb.from(s.table).delete().eq('id', id);
+  if (error) return toast(error.message, true);
+  toast('Deleted.');
+  loadRows();
+}
+
+/* =====================================================
+   SETTINGS TAB
+   ===================================================== */
+async function loadSettings() {
+  const { data, error } = await cpfDb.from('settings').select('*');
+  if (error) { $('listCard').innerHTML = `<div class="empty">${esc(error.message)}</div>`; return; }
+
+  const order = Object.keys(SETTING_LABELS);
+  const sorted = (data||[]).sort((a,b) => order.indexOf(a.key) - order.indexOf(b.key));
+
+  $('listCard').innerHTML = `<div class="card-pad">` + sorted.map(s => {
+    const label = SETTING_LABELS[s.key] || s.key;
+    const long = (s.value_en || '').length > 70;
+    const input = (id, val) => long
+      ? `<textarea id="${id}" style="min-height:90px">${esc(val)}</textarea>`
+      : `<input type="text" id="${id}" value="${esc(val)}" />`;
+    return `<div class="field">
+      <label>${esc(label)}</label>
+      <div class="pair">
+        <div><span class="lang-tag">EN</span>${input('set_en_'+s.key, s.value_en)}</div>
+        <div><span class="lang-tag">FR</span>${input('set_fr_'+s.key, s.value_fr)}</div>
+      </div></div>`;
+  }).join('') +
+  `<div class="form-actions"><button class="btn btn-teal" id="saveSettings">Save site text</button></div></div>`;
+
+  $('saveSettings').addEventListener('click', async () => {
+    const updates = sorted.map(s => ({
+      key: s.key,
+      value_en: $('set_en_' + s.key).value,
+      value_fr: $('set_fr_' + s.key).value
+    }));
+    const { error } = await cpfDb.from('settings').upsert(updates);
+    toast(error ? error.message : 'Site text saved.', !!error);
+  });
+}
+
+/* =====================================================
+   EVENTS
+   ===================================================== */
+$('signInBtn').addEventListener('click', signIn);
+$('password').addEventListener('keydown', e => { if (e.key === 'Enter') signIn(); });
+$('signOutBtn').addEventListener('click', async () => { await cpfDb.auth.signOut(); location.reload(); });
+$('viewSiteBtn').addEventListener('click', () => window.open('index.html', '_blank'));
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (b) openSection(b.dataset.tab); });
+$('addBtn').addEventListener('click', () => openEditor(null));
+$('cancelBtn').addEventListener('click', () => { $('editor').classList.add('hidden'); editingId = null; draftImage = null; });
+$('saveBtn').addEventListener('click', save);
+
+$('listCard').addEventListener('click', e => {
+  const ed = e.target.closest('[data-edit]');
+  const dl = e.target.closest('[data-del]');
+  if (ed) openEditor(ed.dataset.edit);
+  if (dl) remove(dl.dataset.del);
+});
+
+$('formFields').addEventListener('click', e => {
+  if (e.target.id === 'imgPick') $('imgFile').click();
+  if (e.target.id === 'imgClear') {
+    draftImage = null;
+    const d = document.createElement('div');
+    d.className = 'upload-none'; d.id = 'imgPrev'; d.textContent = 'No photo';
+    $('imgPrev').replaceWith(d);
+    $('imgInfo').textContent = 'Photo removed. Click Save to apply.';
+  }
+});
+
+$('formFields').addEventListener('change', e => {
+  if (e.target.id === 'imgFile' && e.target.files[0]) uploadImage(e.target.files[0]);
+});
+
+$('formFields').addEventListener('blur', e => {
+  if (e.target.id === 'f_title_en' && current === 'pages') {
+    const slug = $('f_slug');
+    if (slug && !slug.value.trim()) slug.value = slugify(e.target.value);
+  }
+}, true);
+
+/* ---------- boot ---------- */
+(async () => {
+  if (!window.cpfDb) return loginNote('Add your Supabase keys in assets/js/supabase-config.js to start.');
+  const { data } = await cpfDb.auth.getSession();
+  if (data.session) start();
+})();
 </script>
 </body>
 </html>

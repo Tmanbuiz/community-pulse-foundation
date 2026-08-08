@@ -184,6 +184,16 @@ function cpfApplySettings() {
   swap("imgImpact", "imgImpact");
   swap("imgVolunteer", "imgVolunteer");
 
+  // social media links — a blank value hides the button
+  ["socialFacebook","socialInstagram","socialYouTube","socialLinkedIn",
+   "socialTikTok","socialX","socialWhatsApp"].forEach(key => {
+    const el = document.getElementById(key);
+    if (!el) return;
+    const url = cpfSettings[key] ? (cpfSettings[key].en || "").trim() : "";
+    if (url) { el.href = url; el.style.display = ""; }
+    else { el.style.display = "none"; }
+  });
+
   if (cpfSettings.imgHero && cpfSettings.imgHero.en) {
     document.documentElement.style.setProperty(
       "--cpf-hero", `url('${cpfSettings.imgHero.en}')`);

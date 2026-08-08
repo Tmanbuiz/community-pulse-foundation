@@ -347,7 +347,14 @@ const SETTING_LABELS = {
   contactPhone: 'Contact phone',
   contactPlace: 'Location',
   donateEmail:  'Interac e-Transfer email',
-  volunteerForm:'Volunteer form link'
+  volunteerForm:'Volunteer form link',
+  socialFacebook: 'Facebook page link',
+  socialInstagram:'Instagram link',
+  socialYouTube:  'YouTube channel link',
+  socialLinkedIn: 'LinkedIn link',
+  socialTikTok:   'TikTok link',
+  socialX:        'X (Twitter) link',
+  socialWhatsApp: 'WhatsApp link'
 };
 
 /* =====================================================
@@ -725,6 +732,15 @@ async function loadSettings() {
 
   const textHtml = textRows.map(r => {
     const label = SETTING_LABELS[r.key] || r.key;
+
+    // links are identical in both languages, so show a single box
+    if (r.key.startsWith('social') || r.key === 'volunteerForm') {
+      return `<div class="field">
+        <label>${esc(label)} <span class="hint">— leave empty to hide the button</span></label>
+        <input type="text" id="set_en_${r.key}" value="${esc(r.value_en)}" placeholder="https://..." />
+        <input type="hidden" id="set_fr_${r.key}" value="${esc(r.value_en)}" />
+      </div>`;
+    }
     const long = (r.value_en || '').length > 70;
     const input = (id, val) => long
       ? `<textarea id="${id}" style="min-height:90px">${esc(val)}</textarea>`
@@ -786,11 +802,11 @@ async function loadSettings() {
 
   const saveBtn = $('saveSettings');
   if (saveBtn) saveBtn.addEventListener('click', async () => {
-    const updates = textRows.map(r => ({
-      key: r.key,
-      value_en: $('set_en_' + r.key).value,
-      value_fr: $('set_fr_' + r.key).value
-    }));
+    const updates = textRows.map(r => {
+      const en = $('set_en_' + r.key).value;
+      const isLink = r.key.startsWith('social') || r.key === 'volunteerForm';
+      return { key: r.key, value_en: en, value_fr: isLink ? en : $('set_fr_' + r.key).value };
+    });
     const { error } = await cpfDb.from('settings').upsert(updates);
     toast(error ? error.message : 'Saved.', !!error);
   });

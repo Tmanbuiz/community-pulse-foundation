@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /test.html
+
+Sitemap: https://community-pulse-foundation.pages.dev/sitemap.xml

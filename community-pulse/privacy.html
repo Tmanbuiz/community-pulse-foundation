@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy | The Community Pulse Foundation</title>
+  <meta name="description" content="How The Community Pulse Foundation Inc. collects, uses and protects personal information." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="assets/images/logo-clean.jpg" />
+</head>
+<body>
+
+  <header class="header scrolled" id="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="assets/images/logo-clean.jpg" alt="Community Pulse Foundation Logo" class="logo-img" />
+        <div class="logo-text">
+          <span class="logo-name">The Community Pulse Foundation</span>
+          <span class="logo-tagline">Connecting People • Building Community</span>
+        </div>
+      </a>
+      <nav class="nav" id="nav">
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="index.html#programs" class="nav-link">Programs</a>
+        <a href="index.html#contact" class="nav-link">Contact</a>
+        <a href="index.html#donate" class="nav-link nav-donate">Donate</a>
+      </nav>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <div class="container">
+      <article class="page-body">
+        <h1 class="page-title">Privacy Policy</h1>
+        <p><em>Last updated: August 2026</em></p>
+
+        <p>The Community Pulse Foundation Inc. ("we", "us") is a non-profit organization
+        incorporated in New Brunswick, Canada. We respect your privacy and handle personal
+        information in line with Canada's <em>Personal Information Protection and Electronic
+        Documents Act</em> (PIPEDA).</p>
+
+        <h2>What we collect</h2>
+        <p>We only collect information you choose to give us:</p>
+        <ul>
+          <li>Your name, email address and phone number when you register as a volunteer or contact us</li>
+          <li>Information you include in a message, story submission or programme enquiry</li>
+          <li>Your name and email if you make a donation by Interac e-Transfer, as shown to us by your bank</li>
+        </ul>
+        <p>We do not collect payment card details, banking credentials or government
+        identification through this website.</p>
+
+        <h2>How we use it</h2>
+        <p>We use your information to respond to you, coordinate volunteering, deliver our
+        programmes, acknowledge donations, and share occasional updates about our work.
+        We do not sell, rent or trade personal information, and we do not share it with
+        third parties for their own marketing.</p>
+
+        <h2>Volunteer forms</h2>
+        <p>Our volunteer registration form is hosted by JotForm, and the information you
+        submit is stored on their systems as well as ours. Their handling of that data is
+        governed by JotForm's own privacy policy.</p>
+
+        <h2>Website analytics</h2>
+        <p>We may use privacy-focused analytics to understand how many people visit the site
+        and which pages they read. This does not use cookies, does not track you across
+        other websites, and does not identify you personally.</p>
+
+        <h2>How long we keep it</h2>
+        <p>We keep personal information only as long as needed for the purpose it was given,
+        or as required by law, and then delete it.</p>
+
+        <h2>Your choices</h2>
+        <p>You may ask us at any time to see what information we hold about you, correct it,
+        or delete it. You may also ask us to stop contacting you. Email us and we will act
+        on your request promptly.</p>
+
+        <h2>Children</h2>
+        <p>Some of our programmes involve children. Where a child under 16 takes part, we
+        collect information only with the consent of a parent or guardian, and only what is
+        needed to run the activity safely.</p>
+
+        <h2>Contact us</h2>
+        <p>Questions about this policy, or about your information:<br>
+        The Community Pulse Foundation Inc.<br>
+        Fredericton, New Brunswick, Canada<br>
+        <a href="mailto:thecommunitypulsefoundationinc@gmail.com">thecommunitypulsefoundationinc@gmail.com</a></p>
+
+        <p>If you are not satisfied with our response, you may contact the Office of the
+        Privacy Commissioner of Canada.</p>
+      </article>
+
+      <a href="index.html" class="btn btn-secondary page-back">← Back to home</a>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>© <span id="year"></span> The Community Pulse Foundation Inc. All rights reserved.</p>
+        <p class="footer-note">A non-profit organization incorporated in New Brunswick, Canada.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const btn = document.getElementById('mobileMenuBtn');
+    const nav = document.getElementById('nav');
+    if (btn) btn.addEventListener('click', () => {
+      nav.classList.toggle('open');
+      btn.classList.toggle('active');
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Community Pulse Foundation | Connecting People, Building Community</title>
+  <meta name="description" content="The Community Pulse Foundation is a non-profit organization in New Brunswick dedicated to fostering inclusion, supporting newcomers, and building stronger communities through connection, outreach, and storytelling." />
+  
+  <!-- Fonts -->
+  <meta name="description" content="The Community Pulse Foundation Inc. is a non-profit in Fredericton, New Brunswick, connecting people, celebrating diversity and building stronger communities through outreach, advocacy and storytelling." />
+  <meta name="theme-color" content="#0d7377" />
+  <link rel="canonical" href="https://community-pulse-foundation.pages.dev/" />
+
+  <!-- How the link looks when shared on WhatsApp, Facebook, LinkedIn -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="The Community Pulse Foundation Inc." />
+  <meta property="og:title" content="The Community Pulse Foundation Inc." />
+  <meta property="og:description" content="Connecting People. Celebrating Diversity. Building Stronger Communities across New Brunswick." />
+  <meta property="og:url" content="https://community-pulse-foundation.pages.dev/" />
+  <meta property="og:image" content="https://community-pulse-foundation.pages.dev/assets/images/hero-community.jpg" />
+  <meta property="og:image:alt" content="Community members connecting at a Community Pulse Foundation event" />
+  <meta property="og:locale" content="en_CA" />
+  <meta property="og:locale:alternate" content="fr_CA" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="The Community Pulse Foundation Inc." />
+  <meta name="twitter:description" content="Connecting People. Celebrating Diversity. Building Stronger Communities across New Brunswick." />
+  <meta name="twitter:image" content="https://community-pulse-foundation.pages.dev/assets/images/hero-community.jpg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="assets/images/logo-clean.jpg" />
+</head>
+<body>
+  <!-- Language Switcher (Fixed) -->
+  <div class="lang-switcher">
+    <button id="lang-en" class="lang-btn active" onclick="setLanguage('en')">EN</button>
+    <button id="lang-fr" class="lang-btn" onclick="setLanguage('fr')">FR</button>
+  </div>
+
+  <!-- Navigation -->
+  <header class="header" id="header">
+    <div class="container nav-container">
+      <a href="#home" class="logo">
+        <img src="assets/images/logo-clean.jpg" alt="Community Pulse Foundation Logo" class="logo-img" id="imgLogo" />
+        <div class="logo-text">
+          <span class="logo-name" data-i18n="orgName">The Community Pulse Foundation</span>
+          <span class="logo-tagline" data-i18n="tagline">Connecting People • Building Community</span>
+        </div>
+      </a>
+      
+      <nav class="nav" id="nav">
+        <a href="#home" class="nav-link" data-i18n="navHome">Home</a>
+        <a href="#about" class="nav-link" data-i18n="navAbout">About</a>
+        <a href="#programs" class="nav-link" data-i18n="navPrograms">Programs</a>
+        <a href="#events" class="nav-link" data-i18n="navEvents">Events</a>
+        <a href="#team" class="nav-link" data-i18n="navTeam">Team</a>
+        <a href="#volunteer" class="nav-link" data-i18n="navVolunteer">Get Involved</a>
+        <a href="#contact" class="nav-link" data-i18n="navContact">Contact</a>
+        <a href="#donate" class="nav-link nav-donate" data-i18n="navDonate">Donate</a>
+      </nav>
+      
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero" id="home">
+    <div class="hero-overlay"></div>
+    <div class="container hero-content">
+      <div class="hero-badge" data-i18n="heroBadge">Non-Profit • New Brunswick</div>
+      <h1 class="hero-title">
+        <span data-i18n="heroTitle1">Connecting People.</span><br>
+        <span data-i18n="heroTitle2">Building Community.</span>
+      </h1>
+      <p class="hero-subtitle" data-i18n="heroSubtitle">
+        A community-centered organization dedicated to fostering inclusion, belonging, and resilience among newcomers, families, youth, and long-term residents across New Brunswick.
+      </p>
+      <div class="hero-buttons">
+        <a href="#volunteer" class="btn btn-primary" data-i18n="btnVolunteer">Become a Volunteer</a>
+        <a href="#donate" class="btn btn-donate" data-i18n="btnDonate">Donate Now</a>
+        <a href="#about" class="btn btn-secondary" data-i18n="btnLearnMore">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <!-- Welcome -->
+  <section class="section welcome">
+    <div class="container">
+      <div class="welcome-inner">
+        <h2 class="welcome-title" data-i18n="welcomeTitle">Welcome to The Community Pulse Foundation Inc.</h2>
+        <p data-i18n="welcomeP1">We believe strong communities are built when individuals and families feel seen, heard, valued, and connected.</p>
+        <p class="welcome-belief" data-i18n="welcomeP2">Our work is guided by the belief that every person has a story, every community has a voice, and every connection has the power to create positive change.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section about" id="about">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label" data-i18n="aboutLabel">Who We Are</span>
+        <h2 class="section-title" data-i18n="aboutTitle">About The Community Pulse Foundation</h2>
+      </div>
+      
+      <div class="about-grid">
+        <div class="about-content">
+          <p data-i18n="aboutP1">
+            The Community Pulse Foundation was formally incorporated this year with the Government of New Brunswick. We are a non-profit, community-centered organization committed to enhancing social unity, promoting inclusion, and improving the well-being of individuals and families across the province.
+          </p>
+          <p data-i18n="aboutP2">
+            Our work focuses on strengthening connection, belonging, and community resilience among newcomers, Indigenous peoples, long-term residents, youth, families, and marginalized populations.
+          </p>
+          <p data-i18n="aboutP3">
+            Whether supporting newcomers, amplifying Indigenous voices, empowering youth, strengthening families, or fostering multicultural understanding, we are committed to building bridges that create lasting community resilience and belonging.
+          </p>
+          
+          <div class="mission-vision">
+            <div class="mv-card">
+              <h3 data-i18n="missionTitle">Our Mission</h3>
+              <p class="mv-tagline" data-i18n="missionTagline">Creating Meaningful Community Connections</p>
+              <p data-i18n="missionText">To foster friendship, belonging, and collaboration among newcomers and residents while promoting love, peace, and mutual understanding across cultural, racial, and faith communities.</p>
+            </div>
+            <div class="mv-card">
+              <h3 data-i18n="visionTitle">Our Vision</h3>
+              <p class="mv-tagline" data-i18n="visionTagline">Connecting People. Inspiring Communities.</p>
+              <p data-i18n="visionText">A stronger, more connected, and inclusive New Brunswick where every individual and family feels a true sense of belonging and has the opportunity to thrive.</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="about-image">
+          <img src="assets/images/hero-community.jpg" alt="Diverse community members connecting" id="imgAbout" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Objectives / Values -->
+  <section class="section objectives">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-label" data-i18n="objLabel">What Guides Us</span>
+        <h2 class="section-title" data-i18n="objTitle">Our Core Objectives</h2>
+      </div>
+      
+      <div class="objectives-grid" id="objectivesGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Programs Section -->
+  <section class="section programs" id="programs">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-label" data-i18n="progLabel">What We Do</span>
+        <h2 class="section-title" data-i18n="progTitle">Our Core Programs</h2>
+        <p class="section-desc" data-i18n="progDesc">Our programs support social connection and promote mental and emotional well-being, helping to reduce loneliness and anxiety across communities.</p>
+      </div>
+      
+      <div class="programs-grid" id="programsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Events / Outreaches Section -->
+  <section class="section events" id="events">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-label" data-i18n="eventsLabel">Our Impact</span>
+        <h2 class="section-title" data-i18n="eventsTitle">Past Outreaches & Initiatives</h2>
+      </div>
+      
+      <div class="impact-commitments">
+        <p class="impact-intro" data-i18n="impactIntro">The Community Pulse Foundation is committed to:</p>
+        <ul class="impact-list" id="impactPoints"></ul>
+      </div>
+
+      <div class="events-list" id="eventsList">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Team Section -->
+  <section class="section team" id="team">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-label" data-i18n="teamLabel">Our People</span>
+        <h2 class="section-title" data-i18n="teamTitle">Meet the Team</h2>
+        <p class="section-desc" data-i18n="teamDesc">Dedicated individuals working to build stronger, more inclusive and more resilient communities across New Brunswick.</p>
+      </div>
+      
+      <div class="team-photo">
+        <img src="assets/images/team-advocacy.jpg" alt="The Community Pulse Foundation team" id="imgImpact" />
+        <p class="team-photo-caption" data-i18n="teamPhotoCaption">The Community Pulse Foundation team in the community</p>
+      </div>
+      
+      <div class="team-grid" id="teamGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Get Involved / Volunteer -->
+  <section class="section volunteer" id="volunteer">
+    <div class="container">
+      <div class="volunteer-content">
+        <div class="volunteer-text">
+          <span class="section-label" data-i18n="volLabel">Join Us</span>
+          <h2 class="section-title" data-i18n="volTitle">Get Involved</h2>
+          <p data-i18n="volP1">Whether you want to volunteer, support our outreach drives, share your story on our podcast, or simply connect with others, there is a place for you at The Community Pulse Foundation.</p>
+          <p data-i18n="volP2">We welcome newcomers, long-term residents, youth, families, and anyone who believes in building a more inclusive and caring New Brunswick.</p>
+          
+          <div class="volunteer-benefits">
+            <div class="benefit">
+              <span class="benefit-icon">🤝</span>
+              <span data-i18n="benefit1">Make real community impact</span>
+            </div>
+            <div class="benefit">
+              <span class="benefit-icon">🌍</span>
+              <span data-i18n="benefit2">Meet people from diverse backgrounds</span>
+            </div>
+            <div class="benefit">
+              <span class="benefit-icon">💪</span>
+              <span data-i18n="benefit3">Grow your skills and network</span>
+            </div>
+          </div>
+          
+          <a href="https://form.jotform.com/261327754861059" target="_blank" rel="noopener" class="btn btn-primary btn-large volunteer-link" data-i18n="btnRegister">
+            Register as a Volunteer
+          </a>
+        </div>
+        
+        <div class="volunteer-image">
+          <img src="assets/images/volunteers-packing.jpg" alt="Volunteers packing donations" id="imgVolunteer" />
+        </div>
+      </div>
+
+      <h3 class="involved-title" data-i18n="involvedTitle">Ways to Support Our Mission</h3>
+      <div class="involved-grid" id="involvedGrid"></div>
+    </div>
+  </section>
+
+  <!-- Donate Section -->
+  <section class="section donate" id="donate">
+    <div class="container">
+      <div class="donate-box">
+        <div class="donate-content">
+          <span class="section-label" data-i18n="donateLabel">Support Our Work</span>
+          <h2 class="section-title" data-i18n="donateTitle">Make a Donation</h2>
+          <p data-i18n="donateText">
+            Your generous support helps us continue community outreach, newcomer support, food drives, and programs that build belonging across New Brunswick. Every contribution makes a real difference.
+          </p>
+          
+          <div class="donate-methods">
+            <div class="donate-method">
+              <div class="method-icon">💸</div>
+              <div>
+                <h4 data-i18n="etransferTitle">Interac e-Transfer</h4>
+                <p data-i18n="etransferText">Send to:</p>
+                <a href="mailto:thecommunitypulsefoundationinc@gmail.com" class="donate-email" id="donateEmailLink">thecommunitypulsefoundationinc@gmail.com</a>
+              </div>
+            </div>
+            <div class="donate-method">
+              <div class="method-icon">📧</div>
+              <div>
+                <h4 data-i18n="donateContactTitle">Questions?</h4>
+                <p data-i18n="donateContactText">Reach us at 506 995 0119 or 506 282 5901</p>
+              </div>
+            </div>
+          </div>
+          
+          <a href="thank-you.html" class="btn btn-donate btn-large" data-i18n="btnDonateNow">
+            Donate Now
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="section contact" id="contact">
+    <div class="container">
+      <div class="section-header center">
+        <span class="section-label" data-i18n="contactLabel">Reach Out</span>
+        <h2 class="section-title" data-i18n="contactTitle">Contact Us</h2>
+      </div>
+      
+      <div class="contact-grid">
+        <div class="contact-info">
+          <div class="contact-item">
+            <div class="contact-icon">📧</div>
+            <div>
+              <h4 data-i18n="emailLabel">Email</h4>
+              <a href="mailto:thecommunitypulsefoundationinc@gmail.com" id="contactEmailLink">thecommunitypulsefoundationinc@gmail.com</a>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">📞</div>
+            <div>
+              <h4 data-i18n="phoneLabel">Phone</h4>
+              <p id="contactPhoneText">506 995 0119<br>506 282 5901</p>
+            </div>
+          </div>
+          
+          <div class="contact-item">
+            <div class="contact-icon">📍</div>
+            <div>
+              <h4 data-i18n="locationLabel">Location</h4>
+              <p data-i18n="locationText">Fredericton, New Brunswick, Canada</p>
+            </div>
+          </div>
+          
+          <div class="social-links">
+            <a href="https://www.facebook.com/communitypulsefoundation" target="_blank" rel="noopener" class="social-btn" id="socialFacebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.52 1.49-3.91 3.77-3.91 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.45 2.91h-2.33V22c4.78-.76 8.44-4.92 8.44-9.94z"/></svg></a>
+            <a href="https://www.instagram.com/communitypulsefoundation" target="_blank" rel="noopener" class="social-btn" id="socialInstagram" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.56-.22-.96-.48-1.38-.9-.42-.42-.68-.82-.9-1.38-.16-.42-.36-1.06-.41-2.23C2.17 15.58 2.16 15.2 2.16 12s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.42-.16 1.06-.36 2.23-.41C8.42 2.17 8.8 2.16 12 2.16zm0 3.68A6.16 6.16 0 1 0 18.16 12 6.16 6.16 0 0 0 12 5.84zm0 10.16A4 4 0 1 1 16 12a4 4 0 0 1-4 4zm6.4-10.4a1.44 1.44 0 1 0 1.44 1.44A1.44 1.44 0 0 0 18.4 5.6z"/></svg></a>
+            <a href="https://www.youtube.com/@communitypulsefoundation" target="_blank" rel="noopener" class="social-btn" id="socialYouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.9a3 3 0 0 0-2.12-2.12C19.5 4.27 12 4.27 12 4.27s-7.5 0-9.38.51A3 3 0 0 0 .5 6.9 31.2 31.2 0 0 0 0 12a31.2 31.2 0 0 0 .5 5.1 3 3 0 0 0 2.12 2.12c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3 3 0 0 0 2.12-2.12A31.2 31.2 0 0 0 24 12a31.2 31.2 0 0 0-.5-5.1zM9.6 15.6V8.4l6.24 3.6z"/></svg></a>
+            <a href="#" target="_blank" rel="noopener" class="social-btn" id="socialLinkedIn" aria-label="LinkedIn" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05a3.74 3.74 0 0 1 3.37-1.85c3.6 0 4.27 2.37 4.27 5.46zM5.34 7.43a2.06 2.06 0 1 1 2.06-2.06 2.06 2.06 0 0 1-2.06 2.06zM7.12 20.45H3.56V9h3.56zM22.22 0H1.77A1.75 1.75 0 0 0 0 1.73v20.54A1.75 1.75 0 0 0 1.77 24h20.45A1.76 1.76 0 0 0 24 22.27V1.73A1.76 1.76 0 0 0 22.22 0z"/></svg></a>
+            <a href="#" target="_blank" rel="noopener" class="social-btn" id="socialTikTok" aria-label="TikTok" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.6 5.82A4.28 4.28 0 0 1 15.54 3h-3.09v12.4a2.59 2.59 0 0 1-2.59 2.5 2.59 2.59 0 1 1 .77-5.06V9.7a5.68 5.68 0 1 0 4.91 5.62V9.01a7.35 7.35 0 0 0 4.3 1.38V7.3a4.28 4.28 0 0 1-3.24-1.48z"/></svg></a>
+            <a href="#" target="_blank" rel="noopener" class="social-btn" id="socialX" aria-label="X" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2h3.3l-7.2 8.23L23.5 22h-6.63l-5.2-6.79L5.72 22H2.4l7.7-8.8L1.9 2h6.8l4.7 6.21zm-1.16 18h1.83L7.34 3.88H5.38z"/></svg></a>
+            <a href="#" target="_blank" rel="noopener" class="social-btn" id="socialWhatsApp" aria-label="WhatsApp" style="display:none"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97s-.47-.15-.67.15-.77.96-.94 1.16-.35.22-.64.08a8.11 8.11 0 0 1-2.4-1.48 9 9 0 0 1-1.66-2.06c-.17-.3 0-.46.13-.6s.3-.35.45-.52a2 2 0 0 0 .3-.5.55.55 0 0 0 0-.52c-.08-.15-.67-1.61-.92-2.2s-.49-.51-.67-.52h-.57a1.1 1.1 0 0 0-.8.37 3.35 3.35 0 0 0-1.04 2.48 5.8 5.8 0 0 0 1.22 3.09 13.3 13.3 0 0 0 5.1 4.5c.71.3 1.26.49 1.7.63a4.1 4.1 0 0 0 1.87.12 3.07 3.07 0 0 0 2-1.42 2.48 2.48 0 0 0 .17-1.42c-.07-.12-.27-.2-.57-.35zM12.05 21.8a9.75 9.75 0 0 1-4.96-1.36l-.36-.21-3.68.96.98-3.59-.23-.37a9.72 9.72 0 1 1 8.25 4.57zM20.52 3.49A11.78 11.78 0 0 0 2.1 17.71L.4 24l6.44-1.69a11.76 11.76 0 0 0 5.62 1.43h.01a11.78 11.78 0 0 0 8.05-20.25z"/></svg></a>
+          </div>
+        </div>
+        
+        <div class="contact-cta">
+          <h3 data-i18n="ctaTitle">Ready to make a difference?</h3>
+          <p data-i18n="ctaText">Join our volunteer team or reach out to partner with us on community initiatives.</p>
+          <a href="https://form.jotform.com/261327754861059" target="_blank" rel="noopener" class="btn btn-primary volunteer-link" data-i18n="btnVolunteer">Become a Volunteer</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img src="assets/images/logo-clean.jpg" alt="Logo" class="footer-logo" id="imgLogoFooter" />
+          <p data-i18n="footerTagline">Connecting People, Celebrating Diversity, Building Community.</p>
+        </div>
+        
+        <div class="footer-links">
+          <a href="#about" data-i18n="navAbout">About</a>
+          <a href="#programs" data-i18n="navPrograms">Programs</a>
+          <a href="#events" data-i18n="navEvents">Events</a>
+          <a href="#volunteer" data-i18n="navVolunteer">Get Involved</a>
+          <a href="#donate" data-i18n="navDonate">Donate</a>
+          <a href="#contact" data-i18n="navContact">Contact</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© <span id="year"></span> The Community Pulse Foundation Inc. <span data-i18n="rights">All rights reserved.</span></p>
+        <p class="footer-note" data-i18n="footerNote">A registered non-profit organization in New Brunswick, Canada.</p>
+        <p class="powered-by">
+          <span data-i18n="poweredBy">Designed &amp; powered by</span>
+          <strong>WianTribe&nbsp;Inc.</strong>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+window.SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
+window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo";
+window.CPF_DB_READY = true;
+// NOTE: must be window.cpfDb (not const) so other scripts can see it
+window.cpfDb = window.supabase
+  ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+  : null;
+var cpfDb = window.cpfDb;
+</script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/script.js"></script>
+  <script src="assets/js/dynamic-pages.js"></script>
+</body>
+</html>

@@ -111,6 +111,19 @@ input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 
 #toast.bad{background:var(--danger)}
 @media(prefers-reduced-motion:reduce){#toast{transition:none}}
 
+/* ---------- french translation bar ---------- */
+.fr-bar{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  background:var(--teal-soft);border:1px solid #cfe6e6;border-radius:12px;padding:14px 16px;margin-bottom:20px}
+.fr-toggle{display:flex;align-items:flex-start;gap:11px;margin:0;cursor:pointer;flex:1;min-width:220px}
+.fr-toggle input{width:19px;height:19px;flex:none;margin-top:2px;accent-color:var(--teal);cursor:pointer}
+.fr-toggle span{font-weight:400;font-size:.85rem;color:var(--teal-dark);line-height:1.5}
+.fr-toggle strong{display:block;font-size:.9rem;color:var(--ink)}
+.field-fr{display:none}
+.field-fr.show{display:block}
+.fr-note{font-size:.82rem;color:var(--muted);margin:-8px 0 18px}
+.fr-note button{background:none;border:none;color:var(--teal);font:inherit;font-size:.82rem;
+  font-weight:600;text-decoration:underline;cursor:pointer;padding:0}
+
 /* ---------- role badge ---------- */
 .role-badge{background:rgba(255,255,255,.2);color:#fff;font-size:.72rem;font-weight:700;
   letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:99px}
@@ -203,6 +216,16 @@ select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,
     <div class="card hidden" id="editor">
       <div class="card-pad">
         <h3 id="editorTitle" style="font-size:1.1rem;color:var(--ink);margin-bottom:16px"></h3>
+
+        <div class="fr-bar" id="frBar">
+          <label class="fr-toggle">
+            <input type="checkbox" id="autoFr" checked />
+            <span><strong>Translate to French automatically</strong>
+            Write in English only. Any French box you leave blank is translated when you save.</span>
+          </label>
+          <button type="button" class="btn-sm btn-out" id="translateNowBtn">Translate now</button>
+        </div>
+
         <div id="formFields"></div>
         <div class="form-actions">
           <button class="btn btn-teal" id="saveBtn">Save</button>
@@ -515,6 +538,19 @@ function openEditor(id) {
 
   $('editorTitle').textContent = row ? `Edit “${s.display(row)}”` : `Add to ${s.label.toLowerCase()}`;
   $('formFields').innerHTML = s.fields.map(f => fieldHtml(f, row)).join('');
+
+  const hasFrench = s.fields.some(f => f.lang === 'FR');
+  $('frBar').classList.toggle('hidden', !hasFrench);
+
+  if (hasFrench) {
+    const note = document.createElement('p');
+    note.className = 'fr-note';
+    note.innerHTML = 'French text is hidden. <button type="button" id="showFrBtn">Show and edit the French</button>';
+    $('formFields').appendChild(note);
+    // if this item already has French, show it straight away
+    if (row && s.fields.some(f => f.lang === 'FR' && row[f.k])) showFrenchFields();
+  }
+
   $('editor').classList.remove('hidden');
   $('editor').scrollIntoView({ behavior:'smooth', block:'start' });
 }
@@ -524,21 +560,23 @@ function fieldHtml(f, row) {
   const tag = f.lang ? `<span class="lang-tag">${f.lang}</span>` : '';
   const hint = f.hint ? ` <span class="hint">— ${f.hint}</span>` : '';
   const label = `<label for="f_${f.k}">${tag}${f.l}${hint}</label>`;
+  // French boxes stay tucked away unless the admin wants to see them
+  const cls = f.lang === 'FR' ? 'field field-fr' : 'field';
 
   if (f.t === 'check') {
     return `<div class="toggles"><label><input type="checkbox" id="f_${f.k}" ${v ? 'checked':''} /> ${f.l}</label></div>`;
   }
   if (f.t === 'textarea') {
-    return `<div class="field">${label}<textarea id="f_${f.k}" placeholder="Leave a blank line between paragraphs. Start a line with ## for a heading, or - for a bullet.">${esc(v)}</textarea></div>`;
+    return `<div class="${cls}">${label}<textarea id="f_${f.k}" placeholder="Leave a blank line between paragraphs. Start a line with ## for a heading, or - for a bullet.">${esc(v)}</textarea></div>`;
   }
   if (f.t === 'number') {
-    return `<div class="field">${label}<input type="number" id="f_${f.k}" value="${esc(v||0)}" /></div>`;
+    return `<div class="${cls}">${label}<input type="number" id="f_${f.k}" value="${esc(v||0)}" /></div>`;
   }
   if (f.t === 'image') {
     const prev = v
       ? `<img class="upload-preview" id="imgPrev" src="${esc(v)}" alt="" />`
       : `<div class="upload-none" id="imgPrev">No photo</div>`;
-    return `<div class="field">${label}
+    return `<div class="${cls}">${label}
       <div class="upload">
         ${prev}
         <div class="upload-info" id="imgInfo">JPG or PNG, up to 5 MB. Landscape photos look best.</div>
@@ -547,7 +585,7 @@ function fieldHtml(f, row) {
         <button type="button" class="btn-sm btn-grey" id="imgClear">Remove</button>
       </div></div>`;
   }
-  return `<div class="field">${label}<input type="text" id="f_${f.k}" value="${esc(v)}" /></div>`;
+  return `<div class="${cls}">${label}<input type="text" id="f_${f.k}" value="${esc(v)}" /></div>`;
 }
 
 /* ---------- image upload ---------- */
@@ -572,6 +610,66 @@ async function uploadImage(file) {
 }
 
 /* ---------- save ---------- */
+
+/* =====================================================
+   AUTOMATIC ENGLISH -> FRENCH TRANSLATION
+   ---------------------------------------------------------
+   Uses the free MyMemory service. No account or key needed.
+   The French text is saved to the database like any other
+   text, so you can read it and correct it before or after.
+   ===================================================== */
+
+// MyMemory takes about 500 characters per request, so long
+// text is split on sentence ends and rejoined afterwards.
+function cpfChunk(text, max = 480) {
+  const parts = [];
+  let buf = '';
+  for (const piece of text.split(/(?<=[.!?\n])\s+/)) {
+    if ((buf + ' ' + piece).trim().length > max) {
+      if (buf) parts.push(buf.trim());
+      buf = piece;
+      while (buf.length > max) { parts.push(buf.slice(0, max)); buf = buf.slice(max); }
+    } else {
+      buf = (buf ? buf + ' ' : '') + piece;
+    }
+  }
+  if (buf.trim()) parts.push(buf.trim());
+  return parts;
+}
+
+async function translateToFrench(text) {
+  const clean = (text || '').trim();
+  if (!clean) return '';
+
+  const out = [];
+  for (const chunk of cpfChunk(clean)) {
+    const url = 'https://api.mymemory.translated.net/get?q=' +
+                encodeURIComponent(chunk) + '&langpair=en|fr';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Translation service is unavailable right now.');
+    const json = await res.json();
+    const t = json && json.responseData && json.responseData.translatedText;
+    if (!t) throw new Error('Translation service returned nothing.');
+    if (/MYMEMORY WARNING|QUERY LENGTH LIMIT/i.test(t)) {
+      throw new Error('Daily translation limit reached. Try again tomorrow, or type the French yourself.');
+    }
+    out.push(t);
+  }
+  return out.join(' ');
+}
+
+// Fill every empty French box from its English partner
+async function autoFillFrench(getVal, setVal, pairs) {
+  let filled = 0;
+  for (const [en, fr] of pairs) {
+    const source = (getVal(en) || '').trim();
+    if (!source || (getVal(fr) || '').trim()) continue;   // nothing to do
+    setVal(fr, await translateToFrench(source));
+    filled++;
+  }
+  return filled;
+}
+
 async function save() {
   const s = SECTIONS[current];
   const body = {};
@@ -587,6 +685,33 @@ async function save() {
 
   const required = s.fields.find(f => f.req && !body[f.k]);
   if (required) return toast(`${required.l} is required.`, true);
+
+  // Translate any French field left blank
+  const autoBox = $('autoFr');
+  if (autoBox && autoBox.checked) {
+    const pairs = s.fields
+      .filter(f => f.k.endsWith('_en') && s.fields.some(g => g.k === f.k.slice(0, -3) + '_fr'))
+      .map(f => [f.k, f.k.slice(0, -3) + '_fr']);
+
+    const todo = pairs.filter(([en, fr]) => body[en] && !body[fr]);
+    if (todo.length) {
+      $('saveBtn').disabled = true;
+      $('saveBtn').textContent = 'Translating…';
+      try {
+        for (const [en, fr] of todo) {
+          body[fr] = await translateToFrench(body[en]);
+          const el = $('f_' + fr);
+          if (el) el.value = body[fr];
+        }
+      } catch (e) {
+        $('saveBtn').disabled = false;
+        $('saveBtn').textContent = 'Save';
+        return toast(e.message + ' Nothing was saved.', true);
+      }
+      $('saveBtn').disabled = false;
+      $('saveBtn').textContent = 'Save';
+    }
+  }
 
   if (current === 'pages') body.slug = slugify(body.slug || body.title_en);
 
@@ -613,6 +738,40 @@ async function remove(id) {
   if (error) return toast(error.message, true);
   toast('Deleted.');
   loadRows();
+}
+
+function showFrenchFields() {
+  document.querySelectorAll('.field-fr').forEach(el => el.classList.add('show'));
+  const note = document.querySelector('.fr-note');
+  if (note) note.remove();
+}
+
+// Fill the French boxes right now so they can be checked before saving
+async function translateNow() {
+  const s = SECTIONS[current];
+  const btn = $('translateNowBtn');
+  const pairs = s.fields
+    .filter(f => f.k.endsWith('_en') && s.fields.some(g => g.k === f.k.slice(0, -3) + '_fr'))
+    .map(f => [f.k, f.k.slice(0, -3) + '_fr']);
+
+  const todo = pairs.filter(([en, fr]) => {
+    const a = $('f_' + en), b = $('f_' + fr);
+    return a && b && a.value.trim() && !b.value.trim();
+  });
+
+  if (!todo.length) return toast('Nothing to translate — the French boxes are already filled.', true);
+
+  btn.disabled = true; btn.textContent = 'Translating…';
+  try {
+    for (const [en, fr] of todo) {
+      $('f_' + fr).value = await translateToFrench($('f_' + en).value.trim());
+    }
+    showFrenchFields();
+    toast('Translated. Please read it over before saving.');
+  } catch (e) {
+    toast(e.message, true);
+  }
+  btn.disabled = false; btn.textContent = 'Translate now';
 }
 
 /* =====================================================
@@ -764,6 +923,13 @@ async function loadSettings() {
     </div>`).join('');
 
   $('listCard').innerHTML = `<div class="card-pad">
+      ${canEdit() ? `<div class="fr-bar">
+        <label class="fr-toggle" style="cursor:default">
+          <span><strong>French version</strong>
+          Leave a French box empty and press Translate to fill it from the English.</span>
+        </label>
+        <button type="button" class="btn-sm btn-out" id="translateSettingsBtn">Translate empty French boxes</button>
+      </div>` : ''}
       ${textHtml}
       <h3 style="font-size:1.05rem;color:var(--ink);margin:26px 0 14px;padding-top:20px;border-top:1px solid var(--line)">Site photos</h3>
       ${imageHtml}
@@ -799,6 +965,24 @@ async function loadSettings() {
     });
   });
 
+  const trBtn = $('translateSettingsBtn');
+  if (trBtn) trBtn.addEventListener('click', async () => {
+    const todo = textRows.filter(r =>
+      !r.key.startsWith('social') && r.key !== 'volunteerForm' &&
+      $('set_en_' + r.key).value.trim() && !$('set_fr_' + r.key).value.trim());
+
+    if (!todo.length) return toast('All the French boxes are already filled.', true);
+
+    trBtn.disabled = true; trBtn.textContent = 'Translating…';
+    try {
+      for (const r of todo) {
+        $('set_fr_' + r.key).value = await translateToFrench($('set_en_' + r.key).value.trim());
+      }
+      toast('Translated. Read it over, then press Save changes.');
+    } catch (e) { toast(e.message, true); }
+    trBtn.disabled = false; trBtn.textContent = 'Translate empty French boxes';
+  });
+
   const saveBtn = $('saveSettings');
   if (saveBtn) saveBtn.addEventListener('click', async () => {
     const updates = textRows.map(r => {
@@ -822,6 +1006,8 @@ $('tabs').addEventListener('click', e => { const b = e.target.closest('[data-tab
 $('addBtn').addEventListener('click', () => openEditor(null));
 $('cancelBtn').addEventListener('click', () => { $('editor').classList.add('hidden'); editingId = null; draftImage = null; });
 $('saveBtn').addEventListener('click', save);
+$('translateNowBtn').addEventListener('click', translateNow);
+$('autoFr').addEventListener('change', e => { if (!e.target.checked) showFrenchFields(); });
 
 $('listCard').addEventListener('click', e => {
   const ed = e.target.closest('[data-edit]');
@@ -831,6 +1017,7 @@ $('listCard').addEventListener('click', e => {
 });
 
 $('formFields').addEventListener('click', e => {
+  if (e.target.id === 'showFrBtn') showFrenchFields();
   if (e.target.id === 'imgPick') $('imgFile').click();
   if (e.target.id === 'imgClear') {
     draftImage = null;

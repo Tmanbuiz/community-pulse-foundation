@@ -79,7 +79,7 @@ const translations = {
     footerTagline: "Connecting People, Celebrating Diversity, Building Stronger Communities.",
     rights: "All rights reserved.",
     footerNote: "A registered non-profit organization in New Brunswick, Canada.",
-    poweredBy: "Designed & powered by"
+    poweredBy: "Design by"
   },
   fr: {
     welcomeTitle: "Bienvenue à La Fondation Community Pulse Inc.",
@@ -154,7 +154,7 @@ const translations = {
     footerTagline: "Relier les gens, célébrer la diversité, bâtir des communautés plus fortes.",
     rights: "Tous droits réservés.",
     footerNote: "Un organisme sans but lucratif enregistré au Nouveau-Brunswick, Canada.",
-    poweredBy: "Conçu et propulsé par"
+    poweredBy: "Conçu par"
   }
 };
 

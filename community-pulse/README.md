@@ -164,4 +164,4 @@ Built with care for The Community Pulse Foundation.
 
 ---
 
-Design by **WianTribe Inc.**
+design by **WianTribe Inc.**

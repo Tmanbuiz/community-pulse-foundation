@@ -30,10 +30,41 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
   
+  <link rel="preload" as="image" href="assets/images/hero-community.jpg" fetchpriority="high" />
+
   <link rel="stylesheet" href="assets/css/styles.css" />
   <link rel="icon" type="image/jpeg" href="assets/images/logo-clean.jpg" />
+
+  <!-- Structured data: helps search engines understand this is a real non-profit -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "NGO",
+    "name": "The Community Pulse Foundation Inc.",
+    "url": "https://community-pulse-foundation.pages.dev/",
+    "logo": "https://community-pulse-foundation.pages.dev/assets/images/logo-clean.jpg",
+    "image": "https://community-pulse-foundation.pages.dev/assets/images/hero-community.jpg",
+    "email": "thecommunitypulsefoundationinc@gmail.com",
+    "telephone": "+15069950119",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Fredericton",
+      "addressRegion": "NB",
+      "addressCountry": "CA"
+    },
+    "areaServed": "New Brunswick",
+    "knowsLanguage": ["en", "fr"],
+    "sameAs": [
+      "https://www.facebook.com/communitypulsefoundation",
+      "https://www.instagram.com/communitypulsefoundation",
+      "https://www.youtube.com/@communitypulsefoundation"
+    ]
+  }
+  </script>
 </head>
 <body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
   <!-- Language Switcher (Fixed) -->
   <div class="lang-switcher">
     <button id="lang-en" class="lang-btn active" onclick="setLanguage('en')">EN</button>
@@ -44,7 +75,7 @@
   <header class="header" id="header">
     <div class="container nav-container">
       <a href="#home" class="logo">
-        <img src="assets/images/logo-clean.jpg" alt="Community Pulse Foundation Logo" class="logo-img" id="imgLogo" />
+        <img src="assets/images/logo-clean.jpg" alt="Community Pulse Foundation Logo" class="logo-img" id="imgLogo" width="48" height="48" />
         <div class="logo-text">
           <span class="logo-name" data-i18n="orgName">The Community Pulse Foundation</span>
           <span class="logo-tagline" data-i18n="tagline">Connecting People • Building Community</span>
@@ -62,15 +93,16 @@
         <a href="#donate" class="nav-link nav-donate" data-i18n="navDonate">Donate</a>
       </nav>
       
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">
         <span></span><span></span><span></span>
       </button>
     </div>
   </header>
 
+  <main id="main-content">
   <!-- Hero Section -->
   <section class="hero" id="home">
-    <div class="hero-overlay"></div>
+    <div class="hero-overlay" aria-hidden="true"></div>
     <div class="container hero-content">
       <div class="hero-badge" data-i18n="heroBadge">Non-Profit • New Brunswick</div>
       <h1 class="hero-title">
@@ -134,7 +166,7 @@
         </div>
         
         <div class="about-image">
-          <img src="assets/images/hero-community.jpg" alt="Diverse community members connecting" id="imgAbout" />
+          <img src="assets/images/hero-community.jpg" alt="Diverse community members connecting" id="imgAbout" width="1168" height="784" loading="lazy" />
         </div>
       </div>
     </div>
@@ -198,7 +230,7 @@
       </div>
       
       <div class="team-photo">
-        <img src="assets/images/team-advocacy.jpg" alt="The Community Pulse Foundation team" id="imgImpact" />
+        <img src="assets/images/team-advocacy.jpg" alt="The Community Pulse Foundation team" id="imgImpact" width="1400" height="1050" loading="lazy" />
         <p class="team-photo-caption" data-i18n="teamPhotoCaption">The Community Pulse Foundation team in the community</p>
       </div>
       
@@ -239,7 +271,7 @@
         </div>
         
         <div class="volunteer-image">
-          <img src="assets/images/volunteers-packing.jpg" alt="Volunteers packing donations" id="imgVolunteer" />
+          <img src="assets/images/volunteers-packing.jpg" alt="Volunteers packing donations" id="imgVolunteer" width="1168" height="784" loading="lazy" />
         </div>
       </div>
 
@@ -338,13 +370,14 @@
       </div>
     </div>
   </section>
+  </main>
 
   <!-- Footer -->
   <footer class="footer">
     <div class="container">
       <div class="footer-content">
         <div class="footer-brand">
-          <img src="assets/images/logo-clean.jpg" alt="Logo" class="footer-logo" id="imgLogoFooter" />
+          <img src="assets/images/logo-clean.jpg" alt="Logo" class="footer-logo" id="imgLogoFooter" width="48" height="48" loading="lazy" />
           <p data-i18n="footerTagline">Connecting People, Celebrating Diversity, Building Community.</p>
         </div>
         

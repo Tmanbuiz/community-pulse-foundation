@@ -184,7 +184,7 @@ function setLanguage(lang) {
   renderGetInvolved();
   
   // Save preference
-  localStorage.setItem('cpf-lang', lang);
+  cpfSetStoredLang(lang);
 }
 
 // ==================== RENDER FUNCTIONS ====================
@@ -284,19 +284,38 @@ function renderTeam() {
 function initMobileMenu() {
   const btn = document.getElementById('mobileMenuBtn');
   const nav = document.getElementById('nav');
-  
+
   if (btn && nav) {
+    const closeMenu = () => {
+      nav.classList.remove('open');
+      btn.classList.remove('active');
+      btn.setAttribute('aria-expanded', 'false');
+    };
+
     btn.addEventListener('click', () => {
-      nav.classList.toggle('open');
-      btn.classList.toggle('active');
+      const isOpen = nav.classList.toggle('open');
+      btn.classList.toggle('active', isOpen);
+      btn.setAttribute('aria-expanded', String(isOpen));
     });
-    
+
     // Close menu when clicking a link
     nav.querySelectorAll('.nav-link').forEach(link => {
-      link.addEventListener('click', () => {
-        nav.classList.remove('open');
-        btn.classList.remove('active');
-      });
+      link.addEventListener('click', closeMenu);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nav.classList.contains('open')) {
+        closeMenu();
+        btn.focus();
+      }
+    });
+
+    // Close when clicking outside the menu
+    document.addEventListener('click', (e) => {
+      if (!nav.classList.contains('open')) return;
+      if (nav.contains(e.target) || btn.contains(e.target)) return;
+      closeMenu();
     });
   }
 }
@@ -304,24 +323,51 @@ function initMobileMenu() {
 // ==================== HEADER SCROLL ====================
 function initHeaderScroll() {
   const header = document.getElementById('header');
+  let ticking = false;
+
+  const applyState = () => {
+    header.classList.toggle('scrolled', window.scrollY > 50);
+    ticking = false;
+  };
+
+  // Set correct state immediately in case the page loads mid-scroll
+  applyState();
+
   window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
+    if (!ticking) {
+      window.requestAnimationFrame(applyState);
+      ticking = true;
     }
-  });
+  }, { passive: true });
+}
+
+// ==================== STORAGE (safe in private browsing) ====================
+function cpfGetStoredLang() {
+  try {
+    return localStorage.getItem('cpf-lang');
+  } catch (e) {
+    return null;
+  }
+}
+
+function cpfSetStoredLang(lang) {
+  try {
+    localStorage.setItem('cpf-lang', lang);
+  } catch (e) {
+    // private browsing / storage disabled — language just won't persist
+  }
 }
 
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', () => {
   // Year
   document.getElementById('year').textContent = new Date().getFullYear();
-  
-  // Language preference
-  const savedLang = localStorage.getItem('cpf-lang') || 'en';
+
+  // Language preference — URL (?lang=fr) takes priority so shared French links work
+  const urlLang = new URLSearchParams(window.location.search).get('lang');
+  const savedLang = (urlLang === 'en' || urlLang === 'fr') ? urlLang : (cpfGetStoredLang() || 'en');
   setLanguage(savedLang);
-  
+
   // Mobile menu & header
   initMobileMenu();
   initHeaderScroll();

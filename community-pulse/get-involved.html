@@ -76,8 +76,8 @@
 
         <fieldset class="form-fieldset branch-panel" data-branch-panel="volunteer">
           <legend class="form-legend" data-i18n="involveVolHeading">Volunteering details</legend>
-          <div class="form-group">
-            <span class="form-label" data-i18n="involveVolType">What type of volunteering interests you?</span>
+          <fieldset class="form-group form-subgroup">
+            <legend class="form-label" data-i18n="involveVolType">What type of volunteering interests you?</legend>
             <div class="form-checkbox-group">
               <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Community events" /> <span data-i18n="volTypeEvents">Community events</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Packaging/sorting" /> <span data-i18n="volTypePack">Packaging/sorting</span></label>
@@ -86,16 +86,16 @@
               <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="General support" /> <span data-i18n="volTypeGeneral">General support</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Other" /> <span data-i18n="optOther">Other</span></label>
             </div>
-          </div>
-          <div class="form-group">
-            <span class="form-label" data-i18n="involveAvail">When are you generally available?</span>
+          </fieldset>
+          <fieldset class="form-group form-subgroup">
+            <legend class="form-label" data-i18n="involveAvail">When are you generally available?</legend>
             <div class="form-checkbox-group">
               <label class="form-checkbox"><input type="checkbox" name="Availability" value="Weekdays" /> <span data-i18n="availWeekdays">Weekdays</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Availability" value="Evenings" /> <span data-i18n="availEvenings">Evenings</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Availability" value="Weekends" /> <span data-i18n="availWeekends">Weekends</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Availability" value="Flexible" /> <span data-i18n="availFlexible">Flexible</span></label>
             </div>
-          </div>
+          </fieldset>
           <div class="form-group">
             <label for="volNotes" class="form-label" data-i18n="involveVolNotes">Anything we should know about your availability, skills or accessibility needs?</label>
             <textarea id="volNotes" name="Volunteer notes" rows="3"></textarea>
@@ -104,8 +104,8 @@
 
         <fieldset class="form-fieldset branch-panel" data-branch-panel="items">
           <legend class="form-legend" data-i18n="involveItemsHeading">Item donation details</legend>
-          <div class="form-group">
-            <span class="form-label" data-i18n="involveItemsType">What would you like to donate?</span>
+          <fieldset class="form-group form-subgroup">
+            <legend class="form-label" data-i18n="involveItemsType">What would you like to donate?</legend>
             <div class="form-checkbox-group">
               <label class="form-checkbox"><input type="checkbox" name="Item type" value="Food" /> <span data-i18n="itemFood">Food</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Item type" value="Clothing" /> <span data-i18n="itemClothing">Clothing</span></label>
@@ -113,18 +113,18 @@
               <label class="form-checkbox"><input type="checkbox" name="Item type" value="Household items" /> <span data-i18n="itemHousehold">Household items</span></label>
               <label class="form-checkbox"><input type="checkbox" name="Item type" value="Other" /> <span data-i18n="optOther">Other</span></label>
             </div>
-          </div>
+          </fieldset>
           <div class="form-group">
             <label for="itemDesc" class="form-label" data-i18n="involveItemsDesc">Please describe the items and approximate quantity.</label>
             <textarea id="itemDesc" name="Item description" rows="3"></textarea>
           </div>
-          <div class="form-group">
-            <span class="form-label" data-i18n="involvePickup">Do you need pick-up assistance?</span>
+          <fieldset class="form-group form-subgroup">
+            <legend class="form-label" data-i18n="involvePickup">Do you need pick-up assistance?</legend>
             <div class="form-radio-group form-radio-group-inline">
               <label class="form-radio"><input type="radio" name="Pick-up assistance needed" value="Yes" /> <span data-i18n="yesLabel">Yes</span></label>
               <label class="form-radio"><input type="radio" name="Pick-up assistance needed" value="No" /> <span data-i18n="noLabel">No</span></label>
             </div>
-          </div>
+          </fieldset>
           <div class="form-group">
             <label for="pickupDate" class="form-label" data-i18n="involvePickupDate">Preferred drop-off or pick-up date</label>
             <input type="date" id="pickupDate" name="Preferred date" />

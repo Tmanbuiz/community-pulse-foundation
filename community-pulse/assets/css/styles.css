@@ -1266,6 +1266,21 @@ a {
   margin-top: 16px;
 }
 
+.form-subgroup {
+  border: none;
+  padding: 0;
+  margin-left: 0;
+  margin-right: 0;
+  min-width: 0;
+}
+
+.form-subgroup legend.form-label {
+  padding: 0;
+  display: block;
+  width: 100%;
+  float: none;
+}
+
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

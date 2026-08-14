@@ -735,6 +735,35 @@ a {
   color: var(--text-light);
 }
 
+/* ==================== UPCOMING EVENTS ==================== */
+.upcoming {
+  background: var(--bg-alt);
+}
+
+.upcoming-empty {
+  max-width: 560px;
+  margin: 0 auto;
+  text-align: center;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  box-shadow: var(--shadow);
+}
+
+.upcoming-empty p {
+  color: var(--text-light);
+  font-size: 1.02rem;
+  margin-bottom: 28px;
+}
+
+.upcoming-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: center;
+}
+
 /* ==================== VOLUNTEER ==================== */
 .volunteer {
   background: linear-gradient(135deg, #0d7377 0%, #0a5c5f 100%);

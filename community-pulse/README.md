@@ -154,7 +154,7 @@ community-pulse/
 
 ## Contact
 
-**Email:** thecommunitypulsefoundationinc@gmail.com  
+**Email:** info@thecommunitypulsefoundation.ca  
 **Phone:** 506 995 0119 / 506 282 5901  
 **Location:** Fredericton, New Brunswick, Canada
 

@@ -26,3 +26,14 @@ update public.settings set
   value_en = 'get-involved.html',
   value_fr = 'get-involved.html'
 where key = 'volunteerForm';
+
+-- Old Gmail addresses -> professional domain mailboxes (Zoho)
+update public.settings set
+  value_en = 'info@thecommunitypulsefoundation.ca',
+  value_fr = 'info@thecommunitypulsefoundation.ca'
+where key = 'contactEmail';
+
+update public.settings set
+  value_en = 'donations@thecommunitypulsefoundation.ca',
+  value_fr = 'donations@thecommunitypulsefoundation.ca'
+where key = 'donateEmail';

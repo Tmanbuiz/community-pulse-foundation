@@ -222,9 +222,18 @@ var cpfDb = window.cpfDb;
   <script src="assets/js/dynamic-pages.js"></script>
   <script>
     (function () {
+      var form = document.getElementById('involveForm');
       var radios = document.querySelectorAll('input[name="How would you like to help"]');
       var panels = document.querySelectorAll('[data-branch-panel]');
       var nextField = document.getElementById('formNext');
+
+      // Route each branch to its own inbox address (all are aliases of the
+      // same mailbox, but a distinct "To:" makes filtering/sorting easy).
+      var branchTargets = {
+        volunteer: 'volunteers@thecommunitypulsefoundation.ca',
+        financial: 'donations@thecommunitypulsefoundation.ca'
+      };
+      var defaultTarget = 'info@thecommunitypulsefoundation.ca';
 
       function showBranch(branch) {
         panels.forEach(function (panel) {
@@ -238,6 +247,7 @@ var cpfDb = window.cpfDb;
         nextField.value = branch === 'financial'
           ? 'https://thecommunitypulsefoundation.ca/involved-thank-you.html?branch=financial'
           : 'https://thecommunitypulsefoundation.ca/involved-thank-you.html';
+        form.action = 'https://formsubmit.co/' + (branchTargets[branch] || defaultTarget);
       }
 
       radios.forEach(function (r) {

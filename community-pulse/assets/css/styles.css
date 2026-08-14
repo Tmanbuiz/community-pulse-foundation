@@ -387,6 +387,39 @@ a {
   font-size: 1.05rem;
 }
 
+/* ==================== TRUST STRIP ==================== */
+.trust-strip {
+  background: var(--dark);
+  padding: 14px 0;
+}
+
+.trust-strip-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px 14px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.trust-strip-divider {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 600px) {
+  .trust-strip-divider {
+    display: none;
+  }
+  .trust-strip-inner {
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
 /* ==================== ABOUT ==================== */
 .about-grid {
   display: grid;
@@ -783,6 +816,15 @@ a {
   font-size: 1.05rem;
   max-width: 560px;
   margin: 0 auto 36px;
+}
+
+.donate-receipt-note {
+  font-size: 0.85rem !important;
+  font-style: italic;
+  color: var(--text-light);
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  margin-top: -16px !important;
 }
 
 .donate-methods {

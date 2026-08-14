@@ -95,7 +95,7 @@ create table if not exists public.settings (
 insert into public.settings (key, value_en, value_fr) values
   ('heroTitle1',    'Connecting People.',              'Relier les gens.'),
   ('heroTitle2',    'Building Stronger Communities.',  'Batir des communautes plus fortes.'),
-  ('heroSubtitle',  'A registered non-profit dedicated to strengthening communities through connection, inclusion, meaningful dialogue, and positive social impact across New Brunswick and beyond.', 'Un organisme sans but lucratif enregistre, dedie a renforcer les communautes par la connexion, l''inclusion, le dialogue significatif et l''impact social positif, au Nouveau-Brunswick et au-dela.'),
+  ('heroSubtitle',  'A non-profit organization dedicated to strengthening communities through connection, inclusion, meaningful dialogue, and positive social impact across New Brunswick and beyond.', 'Un organisme sans but lucratif dedie a renforcer les communautes par la connexion, l''inclusion, le dialogue significatif et l''impact social positif, au Nouveau-Brunswick et au-dela.'),
   ('contactEmail',  'thecommunitypulsefoundationinc@gmail.com', 'thecommunitypulsefoundationinc@gmail.com'),
   ('contactPhone',  '506 995 0119 / 506 282 5901', '506 995 0119 / 506 282 5901'),
   ('contactPlace',  'Fredericton, New Brunswick, Canada', 'Fredericton, Nouveau-Brunswick, Canada'),

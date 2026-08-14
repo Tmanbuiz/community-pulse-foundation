@@ -17,6 +17,6 @@ update public.settings set
 where key = 'heroTitle2';
 
 update public.settings set
-  value_en = 'A registered non-profit dedicated to strengthening communities through connection, inclusion, meaningful dialogue, and positive social impact across New Brunswick and beyond.',
-  value_fr = 'Un organisme sans but lucratif enregistre, dedie a renforcer les communautes par la connexion, l''inclusion, le dialogue significatif et l''impact social positif, au Nouveau-Brunswick et au-dela.'
+  value_en = 'A non-profit organization dedicated to strengthening communities through connection, inclusion, meaningful dialogue, and positive social impact across New Brunswick and beyond.',
+  value_fr = 'Un organisme sans but lucratif dedie a renforcer les communautes par la connexion, l''inclusion, le dialogue significatif et l''impact social positif, au Nouveau-Brunswick et au-dela.'
 where key = 'heroSubtitle';

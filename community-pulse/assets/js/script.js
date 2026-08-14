@@ -306,16 +306,19 @@ function renderObjectives() {
 function renderPrograms() {
   const grid = document.getElementById('programsGrid');
   if (!grid) return;
-  
+
   grid.innerHTML = siteData.programs.map(prog => `
-    <div class="program-card">
+    <div class="program-card" id="program-${prog.id}">
       <div class="program-image">
         <img src="${prog.image}" alt="${prog.title[currentLang]}" loading="lazy" />
+        ${prog.status ? `<span class="program-status">${prog.status[currentLang]}</span>` : ''}
       </div>
       <div class="program-content">
         <h3>${prog.title[currentLang]}</h3>
         <span class="program-subtitle">${prog.subtitle[currentLang]}</span>
+        ${prog.audience ? `<span class="program-audience">${prog.audience[currentLang]}</span>` : ''}
         <p>${prog.description[currentLang]}</p>
+        <a href="get-involved.html?type=volunteer" class="program-cta">${translations[currentLang].btnVolunteer}</a>
       </div>
     </div>
   `).join('');
@@ -354,11 +357,11 @@ function renderGetInvolved() {
   const grid = document.getElementById('involvedGrid');
   if (!grid) return;
   grid.innerHTML = siteData.getInvolved.map(w => `
-    <div class="involved-card">
+    <a class="involved-card" ${w.link ? `href="${w.link}"` : ''}>
       <span class="involved-icon">${w.icon}</span>
       <h4>${w.title[currentLang]}</h4>
       <p>${w.text[currentLang]}</p>
-    </div>`).join('');
+    </a>`).join('');
 }
 
 function renderTeam() {

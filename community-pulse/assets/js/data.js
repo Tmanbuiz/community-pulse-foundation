@@ -9,7 +9,7 @@ const siteData = {
   // ==================== CORE VALUES ====================
   objectives: [
     {
-      icon: "\ud83e\udec2",
+      icon: "🫂",
       title: { en: "Inclusion", fr: "Inclusion" },
       text: {
         en: "We believe everyone deserves to feel welcomed, respected, and valued.",
@@ -17,7 +17,7 @@ const siteData = {
       }
     },
     {
-      icon: "\ud83c\udfd8\ufe0f",
+      icon: "🏘️",
       title: { en: "Community", fr: "Communauté" },
       text: {
         en: "We build relationships that strengthen belonging and collective responsibility.",
@@ -25,7 +25,7 @@ const siteData = {
       }
     },
     {
-      icon: "\ud83c\udf0d",
+      icon: "🌍",
       title: { en: "Diversity", fr: "Diversité" },
       text: {
         en: "We celebrate different cultures, experiences, perspectives, and identities.",
@@ -33,7 +33,7 @@ const siteData = {
       }
     },
     {
-      icon: "\ud83c\udf31",
+      icon: "🌱",
       title: { en: "Empowerment", fr: "Autonomisation" },
       text: {
         en: "We create opportunities for individuals and communities to grow and thrive.",
@@ -41,7 +41,7 @@ const siteData = {
       }
     },
     {
-      icon: "\ud83e\udd1d",
+      icon: "🤝",
       title: { en: "Collaboration", fr: "Collaboration" },
       text: {
         en: "We work together with individuals, organizations, and partners to create meaningful impact.",
@@ -71,44 +71,40 @@ const siteData = {
   // ==================== WAYS TO GET INVOLVED ====================
   getInvolved: [
     {
-      icon: "\ud83e\udd1d",
-      title: { en: "Volunteer With Us", fr: "Faire du bénévolat" },
+      icon: "🤝",
+      title: { en: "Volunteer", fr: "Faire du bénévolat" },
       text: {
-        en: "Share your skills, time, and passion to support community initiatives.",
-        fr: "Partagez vos compétences, votre temps et votre passion pour soutenir les initiatives communautaires."
-      }
+        en: "Give your time and skills where they can make a practical difference.",
+        fr: "Offrez votre temps et vos compétences là où ils peuvent faire une réelle différence."
+      },
+      link: "get-involved.html?type=volunteer"
     },
     {
-      icon: "\ud83e\udd1d",
-      title: { en: "Partner With Us", fr: "Devenir partenaire" },
+      icon: "📦",
+      title: { en: "Donate Items", fr: "Faire don d'articles" },
       text: {
-        en: "Collaborate with us to create meaningful programs and community impact.",
-        fr: "Collaborez avec nous pour créer des programmes significatifs et un impact communautaire."
-      }
+        en: "Support identified outreach needs with useful, requested items.",
+        fr: "Soutenez nos besoins de sensibilisation avec des articles utiles et demandés."
+      },
+      link: "get-involved.html?type=items"
     },
     {
-      icon: "\ud83c\udf99\ufe0f",
-      title: { en: "Share Your Story", fr: "Partager votre histoire" },
+      icon: "💳",
+      title: { en: "Financial Support", fr: "Soutien financier" },
       text: {
-        en: "Your experiences can inspire and connect others.",
-        fr: "Vos expériences peuvent inspirer et rapprocher les autres."
-      }
+        en: "Help fund community outreach, logistics and program delivery.",
+        fr: "Aidez à financer la sensibilisation communautaire, la logistique et la prestation de programmes."
+      },
+      link: "get-involved.html?type=financial"
     },
     {
-      icon: "\ud83d\udc9a",
-      title: { en: "Support Our Programs", fr: "Soutenir nos programmes" },
+      icon: "💬",
+      title: { en: "Connect With Us", fr: "Communiquer avec nous" },
       text: {
-        en: "Help us expand outreach, storytelling, and community initiatives.",
-        fr: "Aidez-nous à élargir la sensibilisation, les récits et les initiatives communautaires."
-      }
-    },
-    {
-      icon: "\ud83c\udf1f",
-      title: { en: "Participate", fr: "Participer" },
-      text: {
-        en: "Join our events, conversations, and community activities.",
-        fr: "Joignez-vous à nos événements, conversations et activités communautaires."
-      }
+        en: "Ask a question, share an idea or tell us about a community need.",
+        fr: "Posez une question, partagez une idée ou parlez-nous d'un besoin communautaire."
+      },
+      link: "get-involved.html?type=question"
     }
   ],
 
@@ -117,51 +113,61 @@ const siteData = {
     {
       id: "podcast",
       image: "assets/images/podcast-setup.jpg",
-      title: { en: "Community Personality Show & Podcast", fr: "\u00c9mission et balado Personnalit\u00e9 communautaire" },
+      status: { en: "Active", fr: "Actif" },
+      audience: { en: "Community members & storytellers", fr: "Membres de la communauté et conteurs" },
+      title: { en: "Community Personality Show & Podcast", fr: "Émission et balado Personnalité communautaire" },
       subtitle: { en: "Sharing Stories. Inspiring Change.", fr: "Partager des histoires. Inspirer le changement." },
       description: {
         en: "We highlight individuals creating positive change within their communities. Through interviews, storytelling, and meaningful conversations, we celebrate achievements and inspire leadership, resilience, and social responsibility. Guests include community leaders, youth changemakers, newcomer success stories, Indigenous voices, entrepreneurs, and volunteers.",
-        fr: "Nous mettons en lumi\u00e8re des personnes qui cr\u00e9ent un changement positif dans leur communaut\u00e9. Par des entrevues, des r\u00e9cits et des conversations significatives, nous c\u00e9l\u00e9brons les r\u00e9ussites et inspirons le leadership, la r\u00e9silience et la responsabilit\u00e9 sociale. Nos invit\u00e9s comprennent des leaders communautaires, de jeunes acteurs de changement, des nouveaux arrivants, des voix autochtones, des entrepreneurs et des b\u00e9n\u00e9voles."
+        fr: "Nous mettons en lumière des personnes qui créent un changement positif dans leur communauté. Par des entrevues, des récits et des conversations significatives, nous célébrons les réussites et inspirons le leadership, la résilience et la responsabilité sociale. Nos invités comprennent des leaders communautaires, de jeunes acteurs de changement, des nouveaux arrivants, des voix autochtones, des entrepreneurs et des bénévoles."
       }
     },
     {
       id: "outreach",
       image: "assets/images/volunteers-packing.jpg",
+      status: { en: "Active", fr: "Actif" },
+      audience: { en: "Newcomers & families in need", fr: "Nouveaux arrivants et familles dans le besoin" },
       title: { en: "Community Service & Outreach", fr: "Service communautaire et sensibilisation" },
-      subtitle: { en: "Serving Communities Through Action", fr: "Servir la communaut\u00e9 par l'action" },
+      subtitle: { en: "Serving Communities Through Action", fr: "Servir la communauté par l'action" },
       description: {
         en: "Communities become stronger when people support and care for one another. Our outreach creates practical support systems and opportunities to take part: volunteer engagement programs, newcomer support, food bank collaborations, charity campaigns, community resource navigation, social inclusion programs, and seasonal outreach activities.",
-        fr: "Les communaut\u00e9s se renforcent lorsque les gens s'entraident. Notre travail cr\u00e9e des syst\u00e8mes de soutien concrets et des occasions de participer : programmes de b\u00e9n\u00e9volat, soutien aux nouveaux arrivants, collaborations avec les banques alimentaires, campagnes de charit\u00e9, orientation vers les ressources, programmes d'inclusion sociale et activit\u00e9s saisonni\u00e8res."
+        fr: "Les communautés se renforcent lorsque les gens s'entraident. Notre travail crée des systèmes de soutien concrets et des occasions de participer : programmes de bénévolat, soutien aux nouveaux arrivants, collaborations avec les banques alimentaires, campagnes de charité, orientation vers les ressources, programmes d'inclusion sociale et activités saisonnières."
       }
     },
     {
       id: "family",
       image: "assets/images/family-talk.jpg",
+      status: { en: "Active", fr: "Actif" },
+      audience: { en: "Families & couples", fr: "Familles et couples" },
       title: { en: "Relationship & Family Conversations", fr: "Conversations sur les relations et la famille" },
-      subtitle: { en: "Strengthening Families. Building Healthy Relationships.", fr: "Renforcer les familles. B\u00e2tir des relations saines." },
+      subtitle: { en: "Strengthening Families. Building Healthy Relationships.", fr: "Renforcer les familles. Bâtir des relations saines." },
       description: {
         en: "Families are the foundation of strong communities. Through conversations, education, and community discussions we explore family relationships, parenting support, marriage and partnerships, intercultural relationships, family wellness, and communication and conflict resolution.",
-        fr: "Les familles sont le fondement de communaut\u00e9s fortes. Par des conversations, de l'\u00e9ducation et des discussions communautaires, nous abordons les relations familiales, le soutien \u00e0 la parentalit\u00e9, le mariage et les partenariats, les relations interculturelles, le bien-\u00eatre familial ainsi que la communication et la r\u00e9solution de conflits."
+        fr: "Les familles sont le fondement de communautés fortes. Par des conversations, de l'éducation et des discussions communautaires, nous abordons les relations familiales, le soutien à la parentalité, le mariage et les partenariats, les relations interculturelles, le bien-être familial ainsi que la communication et la résolution de conflits."
       }
     },
     {
       id: "health",
       image: "assets/images/hero-community.jpg",
-      title: { en: "Community Health Talk", fr: "Discussions sur la sant\u00e9 communautaire" },
-      subtitle: { en: "Promoting Health, Wellness, and Awareness", fr: "Promouvoir la sant\u00e9, le bien-\u00eatre et la sensibilisation" },
+      status: { en: "Active", fr: "Actif" },
+      audience: { en: "Community members", fr: "Membres de la communauté" },
+      title: { en: "Community Health Talk", fr: "Discussions sur la santé communautaire" },
+      subtitle: { en: "Promoting Health, Wellness, and Awareness", fr: "Promouvoir la santé, le bien-être et la sensibilisation" },
       description: {
         en: "Healthier communities are created through awareness, education, and access to reliable information. We bring together healthcare professionals, community leaders, and people with lived experience around physical health awareness, mental health education, preventive healthcare, community wellness, and health equity and accessibility.",
-        fr: "Des communaut\u00e9s en meilleure sant\u00e9 se b\u00e2tissent par la sensibilisation, l'\u00e9ducation et l'acc\u00e8s \u00e0 une information fiable. Nous r\u00e9unissons des professionnels de la sant\u00e9, des leaders communautaires et des personnes ayant un v\u00e9cu autour de la sant\u00e9 physique, de la sant\u00e9 mentale, des soins pr\u00e9ventifs, du mieux-\u00eatre collectif et de l'\u00e9quit\u00e9 en sant\u00e9."
+        fr: "Des communautés en meilleure santé se bâtissent par la sensibilisation, l'éducation et l'accès à une information fiable. Nous réunissons des professionnels de la santé, des leaders communautaires et des personnes ayant un vécu autour de la santé physique, de la santé mentale, des soins préventifs, du mieux-être collectif et de l'équité en santé."
       }
     },
     {
       id: "children",
       image: "assets/images/family-talk.jpg",
+      status: { en: "Active", fr: "Actif" },
+      audience: { en: "Children & families", fr: "Enfants et familles" },
       title: { en: "Children's Corner", fr: "Le coin des enfants" },
-      subtitle: { en: "Inspiring Young Minds Through Learning and Creativity", fr: "Inspirer les jeunes esprits par l'apprentissage et la cr\u00e9ativit\u00e9" },
+      subtitle: { en: "Inspiring Young Minds Through Learning and Creativity", fr: "Inspirer les jeunes esprits par l'apprentissage et la créativité" },
       description: {
         en: "Children are the future of every community. The Children's Corner offers storytelling sessions, educational activities, character development lessons, creative challenges, cultural learning, and family-friendly entertainment. Every child deserves the chance to learn, grow, express themselves, and thrive.",
-        fr: "Les enfants sont l'avenir de chaque communaut\u00e9. Le coin des enfants propose des s\u00e9ances de contes, des activit\u00e9s \u00e9ducatives, des le\u00e7ons sur le d\u00e9veloppement du caract\u00e8re, des d\u00e9fis cr\u00e9atifs, des apprentissages culturels et des divertissements familiaux. Chaque enfant m\u00e9rite d'apprendre, de grandir, de s'exprimer et de s'\u00e9panouir."
+        fr: "Les enfants sont l'avenir de chaque communauté. Le coin des enfants propose des séances de contes, des activités éducatives, des leçons sur le développement du caractère, des défis créatifs, des apprentissages culturels et des divertissements familiaux. Chaque enfant mérite d'apprendre, de grandir, de s'exprimer et de s'épanouir."
       }
     }
   ],

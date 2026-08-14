@@ -252,6 +252,17 @@ var cpfDb = window.cpfDb;
           el.disabled = true;
         });
       });
+
+      // Pre-select a branch when linked from a specific CTA, e.g.
+      // get-involved.html?type=volunteer
+      var requestedType = new URLSearchParams(location.search).get('type');
+      if (requestedType && window.CSS && CSS.escape) {
+        var preselect = document.querySelector('input[data-branch="' + CSS.escape(requestedType) + '"]');
+        if (preselect) {
+          preselect.checked = true;
+          showBranch(requestedType);
+        }
+      }
     })();
   </script>
 </body>

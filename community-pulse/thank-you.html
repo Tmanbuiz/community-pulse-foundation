@@ -164,7 +164,7 @@
       </div>
 
       <p class="powered-by" style="margin-top:2.2rem">
-        Designed by <strong>WianTribe&nbsp;Inc.</strong>
+        <span id="ty-poweredby">Designed by</span> <strong>WianTribe&nbsp;Inc.</strong>
       </p>
     </div>
   </div>
@@ -178,7 +178,8 @@
         instruction: "Please send your Interac e-Transfer to:",
         note: "In the message field, you can write “Donation – Community Pulse Foundation”.",
         emailBtn: "Open Email",
-        homeBtn: "Back to Home"
+        homeBtn: "Back to Home",
+        poweredBy: "Designed by"
       },
       fr: {
         title: "Merci !",
@@ -187,15 +188,16 @@
         instruction: "Veuillez envoyer votre virement Interac à :",
         note: "Dans le champ message, vous pouvez écrire « Don – Fondation Community Pulse ».",
         emailBtn: "Ouvrir le courriel",
-        homeBtn: "Retour à l'accueil"
+        homeBtn: "Retour à l'accueil",
+        poweredBy: "Conçu par"
       }
     };
-    
+
     function setTyLang(lang) {
       document.getElementById('ty-en').classList.toggle('active', lang === 'en');
       document.getElementById('ty-fr').classList.toggle('active', lang === 'fr');
       document.documentElement.lang = lang;
-      
+
       const t = tyTexts[lang];
       document.getElementById('ty-title').textContent = t.title;
       document.getElementById('ty-message').textContent = t.message;
@@ -204,6 +206,7 @@
       document.getElementById('ty-note').textContent = t.note;
       document.getElementById('ty-email-btn').textContent = t.emailBtn;
       document.getElementById('ty-home-btn').textContent = t.homeBtn;
+      document.getElementById('ty-poweredby').textContent = t.poweredBy;
     }
     
     // Detect language from previous page if available

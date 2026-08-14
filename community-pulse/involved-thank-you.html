@@ -164,7 +164,7 @@
       </div>
 
       <p class="powered-by" style="margin-top:2.2rem">
-        Designed by <strong>WianTribe&nbsp;Inc.</strong>
+        <span id="ty-poweredby">Designed by</span> <strong>WianTribe&nbsp;Inc.</strong>
       </p>
     </div>
   </div>
@@ -178,7 +178,8 @@
         instruction: "Please send your Interac e-Transfer to:",
         note: "In the message field, you can write “Donation – Community Pulse Foundation”.",
         volunteerBtn: "Volunteer With Us",
-        homeBtn: "Back to Home"
+        homeBtn: "Back to Home",
+        poweredBy: "Designed by"
       },
       fr: {
         title: "Merci !",
@@ -187,7 +188,8 @@
         instruction: "Veuillez envoyer votre virement Interac à :",
         note: "Dans le champ message, vous pouvez écrire « Don – Fondation Community Pulse ».",
         volunteerBtn: "Faire du bénévolat",
-        homeBtn: "Retour à l'accueil"
+        homeBtn: "Retour à l'accueil",
+        poweredBy: "Conçu par"
       }
     };
 
@@ -204,6 +206,7 @@
       document.getElementById('ty-note').textContent = t.note;
       document.getElementById('ty-volunteer-btn').textContent = t.volunteerBtn;
       document.getElementById('ty-home-btn').textContent = t.homeBtn;
+      document.getElementById('ty-poweredby').textContent = t.poweredBy;
     }
 
     // Show Interac instructions only if the visitor came from the financial-support branch

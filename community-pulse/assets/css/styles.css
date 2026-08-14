@@ -1139,6 +1139,162 @@ a {
 }
 
 /* =========================================================
+   GET INVOLVED FORM (get-involved.html)
+   ========================================================= */
+.involve-page {
+  padding: 140px 0 80px;
+}
+
+.involve-container {
+  max-width: 760px;
+}
+
+.involve-header {
+  margin-bottom: 40px;
+}
+
+.involve-header .page-title {
+  border-bottom: none;
+  padding-bottom: 0;
+  margin-bottom: 0.8rem;
+}
+
+.involve-intro {
+  color: var(--text-light);
+  font-size: 1.05rem;
+}
+
+.involve-form {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.form-fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px 28px;
+  background: var(--bg-alt);
+}
+
+.form-legend {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--dark);
+  padding: 0 6px;
+}
+
+.form-note {
+  color: var(--text-light);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.form-group {
+  margin-top: 18px;
+}
+
+.form-group:first-child {
+  margin-top: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+.form-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--dark);
+  margin-bottom: 8px;
+}
+
+.involve-form input[type="text"],
+.involve-form input[type="email"],
+.involve-form input[type="tel"],
+.involve-form input[type="date"],
+.involve-form textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--text);
+  background: white;
+}
+
+.involve-form textarea {
+  resize: vertical;
+}
+
+.involve-form input:focus-visible,
+.involve-form textarea:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.form-radio-group,
+.form-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-radio-group-inline {
+  flex-direction: row;
+  gap: 24px;
+}
+
+.form-radio,
+.form-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.form-radio input,
+.form-checkbox input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+.branch-hidden {
+  display: none;
+}
+
+.form-privacy-note {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  margin: 0;
+}
+
+.form-privacy-note a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+  .involve-page {
+    padding: 110px 0 60px;
+  }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .form-fieldset {
+    padding: 20px;
+  }
+}
+
+/* =========================================================
    ADMIN-CREATED PAGES (page.html)
    ========================================================= */
 .page-wrap {

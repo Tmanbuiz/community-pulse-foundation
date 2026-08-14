@@ -100,7 +100,7 @@ insert into public.settings (key, value_en, value_fr) values
   ('contactPhone',  '506 995 0119 / 506 282 5901', '506 995 0119 / 506 282 5901'),
   ('contactPlace',  'Fredericton, New Brunswick, Canada', 'Fredericton, Nouveau-Brunswick, Canada'),
   ('donateEmail',   'thecommunitypulsefoundationinc@gmail.com', 'thecommunitypulsefoundationinc@gmail.com'),
-  ('volunteerForm', 'https://form.jotform.com/261327754861059', 'https://form.jotform.com/261327754861059')
+  ('volunteerForm', 'get-involved.html', 'get-involved.html')
 on conflict (key) do nothing;
 
 

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Get Involved | The Community Pulse Foundation</title>
+  <meta name="description" content="Volunteer, donate items, provide financial support, or ask a question — tell The Community Pulse Foundation how you'd like to get involved." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <link rel="icon" type="image/jpeg" href="assets/images/logo-clean.jpg" />
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Language Switcher -->
+  <div class="lang-switcher">
+    <button id="lang-en" class="lang-btn active" onclick="setLanguage('en')">EN</button>
+    <button id="lang-fr" class="lang-btn" onclick="setLanguage('fr')">FR</button>
+  </div>
+
+  <!-- Navigation -->
+  <header class="header scrolled" id="header">
+    <div class="container nav-container">
+      <a href="index.html" class="logo">
+        <img src="assets/images/logo-clean.jpg" alt="Community Pulse Foundation Logo" class="logo-img" width="48" height="48" />
+        <div class="logo-text">
+          <span class="logo-name" data-i18n="orgName">The Community Pulse Foundation</span>
+          <span class="logo-tagline" data-i18n="tagline">Connecting People • Building Community</span>
+        </div>
+      </a>
+
+      <nav class="nav" id="nav">
+        <a href="index.html#home" class="nav-link" data-i18n="navHome">Home</a>
+        <a href="index.html#about" class="nav-link" data-i18n="navAbout">About</a>
+        <a href="index.html#programs" class="nav-link" data-i18n="navPrograms">Programs</a>
+        <a href="index.html#events" class="nav-link" data-i18n="navEvents">Events</a>
+        <a href="index.html#team" class="nav-link" data-i18n="navTeam">Team</a>
+        <a href="index.html#contact" class="nav-link" data-i18n="navContact">Contact</a>
+        <a href="index.html#donate" class="nav-link nav-donate" data-i18n="navDonate">Donate</a>
+      </nav>
+
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu" aria-expanded="false" aria-controls="nav">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main id="main-content" class="page-wrap involve-page">
+    <div class="container involve-container">
+      <div class="involve-header">
+        <h1 class="page-title" data-i18n="involveTitle">Get Involved With The Community Pulse Foundation</h1>
+        <p class="involve-intro" data-i18n="involveIntro">Tell us how you would like to help. We will only show questions that are relevant to your selection.</p>
+      </div>
+
+      <form class="involve-form" action="https://formsubmit.co/info@thecommunitypulsefoundation.ca" method="POST" id="involveForm">
+        <!-- FormSubmit configuration -->
+        <input type="hidden" name="_subject" value="New Get Involved submission - Community Pulse Foundation" />
+        <input type="hidden" name="_template" value="table" />
+        <input type="hidden" name="_next" id="formNext" value="involved-thank-you.html" />
+        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+
+        <fieldset class="form-fieldset">
+          <legend class="form-legend" data-i18n="involveQ1">How would you like to get involved?</legend>
+          <div class="form-radio-group">
+            <label class="form-radio"><input type="radio" name="How would you like to help" value="Volunteer my time" data-branch="volunteer" required /> <span data-i18n="optVolunteer">Volunteer my time</span></label>
+            <label class="form-radio"><input type="radio" name="How would you like to help" value="Donate requested items" data-branch="items" /> <span data-i18n="optItems">Donate requested items</span></label>
+            <label class="form-radio"><input type="radio" name="How would you like to help" value="Provide financial support" data-branch="financial" /> <span data-i18n="optFinancial">Provide financial support</span></label>
+            <label class="form-radio"><input type="radio" name="How would you like to help" value="Ask about community outreach" data-branch="question" /> <span data-i18n="optQuestion">Ask about community outreach</span></label>
+            <label class="form-radio"><input type="radio" name="How would you like to help" value="Other" data-branch="other" /> <span data-i18n="optOther">Other</span></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-fieldset branch-panel" data-branch-panel="volunteer">
+          <legend class="form-legend" data-i18n="involveVolHeading">Volunteering details</legend>
+          <div class="form-group">
+            <span class="form-label" data-i18n="involveVolType">What type of volunteering interests you?</span>
+            <div class="form-checkbox-group">
+              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Community events" /> <span data-i18n="volTypeEvents">Community events</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Packaging/sorting" /> <span data-i18n="volTypePack">Packaging/sorting</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Transportation/pick-up support" /> <span data-i18n="volTypeTransport">Transportation/pick-up support</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Outreach/awareness" /> <span data-i18n="volTypeOutreach">Outreach/awareness</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="General support" /> <span data-i18n="volTypeGeneral">General support</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Other" /> <span data-i18n="optOther">Other</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <span class="form-label" data-i18n="involveAvail">When are you generally available?</span>
+            <div class="form-checkbox-group">
+              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Weekdays" /> <span data-i18n="availWeekdays">Weekdays</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Evenings" /> <span data-i18n="availEvenings">Evenings</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Weekends" /> <span data-i18n="availWeekends">Weekends</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Flexible" /> <span data-i18n="availFlexible">Flexible</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="volNotes" class="form-label" data-i18n="involveVolNotes">Anything we should know about your availability, skills or accessibility needs?</label>
+            <textarea id="volNotes" name="Volunteer notes" rows="3"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-fieldset branch-panel" data-branch-panel="items">
+          <legend class="form-legend" data-i18n="involveItemsHeading">Item donation details</legend>
+          <div class="form-group">
+            <span class="form-label" data-i18n="involveItemsType">What would you like to donate?</span>
+            <div class="form-checkbox-group">
+              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Food" /> <span data-i18n="itemFood">Food</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Clothing" /> <span data-i18n="itemClothing">Clothing</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Hygiene/personal care" /> <span data-i18n="itemHygiene">Hygiene/personal care</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Household items" /> <span data-i18n="itemHousehold">Household items</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Other" /> <span data-i18n="optOther">Other</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="itemDesc" class="form-label" data-i18n="involveItemsDesc">Please describe the items and approximate quantity.</label>
+            <textarea id="itemDesc" name="Item description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <span class="form-label" data-i18n="involvePickup">Do you need pick-up assistance?</span>
+            <div class="form-radio-group form-radio-group-inline">
+              <label class="form-radio"><input type="radio" name="Pick-up assistance needed" value="Yes" /> <span data-i18n="yesLabel">Yes</span></label>
+              <label class="form-radio"><input type="radio" name="Pick-up assistance needed" value="No" /> <span data-i18n="noLabel">No</span></label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="pickupDate" class="form-label" data-i18n="involvePickupDate">Preferred drop-off or pick-up date</label>
+            <input type="date" id="pickupDate" name="Preferred date" />
+          </div>
+        </fieldset>
+
+        <fieldset class="form-fieldset branch-panel" data-branch-panel="financial">
+          <legend class="form-legend" data-i18n="involveFinancialHeading">Financial support</legend>
+          <p class="form-note" data-i18n="involveFinancialNote">Thank you for supporting our work. After you submit, we will show you the current Interac e-Transfer instructions and contact details if you need assistance.</p>
+        </fieldset>
+
+        <fieldset class="form-fieldset branch-panel" data-branch-panel="question">
+          <legend class="form-legend" data-i18n="involveQuestionHeading">Your question or idea</legend>
+          <div class="form-group">
+            <label for="topicMsg" class="form-label" data-i18n="involveQuestionLabel">What would you like to ask or share?</label>
+            <textarea id="topicMsg" name="Community outreach question" rows="3"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-fieldset branch-panel" data-branch-panel="other">
+          <legend class="form-legend" data-i18n="involveOtherHeading">Tell us more</legend>
+          <div class="form-group">
+            <label for="otherDesc" class="form-label" data-i18n="involveOtherLabel">Please describe how you'd like to get involved.</label>
+            <textarea id="otherDesc" name="Other details" rows="3"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset class="form-fieldset">
+          <legend class="form-legend" data-i18n="involveDetailsHeading">Your details</legend>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fullName" class="form-label" data-i18n="nameLabel">Name</label>
+              <input type="text" id="fullName" name="Name" required autocomplete="name" />
+            </div>
+            <div class="form-group">
+              <label for="email" class="form-label" data-i18n="emailLabel">Email</label>
+              <input type="email" id="email" name="Email" required autocomplete="email" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="phone" class="form-label" data-i18n="phoneLabel">Phone</label>
+            <input type="tel" id="phone" name="Phone" autocomplete="tel" />
+          </div>
+        </fieldset>
+
+        <p class="form-privacy-note" data-i18n="involvePrivacyNote">By submitting this form, you agree to our <a href="privacy.html">Privacy Policy</a>.</p>
+
+        <button type="submit" class="btn btn-primary btn-large" data-i18n="btnSendInfo">Send My Information</button>
+      </form>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-brand">
+          <img src="assets/images/logo-clean.jpg" alt="Logo" class="footer-logo" width="48" height="48" />
+          <p data-i18n="footerTagline">Connecting People, Celebrating Diversity, Building Community.</p>
+        </div>
+        <div class="footer-links">
+          <a href="index.html#about" data-i18n="navAbout">About</a>
+          <a href="index.html#programs" data-i18n="navPrograms">Programs</a>
+          <a href="index.html#events" data-i18n="navEvents">Events</a>
+          <a href="index.html#volunteer" data-i18n="navVolunteer">Get Involved</a>
+          <a href="index.html#donate" data-i18n="navDonate">Donate</a>
+          <a href="index.html#contact" data-i18n="navContact">Contact</a>
+          <a href="privacy.html">Privacy</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© <span id="year"></span> The Community Pulse Foundation Inc. <span data-i18n="rights">All rights reserved.</span></p>
+        <p class="footer-note" data-i18n="footerNote">A non-profit organization incorporated in New Brunswick, Canada.</p>
+        <p class="powered-by">
+          <span data-i18n="poweredBy">Designed by</span>
+          <strong>WianTribe&nbsp;Inc.</strong>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script>
+window.SUPABASE_URL = "https://gbplyifhbniqbapcdlph.supabase.co";
+window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdicGx5aWZoYm5pcWJhcGNkbHBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYwMjk0MzYsImV4cCI6MjEwMTYwNTQzNn0.xON8mQC7XD7LqHtzvjnQ89ArOAXAuwcNUuxP-qVERYo";
+window.CPF_DB_READY = true;
+window.cpfDb = window.supabase
+  ? window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY)
+  : null;
+var cpfDb = window.cpfDb;
+</script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/script.js"></script>
+  <script src="assets/js/dynamic-pages.js"></script>
+  <script>
+    (function () {
+      var radios = document.querySelectorAll('input[name="How would you like to help"]');
+      var panels = document.querySelectorAll('[data-branch-panel]');
+      var nextField = document.getElementById('formNext');
+
+      function showBranch(branch) {
+        panels.forEach(function (panel) {
+          var match = panel.dataset.branchPanel === branch;
+          panel.classList.toggle('branch-hidden', !match);
+          panel.setAttribute('aria-hidden', String(!match));
+          panel.querySelectorAll('input, textarea, select').forEach(function (el) {
+            el.disabled = !match;
+          });
+        });
+        nextField.value = branch === 'financial'
+          ? 'involved-thank-you.html?branch=financial'
+          : 'involved-thank-you.html';
+      }
+
+      radios.forEach(function (r) {
+        r.addEventListener('change', function () { showBranch(r.dataset.branch); });
+      });
+
+      // Hide branch panels until a selection is made. If this script never
+      // runs, every panel stays visible and submittable (no JS dependency).
+      panels.forEach(function (panel) {
+        panel.classList.add('branch-hidden');
+        panel.setAttribute('aria-hidden', 'true');
+        panel.querySelectorAll('input, textarea, select').forEach(function (el) {
+          el.disabled = true;
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

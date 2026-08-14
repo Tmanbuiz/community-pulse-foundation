@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /admin.html
 
-Sitemap: https://community-pulse-foundation.pages.dev/sitemap.xml
+Sitemap: https://thecommunitypulsefoundation.ca/sitemap.xml

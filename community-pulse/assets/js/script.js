@@ -129,7 +129,23 @@ const translations = {
     involveOtherLabel: "Please describe how you'd like to get involved.",
     involveDetailsHeading: "Your details",
     nameLabel: "Name",
-    involvePrivacyNote: "By submitting this form, you agree to our Privacy Policy.",
+    firstNameLabel: "First name",
+    lastNameLabel: "Last name",
+    optionalLabel: "(optional)",
+    availEventBased: "Event-based / as needed",
+    involveSkills: "Skills or experience you would like to share (optional)",
+    involveAccommodation: "Accessibility or accommodation needs (optional)",
+    involveAccommodationHint: "Only share what would help us include you comfortably. This is kept restricted and is not shown in general lists or exports.",
+    involveAdditional: "Anything else you would like us to know? (optional)",
+    involveConsentHeading: "Consent",
+    involveConsentText: "I consent to The Community Pulse Foundation collecting and using the information in this form to review and manage my volunteer interest, communicate with me about volunteering, and maintain related administrative records as described in the <a href=\"privacy.html\">Privacy Policy</a>.",
+    involveUpdatesText: "Optional: I would also like to receive occasional news and updates about the Foundation's work.",
+    successTitle: "Thank you — we have your application",
+    successBody: "A member of our team will review the information you provided and contact you about suitable opportunities or next steps. Submitting this form does not confirm a volunteer placement.",
+    successRefLabel: "Your volunteer reference",
+    successNote: "Please keep this reference for future correspondence. We have also emailed it to you.",
+    btnBackHome: "Back to Home",
+    involvePrivacyNote: "By submitting this form, you agree to our <a href=\"privacy.html\">Privacy Policy</a>.",
     btnSendInfo: "Send My Information"
   },
   fr: {
@@ -255,7 +271,23 @@ const translations = {
     involveOtherLabel: "Veuillez décrire comment vous aimeriez vous impliquer.",
     involveDetailsHeading: "Vos coordonnées",
     nameLabel: "Nom",
-    involvePrivacyNote: "En soumettant ce formulaire, vous acceptez notre politique de confidentialité.",
+    firstNameLabel: "Prénom",
+    lastNameLabel: "Nom de famille",
+    optionalLabel: "(facultatif)",
+    availEventBased: "Selon les événements / au besoin",
+    involveSkills: "Compétences ou expérience que vous aimeriez partager (facultatif)",
+    involveAccommodation: "Besoins d'accessibilité ou d'adaptation (facultatif)",
+    involveAccommodationHint: "Ne partagez que ce qui nous aiderait à vous inclure confortablement. Cette information demeure restreinte et n'apparaît ni dans les listes générales ni dans les exportations.",
+    involveAdditional: "Autre chose que vous aimeriez nous faire savoir ? (facultatif)",
+    involveConsentHeading: "Consentement",
+    involveConsentText: "Je consens à ce que La Fondation Community Pulse recueille et utilise les renseignements de ce formulaire pour examiner et gérer mon intérêt à faire du bénévolat, communiquer avec moi à ce sujet et tenir les dossiers administratifs connexes, comme décrit dans la <a href=\"privacy.html\">politique de confidentialité</a>.",
+    involveUpdatesText: "Facultatif : je souhaite aussi recevoir occasionnellement des nouvelles et des mises à jour sur le travail de la Fondation.",
+    successTitle: "Merci — nous avons reçu votre demande",
+    successBody: "Un membre de notre équipe examinera les renseignements que vous avez fournis et communiquera avec vous au sujet des occasions ou des prochaines étapes. L'envoi de ce formulaire ne confirme pas un placement bénévole.",
+    successRefLabel: "Votre numéro de référence",
+    successNote: "Veuillez conserver cette référence pour vos communications futures. Nous vous l'avons également envoyée par courriel.",
+    btnBackHome: "Retour à l'accueil",
+    involvePrivacyNote: "En soumettant ce formulaire, vous acceptez notre <a href=\"privacy.html\">politique de confidentialité</a>.",
     btnSendInfo: "Envoyer mes informations"
   }
 };
@@ -274,6 +306,17 @@ function setLanguage(lang) {
     const key = el.getAttribute('data-i18n');
     if (translations[lang][key]) {
       el.textContent = translations[lang][key];
+    }
+  });
+
+  // Same, but for strings that legitimately contain markup (e.g. a link to
+  // the Privacy Policy). textContent would flatten those to plain text and
+  // silently drop the link. These strings come from the dictionary below,
+  // never from user input, so innerHTML is safe here.
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (translations[lang][key]) {
+      el.innerHTML = translations[lang][key];
     }
   });
   

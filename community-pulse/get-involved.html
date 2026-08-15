@@ -75,31 +75,72 @@
           </div>
         </fieldset>
 
+        <!-- Volunteer branch.
+             This branch does NOT submit to FormSubmit. It posts to
+             /api/volunteers and is stored in D1, so the checkbox values
+             below are the controlled codes the API expects, not display
+             labels. -->
         <fieldset class="form-fieldset branch-panel" data-branch-panel="volunteer">
           <legend class="form-legend" data-i18n="involveVolHeading">Volunteering details</legend>
           <fieldset class="form-group form-subgroup">
             <legend class="form-label" data-i18n="involveVolType">What type of volunteering interests you?</legend>
-            <div class="form-checkbox-group">
-              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Community events" /> <span data-i18n="volTypeEvents">Community events</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Packaging/sorting" /> <span data-i18n="volTypePack">Packaging/sorting</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Transportation/pick-up support" /> <span data-i18n="volTypeTransport">Transportation/pick-up support</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Outreach/awareness" /> <span data-i18n="volTypeOutreach">Outreach/awareness</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="General support" /> <span data-i18n="volTypeGeneral">General support</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Volunteer type" value="Other" /> <span data-i18n="optOther">Other</span></label>
+            <div class="form-checkbox-group" id="interestGroup">
+              <label class="form-checkbox"><input type="checkbox" name="interests" value="community_events" /> <span data-i18n="volTypeEvents">Community events</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="interests" value="packaging_sorting" /> <span data-i18n="volTypePack">Packaging/sorting</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="interests" value="transport_support" /> <span data-i18n="volTypeTransport">Transportation/pick-up support</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="interests" value="outreach_awareness" /> <span data-i18n="volTypeOutreach">Outreach/awareness</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="interests" value="general_support" /> <span data-i18n="volTypeGeneral">General support</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="interests" value="other" /> <span data-i18n="optOther">Other</span></label>
             </div>
+            <p class="field-error" data-error-for="interests" hidden></p>
           </fieldset>
+
           <fieldset class="form-group form-subgroup">
             <legend class="form-label" data-i18n="involveAvail">When are you generally available?</legend>
-            <div class="form-checkbox-group">
-              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Weekdays" /> <span data-i18n="availWeekdays">Weekdays</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Evenings" /> <span data-i18n="availEvenings">Evenings</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Weekends" /> <span data-i18n="availWeekends">Weekends</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Availability" value="Flexible" /> <span data-i18n="availFlexible">Flexible</span></label>
+            <div class="form-checkbox-group" id="availabilityGroup">
+              <label class="form-checkbox"><input type="checkbox" name="availability" value="weekday" /> <span data-i18n="availWeekdays">Weekdays</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="availability" value="evening" /> <span data-i18n="availEvenings">Evenings</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="availability" value="weekend" /> <span data-i18n="availWeekends">Weekends</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="availability" value="flexible" /> <span data-i18n="availFlexible">Flexible</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="availability" value="event_based" /> <span data-i18n="availEventBased">Event-based / as needed</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="availability" value="other" /> <span data-i18n="optOther">Other</span></label>
             </div>
+            <p class="field-error" data-error-for="availability" hidden></p>
           </fieldset>
+
           <div class="form-group">
-            <label for="volNotes" class="form-label" data-i18n="involveVolNotes">Anything we should know about your availability, skills or accessibility needs?</label>
-            <textarea id="volNotes" name="Volunteer notes" rows="3"></textarea>
+            <label for="skillsText" class="form-label" data-i18n="involveSkills">Skills or experience you would like to share (optional)</label>
+            <textarea id="skillsText" name="skills_text" rows="3" maxlength="1500"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="accommodationText" class="form-label" data-i18n="involveAccommodation">Accessibility or accommodation needs (optional)</label>
+            <textarea id="accommodationText" name="accommodation_text" rows="3" maxlength="1500"></textarea>
+            <p class="form-hint" data-i18n="involveAccommodationHint">Only share what would help us include you comfortably. This is kept restricted and is not shown in general lists or exports.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="additionalNote" class="form-label" data-i18n="involveAdditional">Anything else you would like us to know? (optional)</label>
+            <textarea id="additionalNote" name="additional_note" rows="3" maxlength="1500"></textarea>
+          </div>
+
+          <fieldset class="form-group form-subgroup">
+            <legend class="form-label" data-i18n="involveConsentHeading">Consent</legend>
+            <label class="form-checkbox form-consent">
+              <input type="checkbox" id="privacyConsent" name="privacy_consent" />
+              <span data-i18n-html="involveConsentText">I consent to The Community Pulse Foundation collecting and using the information in this form to review and manage my volunteer interest, communicate with me about volunteering, and maintain related administrative records as described in the <a href="privacy.html">Privacy Policy</a>.</span>
+            </label>
+            <p class="field-error" data-error-for="privacy_consent" hidden></p>
+
+            <label class="form-checkbox form-consent">
+              <input type="checkbox" id="updatesConsent" name="updates_consent" />
+              <span data-i18n="involveUpdatesText">Optional: I would also like to receive occasional news and updates about the Foundation's work.</span>
+            </label>
+          </fieldset>
+
+          <div class="form-group">
+            <div id="turnstileContainer"></div>
+            <p class="field-error" data-error-for="turnstile" hidden></p>
           </div>
         </fieldset>
 
@@ -157,24 +198,52 @@
           <legend class="form-legend" data-i18n="involveDetailsHeading">Your details</legend>
           <div class="form-row">
             <div class="form-group">
-              <label for="fullName" class="form-label" data-i18n="nameLabel">Name</label>
-              <input type="text" id="fullName" name="Name" required autocomplete="name" />
+              <label for="firstName" class="form-label" data-i18n="firstNameLabel">First name</label>
+              <input type="text" id="firstName" name="first_name" required autocomplete="given-name" minlength="2" maxlength="80" />
+              <p class="field-error" data-error-for="first_name" hidden></p>
             </div>
             <div class="form-group">
-              <label for="email" class="form-label" data-i18n="emailLabel">Email</label>
-              <input type="email" id="email" name="email" required autocomplete="email" />
+              <label for="lastName" class="form-label" data-i18n="lastNameLabel">Last name</label>
+              <input type="text" id="lastName" name="last_name" required autocomplete="family-name" minlength="2" maxlength="80" />
+              <p class="field-error" data-error-for="last_name" hidden></p>
             </div>
           </div>
-          <div class="form-group">
-            <label for="phone" class="form-label" data-i18n="phoneLabel">Phone</label>
-            <input type="tel" id="phone" name="Phone" autocomplete="tel" />
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email" class="form-label" data-i18n="emailLabel">Email</label>
+              <input type="email" id="email" name="email" required autocomplete="email" maxlength="254" />
+              <p class="field-error" data-error-for="email" hidden></p>
+            </div>
+            <div class="form-group">
+              <label for="phone" class="form-label" data-i18n="phoneLabel">Phone <span class="form-optional" data-i18n="optionalLabel">(optional)</span></label>
+              <input type="tel" id="phone" name="phone" autocomplete="tel" maxlength="40" />
+            </div>
           </div>
         </fieldset>
 
-        <p class="form-privacy-note" data-i18n="involvePrivacyNote">By submitting this form, you agree to our <a href="privacy.html">Privacy Policy</a>.</p>
+        <p class="form-privacy-note" data-i18n-html="involvePrivacyNote">By submitting this form, you agree to our <a href="privacy.html">Privacy Policy</a>.</p>
 
-        <button type="submit" class="btn btn-primary btn-large" data-i18n="btnSendInfo">Send My Information</button>
+        <p class="form-banner form-banner-error" id="submitError" role="alert" hidden></p>
+
+        <button type="submit" class="btn btn-primary btn-large" id="submitBtn" data-i18n="btnSendInfo">Send My Information</button>
       </form>
+
+      <!-- Shown in place of the form once a volunteer application is stored.
+           The reference number is the visitor's proof of submission, so it is
+           the most prominent thing here. -->
+      <div class="involve-success" id="involveSuccess" role="status" hidden>
+        <div class="involve-success-icon" aria-hidden="true">✅</div>
+        <h2 data-i18n="successTitle">Thank you — we have your application</h2>
+        <p data-i18n="successBody">A member of our team will review the information you provided and contact you about suitable opportunities or next steps. Submitting this form does not confirm a volunteer placement.</p>
+        <p class="involve-reference">
+          <span data-i18n="successRefLabel">Your volunteer reference</span>
+          <strong id="successRef"></strong>
+        </p>
+        <p class="involve-success-note" data-i18n="successNote">Please keep this reference for future correspondence. We have also emailed it to you.</p>
+        <div class="involve-success-actions">
+          <a href="index.html" class="btn btn-secondary" data-i18n="btnBackHome">Back to Home</a>
+        </div>
+      </div>
     </div>
   </main>
 
@@ -274,7 +343,172 @@ var cpfDb = window.cpfDb;
           showBranch(requestedType);
         }
       }
+
+      /* ===================================================================
+         Volunteer branch -> POST /api/volunteers
+
+         Only this branch is intercepted. The other branches keep their
+         normal FormSubmit behaviour, so nothing about them changes.
+         =================================================================== */
+
+      var TURNSTILE_SITE_KEY = '0x4AAAAAAEQ2Kr_N816NI82-';
+      var turnstileWidgetId = null;
+
+      // One id per page load, reused on retry. If the network drops after the
+      // server committed the record, submitting again returns the same
+      // reference instead of creating a duplicate volunteer.
+      var submissionId = (window.crypto && crypto.randomUUID)
+        ? crypto.randomUUID()
+        : 'cpf-' + Date.now() + '-' + Math.random().toString(16).slice(2);
+
+      function currentBranch() {
+        var checked = document.querySelector('input[name="How would you like to help"]:checked');
+        return checked ? checked.dataset.branch : null;
+      }
+
+      function renderTurnstile() {
+        if (turnstileWidgetId !== null || !window.turnstile) return;
+        var container = document.getElementById('turnstileContainer');
+        if (!container) return;
+        turnstileWidgetId = window.turnstile.render(container, {
+          sitekey: TURNSTILE_SITE_KEY
+        });
+      }
+
+      // Rendered explicitly rather than with the auto class, because the
+      // widget starts inside a hidden panel and would not lay out correctly.
+      window.onTurnstileLoad = function () {
+        if (currentBranch() === 'volunteer') renderTurnstile();
+      };
+
+      radios.forEach(function (r) {
+        r.addEventListener('change', function () {
+          if (r.dataset.branch === 'volunteer') renderTurnstile();
+        });
+      });
+
+      function clearErrors() {
+        document.querySelectorAll('.field-error').forEach(function (el) {
+          el.hidden = true;
+          el.textContent = '';
+        });
+        var banner = document.getElementById('submitError');
+        banner.hidden = true;
+        banner.textContent = '';
+      }
+
+      function showFieldErrors(fields) {
+        var first = null;
+        Object.keys(fields || {}).forEach(function (name) {
+          var el = document.querySelector('[data-error-for="' + name + '"]');
+          if (!el) return;
+          el.textContent = fields[name];
+          el.hidden = false;
+          if (!first) first = el;
+        });
+        if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function showBanner(message) {
+        var banner = document.getElementById('submitError');
+        banner.textContent = message;
+        banner.hidden = false;
+        banner.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      function checkedValues(name) {
+        return Array.prototype.slice
+          .call(document.querySelectorAll('input[name="' + name + '"]:checked'))
+          .map(function (el) { return el.value; });
+      }
+
+      form.addEventListener('submit', function (event) {
+        if (currentBranch() !== 'volunteer') return;   // let FormSubmit handle it
+        event.preventDefault();
+        clearErrors();
+
+        var btn = document.getElementById('submitBtn');
+        var token = window.turnstile && turnstileWidgetId !== null
+          ? window.turnstile.getResponse(turnstileWidgetId)
+          : '';
+
+        if (!token) {
+          showFieldErrors({ turnstile: 'Please complete the verification check.' });
+          return;
+        }
+
+        var payload = {
+          submission_id: submissionId,
+          first_name: document.getElementById('firstName').value,
+          last_name: document.getElementById('lastName').value,
+          email: document.getElementById('email').value,
+          phone: document.getElementById('phone').value,
+          interests: checkedValues('interests'),
+          availability: checkedValues('availability'),
+          skills_text: document.getElementById('skillsText').value,
+          accommodation_text: document.getElementById('accommodationText').value,
+          additional_note: document.getElementById('additionalNote').value,
+          privacy_consent: document.getElementById('privacyConsent').checked,
+          updates_consent: document.getElementById('updatesConsent').checked,
+          turnstile_token: token
+        };
+
+        btn.disabled = true;
+        var originalLabel = btn.textContent;
+        btn.textContent = 'Sending…';
+
+        fetch('/api/volunteers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+          .then(function (res) {
+            return res.json().then(function (body) {
+              return { status: res.status, body: body };
+            });
+          })
+          .then(function (result) {
+            if (result.body && result.body.ok) {
+              document.getElementById('successRef').textContent = result.body.reference;
+              form.hidden = true;
+              var panel = document.getElementById('involveSuccess');
+              panel.hidden = false;
+              panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              return;
+            }
+
+            // Any failure below leaves the entered values untouched so the
+            // visitor never has to retype the form.
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+
+            // The token is single-use; a rejected submit needs a fresh one.
+            if (window.turnstile && turnstileWidgetId !== null) {
+              window.turnstile.reset(turnstileWidgetId);
+            }
+
+            var err = result.body && result.body.error;
+            if (err === 'validation_failed') {
+              showFieldErrors(result.body.fields);
+            } else if (err === 'turnstile_failed' || err === 'turnstile_missing') {
+              showFieldErrors({ turnstile: 'That verification expired. Please try again.' });
+            } else if (result.status === 429) {
+              showBanner('Too many attempts just now. Please wait a moment and try again.');
+            } else {
+              showBanner('Something went wrong on our end and your application was not saved. Please try again, or email info@thecommunitypulsefoundation.ca.');
+            }
+          })
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = originalLabel;
+            if (window.turnstile && turnstileWidgetId !== null) {
+              window.turnstile.reset(turnstileWidgetId);
+            }
+            showBanner('We could not reach the server. Please check your connection and try again.');
+          });
+      });
     })();
   </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit" async defer></script>
 </body>
 </html>

@@ -1354,6 +1354,119 @@ a {
   display: none;
 }
 
+/* ---- hints, optional markers, consent ---- */
+.form-hint {
+  font-size: 0.82rem;
+  color: var(--text-light);
+  margin: 6px 0 0;
+  line-height: 1.5;
+}
+
+.form-optional {
+  font-weight: 400;
+  color: var(--text-light);
+}
+
+.form-consent {
+  align-items: flex-start;
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.form-consent input {
+  margin-top: 3px;
+}
+
+.form-consent a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* ---- validation feedback ---- */
+.field-error {
+  color: #c0392b;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 6px 0 0;
+}
+
+.field-error::before {
+  content: "⚠ ";
+}
+
+.form-banner {
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-size: 0.92rem;
+  margin: 0;
+}
+
+.form-banner-error {
+  background: #fdecea;
+  color: #a93226;
+  border-left: 4px solid #c0392b;
+}
+
+/* ---- success state ---- */
+.involve-success {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
+  border-radius: var(--radius-lg);
+  padding: 44px 40px;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+
+.involve-success-icon {
+  font-size: 2.6rem;
+  margin-bottom: 12px;
+}
+
+.involve-success h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+
+.involve-success p {
+  color: var(--text-light);
+  margin-bottom: 18px;
+}
+
+.involve-reference {
+  background: var(--bg-alt);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 24px 0 !important;
+  color: var(--text) !important;
+}
+
+.involve-reference span {
+  display: block;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-light);
+  margin-bottom: 6px;
+}
+
+.involve-reference strong {
+  font-size: 1.25rem;
+  font-family: Consolas, monospace;
+  color: var(--primary-dark);
+  letter-spacing: 0.04em;
+}
+
+.involve-success-note {
+  font-size: 0.88rem;
+}
+
+.involve-success-actions {
+  margin-top: 8px;
+}
+
 .form-privacy-note {
   font-size: 0.85rem;
   color: var(--text-light);

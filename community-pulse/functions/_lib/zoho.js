@@ -124,7 +124,16 @@ export async function sendMail(env, { to, subject, html }) {
   // volunteer can respond to their acknowledgement.
   // Zoho only permits sending from an address the authenticated account
   // owns, so this must be the mailbox itself or one of its aliases.
-  const fromAddress = env.ZOHO_FROM_ADDRESS || 'info@thecommunitypulsefoundation.ca';
+  const rawFrom = env.ZOHO_FROM_ADDRESS || 'info@thecommunitypulsefoundation.ca';
+
+  // Send as: The Community Pulse Foundation <info@...>
+  // Without a display name, inboxes show the local part ("info"), which
+  // looks like a stray account rather than the organisation. If the
+  // configured value already carries a display name, leave it alone.
+  const fromName = env.ZOHO_FROM_NAME || 'The Community Pulse Foundation';
+  const fromAddress = rawFrom.includes('<')
+    ? rawFrom
+    : `${fromName} <${rawFrom}>`;
 
   const res = await fetch(`${ZOHO_MAIL_HOST}/api/accounts/${accountId}/messages`, {
     method: 'POST',

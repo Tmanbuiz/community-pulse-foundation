@@ -129,13 +129,20 @@ export async function onRequestPost(context) {
   // --- configuration guard -------------------------------------------------
   // Fail loudly server-side rather than silently accepting submissions we
   // cannot store or validate.
-  if (!env.DB) {
-    console.error('volunteers: D1 binding "DB" is missing');
-    return json({ ok: false, error: 'server_misconfigured' }, 500);
-  }
-  if (!env.TURNSTILE_SECRET) {
-    console.error('volunteers: TURNSTILE_SECRET is missing');
-    return json({ ok: false, error: 'server_misconfigured' }, 500);
+  // Distinct codes per missing piece. Deployments have separate production
+  // and preview configuration, so "which half is missing" is the first thing
+  // worth knowing when this fires. No values are exposed, only which name is
+  // absent.
+  const missing = [];
+  if (!env.DB) missing.push('DB');
+  if (!env.TURNSTILE_SECRET) missing.push('TURNSTILE_SECRET');
+
+  if (missing.length) {
+    console.error('volunteers: missing configuration', missing.join(','));
+    return json(
+      { ok: false, error: 'server_misconfigured', missing },
+      500
+    );
   }
 
   // --- origin check (state-changing request) -------------------------------

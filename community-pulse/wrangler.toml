@@ -32,16 +32,12 @@ database_id = "7e81b71c-da50-42c7-a3cd-0a8e61dbdd66"
 # ---------------------------------------------------------
 # Preview (every other branch)
 # ---------------------------------------------------------
-# Left unbound on purpose. A preview database still needs to
-# be created so branch deployments never write test rows into
-# the real volunteer table. Until then /api/volunteers will
-# return "server_misconfigured" on preview URLs, which is the
-# intended safe failure rather than a silent write to prod.
-#
-# Once `community-pulse-crm-preview` exists, uncomment and
-# fill in its id:
-#
-# [[env.preview.d1_databases]]
-# binding = "DB"
-# database_name = "community-pulse-crm-preview"
-# database_id = "<preview-database-id>"
+# A separate database so branch deployments can be tested with
+# throwaway data without ever writing into the real volunteer
+# table. Bindings are non-inheritable in Pages config, so this
+# has to be declared explicitly rather than falling back to the
+# production block above.
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "community-pulse-crm-preview"
+database_id = "8f674016-ac7c-464b-ae41-e10b80bb38c7"

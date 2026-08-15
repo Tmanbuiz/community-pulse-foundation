@@ -1,7 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
-Disallow: /admin/
+Disallow: /crm/
 Disallow: /api/
 
 Sitemap: https://thecommunitypulsefoundation.ca/sitemap.xml

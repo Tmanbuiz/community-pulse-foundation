@@ -18,7 +18,7 @@
 
 # The CRM renders volunteer personal data. Nothing here may sit in a
 # shared cache, and it must never be framed or indexed.
-/admin/*
+/crm/*
   Cache-Control: no-store, private
   X-Robots-Tag: noindex, nofollow
   Referrer-Policy: no-referrer

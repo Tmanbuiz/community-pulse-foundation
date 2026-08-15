@@ -228,7 +228,9 @@ export function adminNotificationEmail({ publicRef, firstName, lastName, interes
   const name = escapeHtml(`${firstName} ${lastName}`.trim());
   const interestList = escapeHtml((interests || []).join(', ') || '—');
   const availabilityList = escapeHtml((availability || []).join(', ') || '—');
-  const link = `${baseUrl || ''}/admin/volunteers/${encodeURIComponent(publicRef)}`;
+  // The CRM is hash-routed, so the fragment is what selects the record.
+  // A path-style /crm/volunteers/REF would just load the dashboard.
+  const link = `${baseUrl || ''}/crm/#/volunteers/${encodeURIComponent(publicRef)}`;
 
   return {
     subject: `New volunteer application - ${ref}`,

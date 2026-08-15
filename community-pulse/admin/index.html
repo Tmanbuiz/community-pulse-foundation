@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Volunteer CRM | The Community Pulse Foundation</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/jpeg" href="/assets/images/logo-clean.jpg" />
+  <link rel="stylesheet" href="/assets/css/admin-crm.css" />
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header class="crm-header">
+    <div class="crm-header-inner">
+      <a href="#/" class="crm-brand">
+        <img src="/assets/images/logo-clean.jpg" alt="" width="32" height="32" />
+        <span>Volunteer CRM</span>
+      </a>
+      <nav class="crm-nav" aria-label="Sections">
+        <a href="#/" data-nav="dashboard">Dashboard</a>
+        <a href="#/volunteers" data-nav="volunteers">Volunteers</a>
+      </nav>
+      <div class="crm-actor" id="crmActor" aria-live="polite"></div>
+    </div>
+  </header>
+
+  <main id="main" class="crm-main">
+    <div class="crm-loading" id="crmLoading">Loading…</div>
+    <div class="crm-error" id="crmError" role="alert" hidden></div>
+    <div id="crmView"></div>
+  </main>
+
+  <script src="/assets/js/admin-crm.js"></script>
+</body>
+</html>

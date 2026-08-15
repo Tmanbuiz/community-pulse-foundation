@@ -119,6 +119,11 @@ export async function sendMail(env, { to, subject, html }) {
 
   const accessToken = await getAccessToken(env);
   const accountId = await getAccountId(env, accessToken);
+  // Deliberately a repliable address, not a no-reply one: Zoho's send API
+  // has no replyTo parameter, so the From address is the only way a
+  // volunteer can respond to their acknowledgement.
+  // Zoho only permits sending from an address the authenticated account
+  // owns, so this must be the mailbox itself or one of its aliases.
   const fromAddress = env.ZOHO_FROM_ADDRESS || 'info@thecommunitypulsefoundation.ca';
 
   const res = await fetch(`${ZOHO_MAIL_HOST}/api/accounts/${accountId}/messages`, {

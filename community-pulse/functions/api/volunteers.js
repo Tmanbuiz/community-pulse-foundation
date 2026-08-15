@@ -15,25 +15,36 @@
    reject a valid application.
    ========================================================= */
 
+import {
+  acknowledgementEmail,
+  adminNotificationEmail,
+  deliverCommunication
+} from '../_lib/zoho.js';
+
 // Controlled category codes. Anything not in these sets is rejected
 // rather than stored, so the admin filters stay meaningful.
-const INTEREST_CODES = new Set([
-  'community_events',
-  'packaging_sorting',
-  'transport_support',
-  'outreach_awareness',
-  'general_support',
-  'other'
-]);
+// The labels are only for human-readable email/admin display; the
+// codes are what actually goes in the database.
+const INTEREST_LABELS = {
+  community_events: 'Community Events',
+  packaging_sorting: 'Packaging / Sorting',
+  transport_support: 'Transportation / Pick-up Support',
+  outreach_awareness: 'Outreach / Awareness',
+  general_support: 'General Support',
+  other: 'Other'
+};
 
-const AVAILABILITY_CODES = new Set([
-  'weekday',
-  'evening',
-  'weekend',
-  'flexible',
-  'event_based',
-  'other'
-]);
+const AVAILABILITY_LABELS = {
+  weekday: 'Weekdays',
+  evening: 'Evenings',
+  weekend: 'Weekends',
+  flexible: 'Flexible',
+  event_based: 'Event-based / as needed',
+  other: 'Other'
+};
+
+const INTEREST_CODES = new Set(Object.keys(INTEREST_LABELS));
+const AVAILABILITY_CODES = new Set(Object.keys(AVAILABILITY_LABELS));
 
 const LIMITS = {
   name: { min: 2, max: 80 },
@@ -289,19 +300,6 @@ export async function onRequestPost(context) {
       );
     }
 
-    // Queue the acknowledgement. It is recorded as PENDING here and actually
-    // delivered by the mail step; if delivery fails it becomes FAILED and
-    // shows up in the admin action queue for retry.
-    statements.push(
-      env.DB
-        .prepare(
-          `INSERT INTO communications
-             (volunteer_id, type, to_address, subject, status, created_at, updated_at)
-           VALUES (?, 'ACKNOWLEDGEMENT', ?, ?, 'PENDING', ?, ?)`
-        )
-        .bind(volunteerId, email, 'Thank you for supporting your community', now, now)
-    );
-
     statements.push(
       env.DB
         .prepare(
@@ -313,8 +311,69 @@ export async function onRequestPost(context) {
 
     await env.DB.batch(statements);
 
-    // The application is safely stored from this point on. Email delivery is
-    // handled separately and must not change this response.
+    // ---------------------------------------------------------------------
+    // The application is safely stored from this point on. Everything below
+    // is best-effort: it can fail, be retried, or be skipped entirely without
+    // changing the fact that this volunteer applied successfully.
+    // ---------------------------------------------------------------------
+    const interestLabels = interests.map((c) => INTEREST_LABELS[c] || c);
+    const availabilityLabels = availability.map((c) => AVAILABILITY_LABELS[c] || c);
+
+    const ack = acknowledgementEmail({ firstName, publicRef });
+    const adminNote = adminNotificationEmail({
+      publicRef,
+      firstName,
+      lastName,
+      interests: interestLabels,
+      availability: availabilityLabels,
+      submittedAt: now,
+      baseUrl: allowedOrigin
+    });
+    const adminTo = env.ADMIN_NOTIFICATION_TO || 'admin@thecommunitypulsefoundation.ca';
+
+    // Both rows are created PENDING first, so an admin can still see that an
+    // email was owed even if the isolate dies before delivery completes.
+    const queued = await env.DB.batch([
+      env.DB
+        .prepare(
+          `INSERT INTO communications
+             (volunteer_id, type, to_address, subject, status, created_at, updated_at)
+           VALUES (?, 'ACKNOWLEDGEMENT', ?, ?, 'PENDING', ?, ?)`
+        )
+        .bind(volunteerId, email, ack.subject, now, now),
+      env.DB
+        .prepare(
+          `INSERT INTO communications
+             (volunteer_id, type, to_address, subject, status, created_at, updated_at)
+           VALUES (?, 'ADMIN_NOTIFICATION', ?, ?, 'PENDING', ?, ?)`
+        )
+        .bind(volunteerId, adminTo, adminNote.subject, now, now)
+    ]);
+
+    const ackId = queued[0] && queued[0].meta && queued[0].meta.last_row_id;
+    const adminId = queued[1] && queued[1].meta && queued[1].meta.last_row_id;
+
+    // Deliver after the response is sent. The volunteer should not sit
+    // watching a spinner while we wait on Zoho.
+    context.waitUntil(
+      Promise.all([
+        ackId
+          ? deliverCommunication(env, ackId, {
+              to: email,
+              subject: ack.subject,
+              html: ack.html
+            })
+          : Promise.resolve(),
+        adminId
+          ? deliverCommunication(env, adminId, {
+              to: adminTo,
+              subject: adminNote.subject,
+              html: adminNote.html
+            })
+          : Promise.resolve()
+      ])
+    );
+
     return json({ ok: true, reference: publicRef }, 201);
   } catch (err) {
     // Log enough to debug without dumping the whole personal record.

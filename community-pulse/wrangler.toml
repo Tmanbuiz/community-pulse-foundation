@@ -1,0 +1,47 @@
+# =========================================================
+# Cloudflare Pages configuration
+# ---------------------------------------------------------
+# This project's dashboard reports that bindings are managed
+# through wrangler.toml, so the D1 binding has to live here
+# rather than in the Pages UI.
+#
+# IMPORTANT - this is a *Pages* config, not a Workers config.
+# Do NOT add a `main` key. An earlier wrangler.toml in this
+# repo was written as a Workers config and broke every
+# deployment with "Workers needs an entry point". Pages uses
+# `pages_build_output_dir` instead.
+#
+# Paths here are relative to the Pages "Root directory"
+# setting, which is `community-pulse`. This file sits at the
+# root of that directory and the site is served from it, so
+# the build output directory is ".".
+# =========================================================
+
+name = "community-pulse-foundation"
+pages_build_output_dir = "."
+compatibility_date = "2026-08-07"
+
+# ---------------------------------------------------------
+# Production (the `main` branch)
+# ---------------------------------------------------------
+[[d1_databases]]
+binding = "DB"
+database_name = "community-pulse-crm"
+database_id = "7e81b71c-da50-42c7-a3cd-0a8e61dbdd66"
+
+# ---------------------------------------------------------
+# Preview (every other branch)
+# ---------------------------------------------------------
+# Left unbound on purpose. A preview database still needs to
+# be created so branch deployments never write test rows into
+# the real volunteer table. Until then /api/volunteers will
+# return "server_misconfigured" on preview URLs, which is the
+# intended safe failure rather than a silent write to prod.
+#
+# Once `community-pulse-crm-preview` exists, uncomment and
+# fill in its id:
+#
+# [[env.preview.d1_databases]]
+# binding = "DB"
+# database_name = "community-pulse-crm-preview"
+# database_id = "<preview-database-id>"

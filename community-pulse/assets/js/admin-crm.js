@@ -118,9 +118,23 @@
       return;
     }
     if (err.status === 403) {
+      var who = err.body && err.body.identity;
+      if (err.body && err.body.error === 'insufficient_role') {
+        showError(
+          'Not permitted',
+          'Your role (<code>' + esc(err.body.role) + '</code>) does not allow this action.'
+        );
+        return;
+      }
       showError(
-        'No access',
-        'You are signed in, but this account has no active role in the CRM. An owner needs to add you to the admin users table.'
+        'No access yet',
+        'You are signed in' + (who ? ' as <code>' + esc(who) + '</code>' : '') +
+        ', but that address has no active role in the CRM.' +
+        (who
+          ? '<br /><br />Add it to the admin users table:<br />' +
+            '<code>INSERT OR IGNORE INTO admin_users (email, display_name, role, active, created_at) ' +
+            "VALUES ('" + esc(who) + "', 'Admin', 'OWNER', 1, datetime('now'));</code>"
+          : '')
       );
       return;
     }

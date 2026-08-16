@@ -167,8 +167,16 @@ export async function requireAdmin(context, minimumRole = 'VIEWER') {
   // Authenticated by Access but not provisioned here. Treated as a
   // forbidden, not a 401: they are who they say they are, they just have
   // no role. Otherwise the UI would loop them through login forever.
-  if (!row || !row.active) {
-    return { ok: false, status: 403, error: 'not_authorized' };
+  //
+  // The rejected address is echoed back deliberately. Access has already
+  // proven the caller owns it, so this reveals nothing they do not know,
+  // and it turns "why am I locked out" into an obvious fix - the identity
+  // signed in with is often not the address someone assumed it would be.
+  if (!row) {
+    return { ok: false, status: 403, error: 'not_authorized', identity: email };
+  }
+  if (!row.active) {
+    return { ok: false, status: 403, error: 'account_disabled', identity: email };
   }
 
   if ((ROLE_RANK[row.role] || 0) < (ROLE_RANK[minimumRole] || 0)) {
@@ -198,6 +206,8 @@ export function adminJson(body, status = 200) {
 export function denied(result) {
   const body = { ok: false, error: result.error };
   if (result.missing) body.missing = result.missing;
+  if (result.identity) body.identity = result.identity;
+  if (result.role) body.role = result.role;
   return adminJson(body, result.status);
 }
 

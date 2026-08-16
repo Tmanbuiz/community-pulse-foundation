@@ -15,3 +15,14 @@
 
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
+
+# The CRM renders volunteer personal data. Nothing here may sit in a
+# shared cache, and it must never be framed or indexed.
+/crm/*
+  Cache-Control: no-store, private
+  X-Robots-Tag: noindex, nofollow
+  Referrer-Policy: no-referrer
+
+/api/admin/*
+  Cache-Control: no-store, private
+  X-Robots-Tag: noindex, nofollow

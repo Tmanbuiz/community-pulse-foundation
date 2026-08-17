@@ -14,10 +14,13 @@
 # they were trying to get to.
 # =========================================================
 
-/thank-you.html           /get-involved.html?type=financial   301
-/involved-thank-you.html  /get-involved.html                  301
+# Targets are extensionless because Pages issues its own 308 from
+# /foo.html to /foo. Pointing at /get-involved.html here would send a
+# visitor through three redirects instead of two.
+/thank-you.html           /get-involved?type=financial   301
+/involved-thank-you.html  /get-involved                  301
 
-# Same targets without the extension, in case either was ever
-# linked that way.
-/thank-you                /get-involved.html?type=financial   301
-/involved-thank-you       /get-involved.html                  301
+# The same URLs without the extension, in case either was ever linked
+# that way.
+/thank-you                /get-involved?type=financial   301
+/involved-thank-you       /get-involved                  301

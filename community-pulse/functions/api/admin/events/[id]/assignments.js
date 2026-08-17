@@ -137,8 +137,14 @@ export async function onRequestPost(context) {
       toAssign.map(({ volunteer, reinstate }) =>
         reinstate
           ? env.DB.prepare(
+              // notified_at and hours are cleared: this is a fresh assignment
+              // that happens to reuse the row. Leaving notified_at meant the
+              // roster showed "emailed" for someone re-added without one, so a
+              // second coordinator would believe they had been told the details
+              // and never contact them.
               `UPDATE event_assignments
-                  SET status = 'ASSIGNED', role = ?, updated_at = ?, created_by = ?
+                  SET status = 'ASSIGNED', role = ?, hours = NULL, notes = NULL,
+                      notified_at = NULL, updated_at = ?, created_by = ?
                 WHERE event_id = ? AND volunteer_id = ?`
             ).bind(role || null, now, auth.actor.email, event.id, volunteer.id)
           : env.DB.prepare(

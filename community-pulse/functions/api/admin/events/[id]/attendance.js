@@ -106,19 +106,38 @@ export async function onRequestPost(context) {
         continue;
       }
 
-      const role = typeof entry.role === 'string'
-        ? entry.role.replace(/\s+/g, ' ').trim().slice(0, LIMITS.role)
-        : null;
-      const notes = typeof entry.notes === 'string'
-        ? entry.notes.replace(/\r\n/g, '\n').trim().slice(0, LIMITS.notes)
-        : null;
+      // Only columns the caller actually sent are written. Writing every
+      // column unconditionally meant an omitted field was silently set to
+      // NULL: the interface never sends `notes`, so every routine attendance
+      // save wiped any note stored against that helper.
+      const sets = ['status = ?', 'hours = ?'];
+      const binds = [status, hours.value];
+
+      if (entry.role !== undefined) {
+        sets.push('role = ?');
+        binds.push(
+          typeof entry.role === 'string'
+            ? entry.role.replace(/\s+/g, ' ').trim().slice(0, LIMITS.role) || null
+            : null
+        );
+      }
+
+      if (entry.notes !== undefined) {
+        sets.push('notes = ?');
+        binds.push(
+          typeof entry.notes === 'string'
+            ? entry.notes.replace(/\r\n/g, '\n').trim().slice(0, LIMITS.notes) || null
+            : null
+        );
+      }
+
+      sets.push('updated_at = ?');
+      binds.push(now, id, event.id);
 
       statements.push(
         env.DB.prepare(
-          `UPDATE event_assignments
-              SET status = ?, hours = ?, role = ?, notes = ?, updated_at = ?
-            WHERE id = ? AND event_id = ?`
-        ).bind(status, hours.value, role, notes, now, id, event.id)
+          `UPDATE event_assignments SET ${sets.join(', ')} WHERE id = ? AND event_id = ?`
+        ).bind(...binds)
       );
       applied += 1;
     }

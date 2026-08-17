@@ -8,7 +8,11 @@
      DB                       D1 database binding
      TURNSTILE_SECRET         Turnstile secret key (server-only)
      PRIVACY_CONSENT_VERSION  e.g. "2026-08-v1"
-     APP_BASE_URL             e.g. "https://thecommunitypulsefoundation.ca"
+
+   Links in outgoing email use the origin of the deployment that
+   received the submission, not a configured base URL, so that an
+   admin notification always points at the CRM whose database
+   actually holds the record.
 
    Order of operations matters: the volunteer record is saved
    BEFORE any email is attempted. A mail outage must never
@@ -146,9 +150,10 @@ export async function onRequestPost(context) {
   }
 
   // --- origin check (state-changing request) -------------------------------
-  const allowedOrigin = env.APP_BASE_URL || 'https://thecommunitypulsefoundation.ca';
+  // Compared against the request's own origin rather than the canonical one,
+  // so the guard holds on production, preview and branch deployments alike.
   const origin = request.headers.get('Origin');
-  if (origin && origin !== allowedOrigin) {
+  if (origin && origin !== new URL(request.url).origin) {
     return json({ ok: false, error: 'bad_origin' }, 403);
   }
 
@@ -334,7 +339,10 @@ export async function onRequestPost(context) {
       interests: interestLabels,
       availability: availabilityLabels,
       submittedAt: now,
-      baseUrl: allowedOrigin
+      // The deployment that received the submission, not the canonical site -
+      // the record lives in this deployment's database. See the equivalent
+      // note in enquiries.js.
+      baseUrl: new URL(request.url).origin
     });
     const adminTo = env.ADMIN_NOTIFICATION_TO || 'admin@thecommunitypulsefoundation.ca';
 

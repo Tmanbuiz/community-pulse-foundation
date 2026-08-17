@@ -83,7 +83,10 @@ export async function onRequestPost(context) {
         interests: (interests.results || []).map((r) => INTEREST_LABELS[r.interest_code] || r.interest_code),
         availability: (availability.results || []).map((r) => AVAILABILITY_LABELS[r.availability_code] || r.availability_code),
         submittedAt: v.created_at,
-        baseUrl: env.APP_BASE_URL || ''
+        // This deployment, not the canonical site: the retried notification
+        // should link to the CRM holding the record, which is the one the
+        // admin is retrying from.
+        baseUrl: new URL(context.request.url).origin
       });
     } else {
       // ADMIN_EMAIL and anything added later have no regenerable template.

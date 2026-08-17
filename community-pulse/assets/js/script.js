@@ -142,7 +142,12 @@ const translations = {
     involveUpdatesText: "Optional: I would also like to receive occasional news and updates about the Foundation's work.",
     successTitle: "Thank you — we have your application",
     successBody: "A member of our team will review the information you provided and contact you about suitable opportunities or next steps. Submitting this form does not confirm a volunteer placement.",
-    successRefLabel: "Your volunteer reference",
+    successTitleEnquiry: "Thank you — we have your message",
+    successBodyEnquiry: "A member of our team will read your message and get back to you.",
+    successBodyFinancial: "We have emailed you the transfer details. Once your donation arrives we will confirm it by email.",
+    involveAmount: "Amount you plan to give",
+    involveAmountHint: "Only so we can match your transfer when it arrives. No payment is taken on this website, and you can leave this blank.",
+    successRefLabel: "Your reference",
     successNote: "Please keep this reference for future correspondence. We have also emailed it to you.",
     btnBackHome: "Back to Home",
     involvePrivacyNote: "By submitting this form, you agree to our <a href=\"privacy.html\">Privacy Policy</a>.",
@@ -284,6 +289,11 @@ const translations = {
     involveUpdatesText: "Facultatif : je souhaite aussi recevoir occasionnellement des nouvelles et des mises à jour sur le travail de la Fondation.",
     successTitle: "Merci — nous avons reçu votre demande",
     successBody: "Un membre de notre équipe examinera les renseignements que vous avez fournis et communiquera avec vous au sujet des occasions ou des prochaines étapes. L'envoi de ce formulaire ne confirme pas un placement bénévole.",
+    successTitleEnquiry: "Merci — nous avons reçu votre message",
+    successBodyEnquiry: "Un membre de notre équipe lira votre message et vous répondra.",
+    successBodyFinancial: "Nous vous avons envoyé par courriel les instructions de virement. Dès que votre don sera reçu, nous vous le confirmerons par courriel.",
+    involveAmount: "Montant que vous prévoyez donner",
+    involveAmountHint: "Uniquement pour nous aider à faire le rapprochement avec votre virement. Aucun paiement n'est prélevé sur ce site, et vous pouvez laisser ce champ vide.",
     successRefLabel: "Votre numéro de référence",
     successNote: "Veuillez conserver cette référence pour vos communications futures. Nous vous l'avons également envoyée par courriel.",
     btnBackHome: "Retour à l'accueil",
@@ -292,9 +302,15 @@ const translations = {
   }
 };
 
+// Exposed so pages with their own inline scripts (the Get Involved form
+// builds confirmation copy at runtime) can read the same dictionary rather
+// than keeping a second, drifting copy of these strings.
+window.translations = translations;
+
 // ==================== LANGUAGE FUNCTIONS ====================
 function setLanguage(lang) {
   currentLang = lang;
+  window.currentLang = lang;
   document.documentElement.lang = lang;
   
   // Update buttons

@@ -172,59 +172,72 @@ export async function onRequestPost(context) {
       let sent = 0;
       const failures = [];
 
-      for (const { volunteer } of toAssign) {
-        const mail = eventAssignmentEmail({
-          firstName: volunteer.first_name,
-          event: {
-            title: event.title,
-            starts_at: event.starts_at,
-            ends_at: event.ends_at,
-            location: event.location,
-            description: event.description
-          },
-          role,
-          note
-        });
-
-        try {
-          const queued = await env.DB
-            .prepare(
-              `INSERT INTO communications
-                 (volunteer_id, type, to_address, subject, body_preview, status, created_by, created_at, updated_at)
-               VALUES (?, 'EVENT_ASSIGNMENT', ?, ?, ?, 'PENDING', ?, ?, ?)`
-            )
-            .bind(
-              volunteer.id,
-              volunteer.email,
-              mail.subject,
-              (note || event.title).slice(0, 200),
-              auth.actor.email,
-              now,
-              now
-            )
-            .run();
-
-          const result = await deliverCommunication(env, queued.meta && queued.meta.last_row_id, {
-            to: volunteer.email,
-            subject: mail.subject,
-            html: mail.html
+      // Each volunteer's queue-send-mark sequence is independent of every
+      // other's, so they run concurrently rather than one at a time. On a
+      // large roster the sequential form meant the admin's browser sat on
+      // "Adding..." for one Zoho round trip per person; every task here
+      // still resolves rather than rejects, so one failure can never affect
+      // another's outcome or short-circuit the batch.
+      const outcomes = await Promise.all(
+        toAssign.map(async ({ volunteer }) => {
+          const name = `${volunteer.first_name} ${volunteer.last_name}`.trim();
+          const mail = eventAssignmentEmail({
+            firstName: volunteer.first_name,
+            event: {
+              title: event.title,
+              starts_at: event.starts_at,
+              ends_at: event.ends_at,
+              location: event.location,
+              description: event.description
+            },
+            role,
+            note
           });
 
-          if (result.ok) {
-            sent += 1;
+          try {
+            const queued = await env.DB
+              .prepare(
+                `INSERT INTO communications
+                   (volunteer_id, type, to_address, subject, body_preview, status, created_by, created_at, updated_at)
+                 VALUES (?, 'EVENT_ASSIGNMENT', ?, ?, ?, 'PENDING', ?, ?, ?)`
+              )
+              .bind(
+                volunteer.id,
+                volunteer.email,
+                mail.subject,
+                (note || event.title).slice(0, 200),
+                auth.actor.email,
+                now,
+                now
+              )
+              .run();
+
+            const result = await deliverCommunication(env, queued.meta && queued.meta.last_row_id, {
+              to: volunteer.email,
+              subject: mail.subject,
+              html: mail.html
+            });
+
+            if (!result.ok) return { ok: false, name, error: result.error };
+
             await env.DB
               .prepare('UPDATE event_assignments SET notified_at = ? WHERE event_id = ? AND volunteer_id = ?')
               .bind(now, event.id, volunteer.id)
               .run();
-          } else {
-            failures.push({ name: `${volunteer.first_name} ${volunteer.last_name}`.trim(), error: result.error });
+            return { ok: true };
+          } catch (mailErr) {
+            return {
+              ok: false,
+              name,
+              error: (mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 120)
+            };
           }
-        } catch (mailErr) {
-          failures.push({
-            name: `${volunteer.first_name} ${volunteer.last_name}`.trim(),
-            error: (mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 120)
-          });
-        }
+        })
+      );
+
+      for (const outcome of outcomes) {
+        if (outcome.ok) sent += 1;
+        else failures.push({ name: outcome.name, error: outcome.error });
       }
 
       notified = { sent, attempted: toAssign.length, failures };

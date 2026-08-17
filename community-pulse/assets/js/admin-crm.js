@@ -55,6 +55,15 @@
     CANCELLED: 'Taken off'
   };
 
+  // What /api/admin/communications/:id/retry can actually rebuild. It
+  // regenerates ACKNOWLEDGEMENT and ADMIN_NOTIFICATION content from data
+  // still on the volunteer row. STATUS_UPDATE and EVENT_ASSIGNMENT emails
+  // carry a specific status transition and an optional admin-written note
+  // that are not stored anywhere retrievable, so offering a Retry button for
+  // them would just be a dead end - the endpoint returns 400 and nothing
+  // resends. Those are shown with a prompt to follow up directly instead.
+  var RETRYABLE_TYPES = { ACKNOWLEDGEMENT: true, ADMIN_NOTIFICATION: true };
+
   var REJECT_REASONS = {
     not_on_this_event: 'One row did not belong to this event and was ignored.',
     invalid_status: 'One row had an unrecognised status.',
@@ -321,19 +330,26 @@
     // The retry queue leads, because a failed acknowledgement is the one
     // failure a volunteer would actually notice.
     if (failed.length) {
-      html += '<section class="panel"><div class="panel-head"><h2>Failed emails — needs retry</h2></div>' +
+      var failedNote = data.actionQueue.failedEmailsTotal > failed.length
+        ? '<span class="cell-sub">Showing the 20 most recent of ' + esc(data.actionQueue.failedEmailsTotal) + '</span>'
+        : '';
+      html += '<section class="panel"><div class="panel-head"><h2>Failed emails — needs attention</h2>' + failedNote + '</div>' +
         '<div class="table-scroll"><table class="crm-table"><thead><tr>' +
-        '<th>Volunteer</th><th>Type</th><th>To</th><th>Attempts</th><th>Error</th><th></th>' +
+        '<th>Record</th><th>Type</th><th>To</th><th>Attempts</th><th>Error</th><th></th>' +
         '</tr></thead><tbody>' +
         failed.map(function (f) {
+          var profileLink = '#/' + (f.kind === 'enquiry' ? 'enquiries' : 'volunteers') + '/' + encodeURIComponent(f.reference);
+          var action = RETRYABLE_TYPES[f.type]
+            ? '<button class="btn btn-quiet btn-sm" data-retry="' + esc(f.communicationId) + '">Retry</button>'
+            : '<span class="cell-sub">Cannot auto-resend — contact them directly</span>';
           return '<tr>' +
-            '<td><a class="ref-link" href="#/volunteers/' + encodeURIComponent(f.reference) + '">' + esc(f.reference) + '</a>' +
+            '<td><a class="ref-link" href="' + profileLink + '">' + esc(f.reference) + '</a>' +
               '<span class="cell-sub">' + esc(f.name) + '</span></td>' +
             '<td>' + esc(f.type) + '</td>' +
             '<td>' + esc(f.to) + '</td>' +
             '<td>' + esc(f.attempts) + '</td>' +
             '<td><span class="cell-sub">' + esc(f.error || '—') + '</span></td>' +
-            '<td><button class="btn btn-quiet btn-sm" data-retry="' + esc(f.communicationId) + '">Retry</button></td>' +
+            '<td>' + action + '</td>' +
             '</tr>';
         }).join('') +
         '</tbody></table></div></section>';
@@ -696,7 +712,11 @@
                         esc(h.title) + '</a></div>' +
                       '<div class="note-meta">' + esc(fmtWhen(h.startsAt)) + ' · ' +
                         esc(ASSIGNMENT_LABELS[h.status] || h.status) +
-                        (h.hours ? ' · ' + esc(h.hours) + 'h' : '') +
+                        // A truthy check here would hide a legitimately
+                        // recorded 0 - someone who turned up but the
+                        // activity was cancelled on arrival - as if no hours
+                        // had been recorded at all.
+                        (h.hours === null || h.hours === undefined ? '' : ' · ' + esc(h.hours) + 'h') +
                         (h.role ? ' · ' + esc(h.role) : '') + '</div>' +
                       '</div>';
                   }).join('')
@@ -712,7 +732,11 @@
                   '<div class="note-meta">' + esc(c.to) + ' · ' + esc(fmtDate(c.createdAt)) +
                     (c.error ? '<br />' + esc(c.error) : '') + '</div>' +
                   (c.status === 'FAILED' && canEdit
-                    ? '<div style="margin-top:6px"><button class="btn btn-quiet btn-sm" data-retry="' + esc(c.id) + '">Retry</button></div>'
+                    ? '<div style="margin-top:6px">' +
+                        (RETRYABLE_TYPES[c.type]
+                          ? '<button class="btn btn-quiet btn-sm" data-retry="' + esc(c.id) + '">Retry</button>'
+                          : '<span class="cell-sub">Cannot auto-resend — contact them directly</span>') +
+                      '</div>'
                     : '') +
                   '</div>';
               }).join('')
@@ -1177,12 +1201,22 @@
     if (!startsAt) return '—';
     var s = new Date(startsAt);
     if (isNaN(s)) return '—';
-    var day = s.toLocaleDateString('en-CA', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+    var dateOpts = { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' };
+    var day = s.toLocaleDateString('en-CA', dateOpts);
     var from = s.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
     if (!endsAt) return day + ', ' + from;
     var e = new Date(endsAt);
     if (isNaN(e)) return day + ', ' + from;
-    return day + ', ' + from + '–' + e.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+    var to = e.toLocaleTimeString('en-CA', { hour: 'numeric', minute: '2-digit' });
+
+    // A shift crossing midnight needs the finish date spelled out, matching
+    // formatEventWhen() in zoho.js - otherwise an overnight event looks like
+    // an ordinary same-day one everywhere an admin actually looks, even
+    // though the email a volunteer receives gets this right.
+    var endDay = e.toLocaleDateString('en-CA', dateOpts);
+    if (endDay !== day) return day + ', ' + from + ' until ' + endDay + ', ' + to;
+
+    return day + ', ' + from + '–' + to;
   }
 
   function eventCreateForm() {
@@ -1605,11 +1639,20 @@
             method: 'POST',
             body: JSON.stringify({ entries: collectEntries() })
           });
+          // Rejected rows were not saved at all. Hours-dropped rows *were*
+          // saved - the status change went through - only their hours were
+          // set aside, so this is reported as a separate, less alarming
+          // message rather than folded into "not saved".
           if (res.rejected && res.rejected.length) {
             showError('Some rows were not saved',
               '<ul>' + res.rejected.map(function (r) {
                 return '<li>' + esc(REJECT_REASONS[r.reason] || r.reason) + '</li>';
               }).join('') + '</ul>');
+          } else if (res.hoursDropped && res.hoursDropped.length) {
+            showError('Saved, but some hours were not recorded',
+              'Hours only count against someone marked as turned up. ' +
+              esc(res.hoursDropped.length) + (res.hoursDropped.length === 1 ? ' row had' : ' rows had') +
+              ' hours entered against a different status, so the status change was saved and the hours were left blank.');
           }
           renderEvent(ref);
         } catch (err) {

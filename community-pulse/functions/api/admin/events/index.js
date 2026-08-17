@@ -89,16 +89,24 @@ export async function onRequestGet(context) {
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
   try {
-    const countRow = await env.DB
-      .prepare(`SELECT COUNT(*) AS n FROM events e ${whereSql}`)
-      .bind(...binds)
-      .first();
-
+    // Independent statements against the same WHERE clause, combined into
+    // one round trip rather than two sequential ones.
+    //
     // Assignment tallies come from correlated subqueries rather than a JOIN
     // with GROUP BY: the counts are per-status and a single grouped join
     // cannot produce them without either several passes or a pivot.
-    const rows = await env.DB
-      .prepare(
+    //
+    // total_hours is filtered to ATTENDED, matching the volunteer profile's
+    // total exactly. It previously summed every row's `hours` regardless of
+    // status; that happened to agree with the filtered total only because
+    // attendance.js is currently the sole writer of non-null hours and
+    // enforces the same rule at insert time - an implicit invariant, not a
+    // guaranteed one. Filtering here too means the two screens can never
+    // show two different totals for the same event, regardless of how a
+    // future write path (a direct DB correction, a bulk import) behaves.
+    const [countResult, rows] = await env.DB.batch([
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM events e ${whereSql}`).bind(...binds),
+      env.DB.prepare(
         `SELECT e.id, e.public_ref, e.title, e.location, e.starts_at, e.ends_at,
                 e.capacity, e.status, e.archived_at,
                 (SELECT COUNT(*) FROM event_assignments a
@@ -106,16 +114,16 @@ export async function onRequestGet(context) {
                 (SELECT COUNT(*) FROM event_assignments a
                   WHERE a.event_id = e.id AND a.status = 'ATTENDED') AS attended,
                 (SELECT COALESCE(SUM(a.hours), 0) FROM event_assignments a
-                  WHERE a.event_id = e.id) AS total_hours
+                  WHERE a.event_id = e.id AND a.status = 'ATTENDED') AS total_hours
            FROM events e
            ${whereSql}
           ORDER BY ${orderBy}
           LIMIT ? OFFSET ?`
-      )
-      .bind(...binds, limit, offset)
-      .all();
+      ).bind(...binds, limit, offset)
+    ]);
 
-    const total = (countRow && countRow.n) || 0;
+    const countRow = (countResult.results && countResult.results[0]) || {};
+    const total = countRow.n || 0;
 
     return adminJson({
       ok: true,

@@ -77,6 +77,7 @@ export async function onRequestPost(context) {
 
     const statements = [];
     const rejected = [];
+    const hoursDropped = [];
     let applied = 0;
     const now = new Date().toISOString();
 
@@ -100,10 +101,16 @@ export async function onRequestPost(context) {
       }
 
       // Hours against someone who did not turn up would corrupt any total
-      // reported to a funder, so they are refused rather than quietly dropped.
-      if (hours.value !== null && status !== 'ATTENDED') {
-        rejected.push({ assignmentId: id, reason: 'hours_without_attendance' });
-        continue;
+      // reported to a funder, so they are never written - but the status
+      // change is applied regardless, and the drop is reported back rather
+      // than the whole row being refused. Rejecting the row outright used to
+      // mean a correction *away* from ATTENDED (the exact fix this file needs
+      // to make) silently failed whenever it arrived with a leftover hours
+      // value, because the status change never got the chance to apply.
+      let hoursValue = hours.value;
+      if (hoursValue !== null && status !== 'ATTENDED') {
+        hoursValue = null;
+        hoursDropped.push({ assignmentId: id });
       }
 
       // Only columns the caller actually sent are written. Writing every
@@ -111,7 +118,7 @@ export async function onRequestPost(context) {
       // NULL: the interface never sends `notes`, so every routine attendance
       // save wiped any note stored against that helper.
       const sets = ['status = ?', 'hours = ?'];
-      const binds = [status, hours.value];
+      const binds = [status, hoursValue];
 
       if (entry.role !== undefined) {
         sets.push('role = ?');
@@ -168,6 +175,7 @@ export async function onRequestPost(context) {
       after: {
         applied,
         rejected: rejected.length,
+        hoursDropped: hoursDropped.length,
         attended: (totals && totals.attended) || 0,
         totalHours: (totals && totals.total_hours) || 0
       }
@@ -177,6 +185,7 @@ export async function onRequestPost(context) {
       ok: true,
       applied,
       rejected,
+      hoursDropped,
       totals: {
         roster: (totals && totals.roster) || 0,
         attended: (totals && totals.attended) || 0,

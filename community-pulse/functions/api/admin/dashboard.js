@@ -68,14 +68,23 @@ export async function onRequestGet(context) {
       // they cannot be safely regenerated - those rows are surfaced for
       // visibility, with a prompt to follow up directly, rather than offered
       // a Retry button that would fail.
+      // Every column is aliased explicitly. In a compound SELECT, ORDER BY
+      // resolves against the *named* result columns of the first branch, so
+      // an unaliased `c.updated_at` gives "1st ORDER BY term does not match
+      // any column in the result set" - and the same omission would leave
+      // r.updated_at undefined when mapping the rows below.
       env.DB.prepare(
-        `SELECT 'volunteer' AS kind, c.id, c.type, c.to_address, c.attempts, c.error_message, c.updated_at,
+        `SELECT 'volunteer' AS kind, c.id AS id, c.type AS type,
+                c.to_address AS to_address, c.attempts AS attempts,
+                c.error_message AS error_message, c.updated_at AS updated_at,
                 v.public_ref AS reference, (v.first_name || ' ' || v.last_name) AS name
            FROM communications c
            JOIN volunteers v ON v.id = c.volunteer_id
           WHERE c.status = 'FAILED'
          UNION ALL
-         SELECT 'enquiry' AS kind, ec.id, ec.type, ec.to_address, ec.attempts, ec.error_message, ec.updated_at,
+         SELECT 'enquiry' AS kind, ec.id AS id, ec.type AS type,
+                ec.to_address AS to_address, ec.attempts AS attempts,
+                ec.error_message AS error_message, ec.updated_at AS updated_at,
                 e.public_ref AS reference, (e.first_name || ' ' || e.last_name) AS name
            FROM enquiry_communications ec
            JOIN enquiries e ON e.id = ec.enquiry_id

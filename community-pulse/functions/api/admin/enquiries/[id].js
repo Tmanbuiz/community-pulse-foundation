@@ -177,25 +177,35 @@ export async function onRequestPatch(context) {
       }
     }
 
-    if (!sets.length) return adminJson({ ok: true, unchanged: true });
+    const wantsNotify = body.notify === true;
+
+    // Sending an update is a legitimate action on its own - see the equivalent
+    // note in volunteers/[id].js. Requiring a status change first would mean
+    // falsifying the audit trail in order to send an email.
+    if (!sets.length && !wantsNotify) {
+      return adminJson({ ok: true, unchanged: true });
+    }
 
     const now = new Date().toISOString();
-    sets.push('updated_at = ?');
-    binds.push(now, e.id);
 
-    await env.DB
-      .prepare(`UPDATE enquiries SET ${sets.join(', ')} WHERE id = ?`)
-      .bind(...binds)
-      .run();
+    if (sets.length) {
+      sets.push('updated_at = ?');
+      binds.push(now, e.id);
 
-    await recordAudit(env, {
-      actor: auth.actor.email,
-      action: after.status ? 'STATUS_CHANGE' : 'ENQUIRY_UPDATE',
-      entityType: 'enquiry',
-      entityId: e.id,
-      before,
-      after
-    });
+      await env.DB
+        .prepare(`UPDATE enquiries SET ${sets.join(', ')} WHERE id = ?`)
+        .bind(...binds)
+        .run();
+
+      await recordAudit(env, {
+        actor: auth.actor.email,
+        action: after.status ? 'STATUS_CHANGE' : 'ENQUIRY_UPDATE',
+        entityType: 'enquiry',
+        entityId: e.id,
+        before,
+        after
+      });
+    }
 
     /* ---------------- optional notification ----------------
        Deliberately after the update and the audit entry. The status change is
@@ -204,13 +214,18 @@ export async function onRequestPatch(context) {
        rather than the whole request being rolled back. */
     let notified = null;
 
-    const wantsNotify = body.notify === true;
-    if (wantsNotify && after.status && NOTIFIABLE.has(after.status)) {
+    // The status being communicated: the new one if it changed, otherwise the
+    // one the admin selected, otherwise where the record already stands.
+    const notifyStatus =
+      after.status ||
+      (body.status !== undefined ? String(body.status).toUpperCase() : e.status);
+
+    if (wantsNotify && NOTIFIABLE.has(notifyStatus)) {
       const personalNote =
         typeof body.note === 'string' ? body.note.trim().slice(0, MAX_PERSONAL_NOTE) : '';
 
       const mail = enquiryStatusUpdateEmail({
-        status: after.status,
+        status: notifyStatus,
         type: e.type,
         firstName: e.first_name,
         publicRef: e.public_ref,
@@ -224,7 +239,7 @@ export async function onRequestPatch(context) {
             type: 'STATUS_UPDATE',
             to: e.email,
             subject: mail.subject,
-            preview: personalNote || after.status,
+            preview: personalNote || notifyStatus,
             createdBy: auth.actor.email
           });
 
@@ -241,7 +256,7 @@ export async function onRequestPatch(context) {
             action: 'STATUS_EMAIL_SEND',
             entityType: 'enquiry',
             entityId: e.id,
-            after: { status: after.status, sent: sent.ok, hadNote: !!personalNote }
+            after: { status: notifyStatus, sent: sent.ok, hadNote: !!personalNote }
           });
         } catch (mailErr) {
           // Never let a mail problem surface as a failed status change.

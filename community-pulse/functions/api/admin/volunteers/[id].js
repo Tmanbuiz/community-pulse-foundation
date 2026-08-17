@@ -177,27 +177,36 @@ export async function onRequestPatch(context) {
       }
     }
 
-    if (!sets.length) {
+    const wantsNotify = body.notify === true;
+
+    // Sending an update is a legitimate action on its own. A volunteer whose
+    // status was set to ACTIVE before this feature existed still deserves the
+    // welcome email, and requiring a pointless status change first would mean
+    // falsifying the audit trail to send it.
+    if (!sets.length && !wantsNotify) {
       return adminJson({ ok: true, unchanged: true });
     }
 
     const now = new Date().toISOString();
-    sets.push('updated_at = ?');
-    binds.push(now, v.id);
 
-    await env.DB
-      .prepare(`UPDATE volunteers SET ${sets.join(', ')} WHERE id = ?`)
-      .bind(...binds)
-      .run();
+    if (sets.length) {
+      sets.push('updated_at = ?');
+      binds.push(now, v.id);
 
-    await recordAudit(env, {
-      actor: auth.actor.email,
-      action: after.status ? 'STATUS_CHANGE' : 'VOLUNTEER_UPDATE',
-      entityType: 'volunteer',
-      entityId: v.id,
-      before,
-      after
-    });
+      await env.DB
+        .prepare(`UPDATE volunteers SET ${sets.join(', ')} WHERE id = ?`)
+        .bind(...binds)
+        .run();
+
+      await recordAudit(env, {
+        actor: auth.actor.email,
+        action: after.status ? 'STATUS_CHANGE' : 'VOLUNTEER_UPDATE',
+        entityType: 'volunteer',
+        entityId: v.id,
+        before,
+        after
+      });
+    }
 
     /* ---------------- optional notification ----------------
        After the update and the audit entry, for the same reason as on
@@ -205,13 +214,18 @@ export async function onRequestPatch(context) {
        if Zoho is unavailable. */
     let notified = null;
 
-    const wantsNotify = body.notify === true;
-    if (wantsNotify && after.status && NOTIFIABLE.has(after.status)) {
+    // The status being communicated: the new one if it changed, otherwise the
+    // one the admin selected, otherwise where the record already stands.
+    const notifyStatus =
+      after.status ||
+      (body.status !== undefined ? String(body.status).toUpperCase() : v.status);
+
+    if (wantsNotify && NOTIFIABLE.has(notifyStatus)) {
       const personalNote =
         typeof body.note === 'string' ? body.note.trim().slice(0, MAX_PERSONAL_NOTE) : '';
 
       const mail = volunteerStatusUpdateEmail({
-        status: after.status,
+        status: notifyStatus,
         firstName: v.first_name,
         publicRef: v.public_ref,
         note: personalNote
@@ -229,7 +243,7 @@ export async function onRequestPatch(context) {
               v.id,
               v.email,
               mail.subject,
-              (personalNote || after.status).slice(0, 200),
+              (personalNote || notifyStatus).slice(0, 200),
               auth.actor.email,
               now,
               now
@@ -251,7 +265,7 @@ export async function onRequestPatch(context) {
             action: 'STATUS_EMAIL_SEND',
             entityType: 'volunteer',
             entityId: v.id,
-            after: { status: after.status, sent: sent.ok, hadNote: !!personalNote }
+            after: { status: notifyStatus, sent: sent.ok, hadNote: !!personalNote }
           });
         } catch (mailErr) {
           const message = (mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 300);

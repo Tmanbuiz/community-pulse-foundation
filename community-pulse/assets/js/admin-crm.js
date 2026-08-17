@@ -64,7 +64,7 @@
     return '<div id="notifyBlock" hidden style="margin-bottom:12px">' +
         '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">' +
           '<input type="checkbox" id="notifyPerson" style="margin-top:3px" />' +
-          '<span>Email them about this change</span>' +
+          '<span id="notifyLabel">Email them about this change</span>' +
         '</label>' +
         '<div id="notifyDetail" hidden style="margin-top:10px">' +
           '<p class="cell-sub" id="notifySummary" style="margin:0 0 8px"></p>' +
@@ -84,17 +84,28 @@
     var check = document.getElementById('notifyPerson');
     var detail = document.getElementById('notifyDetail');
     var summary = document.getElementById('notifySummary');
+    var label = document.getElementById('notifyLabel');
     if (!block || !selectEl) return;
 
     function sync() {
       var next = selectEl.value;
-      var eligible = allowed.indexOf(next) !== -1 && next !== currentStatus;
+
+      // Offered whenever the selected status is one we can write an email
+      // about, whether or not it is changing. A record already marked ACTIVE
+      // still needs its welcome email sending, and requiring a fake status
+      // change first would be both awkward and dishonest in the audit trail.
+      var eligible = allowed.indexOf(next) !== -1;
       block.hidden = !eligible;
       if (!eligible) {
         check.checked = false;
         detail.hidden = true;
         return;
       }
+
+      var unchanged = next === currentStatus;
+      label.textContent = unchanged
+        ? 'Email them about this (status is already ' + next + ')'
+        : 'Email them about this change';
       summary.textContent = 'They will be told ' + (NOTIFY_SUMMARY[next] || 'about this change.');
       detail.hidden = !check.checked;
     }

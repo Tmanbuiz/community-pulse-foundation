@@ -10,7 +10,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/jpeg" href="/assets/images/logo-clean.jpg" />
-  <link rel="stylesheet" href="/assets/css/admin-crm.css" />
+  <!-- Versioned deliberately. The zone's Browser Cache TTL overrides the
+       Cache-Control we set in _headers, so the only dependable way to stop
+       admins running a stale copy of the app against a newer API is to change
+       the URL. Bump ?v= on every change to admin-crm.js or admin-crm.css. -->
+  <link rel="stylesheet" href="/assets/css/admin-crm.css?v=20260817a" />
 </head>
 <body>
   <a href="#main" class="skip-link">Skip to main content</a>
@@ -36,6 +40,6 @@
     <div id="crmView"></div>
   </main>
 
-  <script src="/assets/js/admin-crm.js"></script>
+  <script src="/assets/js/admin-crm.js?v=20260817a"></script>
 </body>
 </html>

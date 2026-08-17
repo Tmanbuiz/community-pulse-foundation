@@ -406,6 +406,169 @@ export function fundsReceivedEmail({ firstName, publicRef, amount }) {
 }
 
 /**
+ * Render an admin's optional personal note.
+ *
+ * Escaped, then newlines restored as breaks - an admin typing three short
+ * lines should get three short lines, not one run-on paragraph. Set apart
+ * visually so it reads as a message from a person rather than template copy.
+ */
+function noteBlock(note) {
+  const trimmed = (note || '').trim();
+  if (!trimmed) return '';
+
+  const body = escapeHtml(trimmed).replace(/\n/g, '<br />');
+  return `
+    <div style="background:#f8fafb;border-left:4px solid #0d7377;padding:14px 18px;margin:20px 0">
+      ${body}
+    </div>`;
+}
+
+/**
+ * Status update for an enquiry, sent only when an admin explicitly asks for it.
+ *
+ * The copy varies by status and, for REVIEWED, by enquiry type: "we have looked
+ * at this" means something quite different to someone offering a sofa than to
+ * someone who asked a question. Nothing here promises a timeline we cannot keep,
+ * and nothing implies a donation was received - that is a separate, deliberate
+ * confirmation (see fundsReceivedEmail).
+ */
+export function enquiryStatusUpdateEmail({ status, type, firstName, publicRef, note }) {
+  const name = escapeHtml(firstName);
+  const ref = escapeHtml(publicRef);
+
+  const reviewedBody = {
+    ITEM_DONATION: `<p>We have reviewed what you offered to donate. Someone from our
+      team will contact you to confirm the details and, if you asked us to collect,
+      to arrange a time that works for you.</p>`,
+    FINANCIAL: `<p>We have reviewed your message about supporting us financially, and
+      someone from our team will be in touch with the next step. If you have already
+      sent your contribution, we will confirm separately once it reaches us.</p>`,
+    QUESTION: `<p>We have read your question and passed it to the right person on our
+      team. You should hear back from us shortly.</p>`,
+    OTHER: `<p>We have read your message and passed it to the right person on our
+      team. You should hear back from us shortly.</p>`
+  };
+
+  const variants = {
+    REVIEWED: {
+      subject: 'An update on your message',
+      body: reviewedBody[type] || reviewedBody.OTHER
+    },
+    RESPONDED: {
+      subject: 'We have replied to you',
+      // Doubles as a deliverability check: if our reply went to spam, this
+      // tells the person to go looking for it.
+      body: `<p>A member of our team has now replied to you directly. That reply
+        should be in your inbox - if you cannot find it, please check your spam
+        or junk folder, and do let us know if it has not arrived.</p>`
+    },
+    CLOSED: {
+      subject: 'Your message with The Community Pulse Foundation',
+      body: `<p>We are marking your message as complete. Thank you for taking the
+        time to get in touch with us - it matters more than you might think that
+        people in this community reach out, offer what they have, and ask
+        questions. If anything else comes up, simply reply to this email and we
+        will pick it up from here.</p>`
+    }
+  };
+
+  const chosen = variants[status];
+  if (!chosen) return null;
+
+  return {
+    subject: chosen.subject,
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      ${chosen.body}
+      ${noteBlock(note)}
+
+      <p style="background:#f8fafb;border-left:4px solid #0d7377;padding:12px 16px;margin:20px 0">
+        <strong>Your reference:</strong> ${ref}
+      </p>
+
+      <p>Please quote this reference if you get in touch about the same matter.</p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
+/**
+ * Status update for a volunteer. Same rules: admin-triggered only.
+ *
+ * ACTIVE is the one that genuinely deserves a warm email - it is the moment
+ * someone stops being an applicant and becomes part of the team.
+ */
+export function volunteerStatusUpdateEmail({ status, firstName, publicRef, note }) {
+  const name = escapeHtml(firstName);
+  const ref = escapeHtml(publicRef);
+
+  const variants = {
+    CONTACTED: {
+      subject: 'An update on your volunteer application',
+      body: `<p>We have reviewed your volunteer application and someone from our team
+        is reaching out to you about it. Thank you for your patience while we worked
+        through the details.</p>`
+    },
+    ACTIVE: {
+      subject: 'Welcome to the team',
+      body: `<p>You are now an active volunteer with The Community Pulse Foundation.
+        Welcome, and thank you.</p>
+
+        <p>Volunteering is a real commitment of time that you could have spent on
+        anything else, and choosing to spend it on your neighbours is what makes the
+        work we do possible at all. We are glad to have you with us. Someone from our
+        team will be in touch about what is coming up and where you can help.</p>`
+    },
+    APPROVED: {
+      subject: 'Your volunteer application has been approved',
+      body: `<p>Your volunteer application has been approved. Thank you for your
+        patience while we reviewed it.</p>
+
+        <p>Someone from our team will follow up with the practical details - what is
+        coming up, what is involved, and where your time would be most useful.</p>`
+    },
+    DECLINED: {
+      // The hardest email here, and the one most worth getting right. No false
+      // reasons, no vague corporate softening, and a genuine door left open -
+      // this person offered their time to their community and should not be
+      // made to feel foolish for having done so.
+      subject: 'Your volunteer application',
+      body: `<p>Thank you for applying to volunteer with The Community Pulse
+        Foundation. After reviewing your application, we are not able to move
+        forward with it at this time.</p>
+
+        <p>We know that is disappointing to read. Please understand that it often
+        comes down to the roles we happen to have open and what they require, rather
+        than anything lacking in what you offered. Deciding to give your time to
+        people you may never meet is a good thing to have done, and we would
+        genuinely welcome an application from you again in the future.</p>
+
+        <p>If you would like to know more, simply reply to this email and we will
+        do our best to answer.</p>`
+    }
+  };
+
+  const chosen = variants[status];
+  if (!chosen) return null;
+
+  return {
+    subject: chosen.subject,
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      ${chosen.body}
+      ${noteBlock(note)}
+
+      <p style="background:#f8fafb;border-left:4px solid #0d7377;padding:12px 16px;margin:20px 0">
+        <strong>Volunteer reference:</strong> ${ref}
+      </p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
+/**
  * Send an enquiry acknowledgement and record the outcome on the enquiry row.
  *
  * Enquiries track delivery inline rather than in `communications`, since they
@@ -493,6 +656,68 @@ export async function deliverCommunication(env, communicationId, { to, subject, 
       .bind(message, now, communicationId)
       .run()
       .catch(() => { /* the send failure is already logged; do not mask it */ });
+
+    return { ok: false, error: message };
+  }
+}
+
+/**
+ * Queue an enquiry communication and return its row id.
+ *
+ * Written before the send is attempted so a message that fails mid-flight
+ * still leaves a record. `body_preview` is a short excerpt only - the full
+ * rendered email is never stored.
+ */
+export async function queueEnquiryComm(env, { enquiryId, type, to, subject, preview, createdBy }) {
+  const now = new Date().toISOString();
+
+  const row = await env.DB
+    .prepare(
+      `INSERT INTO enquiry_communications
+         (enquiry_id, type, to_address, subject, body_preview, status, created_by, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, 'PENDING', ?, ?, ?)`
+    )
+    .bind(enquiryId, type, to, subject || null, (preview || '').slice(0, 200) || null, createdBy || null, now, now)
+    .run();
+
+  return row.meta && row.meta.last_row_id;
+}
+
+/**
+ * Send a queued enquiry communication and record the outcome.
+ * Never throws, for the same reason as deliverCommunication.
+ */
+export async function deliverEnquiryComm(env, commId, { to, subject, html }) {
+  const now = new Date().toISOString();
+
+  try {
+    const providerId = await sendMail(env, { to, subject, html });
+
+    await env.DB
+      .prepare(
+        `UPDATE enquiry_communications
+            SET status = 'SENT', provider_id = ?, attempts = attempts + 1,
+                error_message = NULL, updated_at = ?
+          WHERE id = ?`
+      )
+      .bind(providerId, now, commId)
+      .run();
+
+    return { ok: true };
+  } catch (err) {
+    const message = (err && err.message ? err.message : 'unknown_error').slice(0, 300);
+    console.error('zoho: enquiry comm failed', { commId, message });
+
+    await env.DB
+      .prepare(
+        `UPDATE enquiry_communications
+            SET status = 'FAILED', attempts = attempts + 1,
+                error_message = ?, updated_at = ?
+          WHERE id = ?`
+      )
+      .bind(message, now, commId)
+      .run()
+      .catch(() => { /* already logged */ });
 
     return { ok: false, error: message };
   }

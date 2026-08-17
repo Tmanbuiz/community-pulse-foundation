@@ -1,0 +1,3 @@
+CREATE TABLE IF NOT EXISTS enquiry_communications (id INTEGER PRIMARY KEY AUTOINCREMENT, enquiry_id INTEGER NOT NULL, type TEXT NOT NULL, direction TEXT NOT NULL DEFAULT 'OUTBOUND', to_address TEXT NOT NULL, subject TEXT, body_preview TEXT, status TEXT NOT NULL DEFAULT 'PENDING', provider_id TEXT, error_message TEXT, attempts INTEGER NOT NULL DEFAULT 0, created_by TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, FOREIGN KEY (enquiry_id) REFERENCES enquiries(id) ON DELETE CASCADE, CHECK (status IN ('PENDING','SENT','FAILED','RETRIED')));
+CREATE INDEX IF NOT EXISTS idx_enq_comms_enquiry ON enquiry_communications (enquiry_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_enq_comms_status ON enquiry_communications (status);

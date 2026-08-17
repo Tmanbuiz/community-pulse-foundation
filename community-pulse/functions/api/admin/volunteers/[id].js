@@ -10,11 +10,20 @@
    ========================================================= */
 
 import { requireAdmin, adminJson, denied, recordAudit } from '../../../_lib/admin-auth.js';
+import { volunteerStatusUpdateEmail, deliverCommunication } from '../../../_lib/zoho.js';
 
 const STATUSES = [
   'NEW', 'REVIEWED', 'CONTACTED', 'APPROVED',
   'ACTIVE', 'INACTIVE', 'DECLINED', 'ARCHIVED'
 ];
+
+// Statuses a volunteer can meaningfully be told about. REVIEWED, INACTIVE and
+// ARCHIVED are internal bookkeeping - being emailed "your application has been
+// reviewed" tells someone nothing they can act on. Nothing sends unless an
+// admin explicitly asks; this only bounds what may be asked for.
+const NOTIFIABLE = new Set(['CONTACTED', 'APPROVED', 'ACTIVE', 'DECLINED']);
+
+const MAX_PERSONAL_NOTE = 1000;
 
 // Statuses that mean the volunteer has actually been reached.
 const CONTACT_STATUSES = new Set(['CONTACTED', 'APPROVED', 'ACTIVE']);
@@ -190,6 +199,70 @@ export async function onRequestPatch(context) {
       after
     });
 
+    /* ---------------- optional notification ----------------
+       After the update and the audit entry, for the same reason as on
+       enquiries: the status change is the fact of record and must stand even
+       if Zoho is unavailable. */
+    let notified = null;
+
+    const wantsNotify = body.notify === true;
+    if (wantsNotify && after.status && NOTIFIABLE.has(after.status)) {
+      const personalNote =
+        typeof body.note === 'string' ? body.note.trim().slice(0, MAX_PERSONAL_NOTE) : '';
+
+      const mail = volunteerStatusUpdateEmail({
+        status: after.status,
+        firstName: v.first_name,
+        publicRef: v.public_ref,
+        note: personalNote
+      });
+
+      if (mail) {
+        try {
+          const queued = await env.DB
+            .prepare(
+              `INSERT INTO communications
+                 (volunteer_id, type, to_address, subject, body_preview, status, created_by, created_at, updated_at)
+               VALUES (?, 'STATUS_UPDATE', ?, ?, ?, 'PENDING', ?, ?, ?)`
+            )
+            .bind(
+              v.id,
+              v.email,
+              mail.subject,
+              (personalNote || after.status).slice(0, 200),
+              auth.actor.email,
+              now,
+              now
+            )
+            .run();
+
+          const commId = queued.meta && queued.meta.last_row_id;
+
+          const sent = await deliverCommunication(env, commId, {
+            to: v.email,
+            subject: mail.subject,
+            html: mail.html
+          });
+
+          notified = sent.ok ? { sent: true, to: v.email } : { sent: false, error: sent.error };
+
+          await recordAudit(env, {
+            actor: auth.actor.email,
+            action: 'STATUS_EMAIL_SEND',
+            entityType: 'volunteer',
+            entityId: v.id,
+            after: { status: after.status, sent: sent.ok, hadNote: !!personalNote }
+          });
+        } catch (mailErr) {
+          const message = (mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 300);
+          console.error('admin/volunteer status email failed', message);
+          notified = { sent: false, error: message };
+        }
+      }
+    } else if (wantsNotify) {
+      notified = { sent: false, error: 'not_notifiable' };
+    }
+
     const updated = await env.DB
       .prepare('SELECT status, last_contact_at, archived_at, updated_at FROM volunteers WHERE id = ?')
       .bind(v.id)
@@ -197,6 +270,7 @@ export async function onRequestPatch(context) {
 
     return adminJson({
       ok: true,
+      notified,
       volunteer: {
         id: v.id,
         reference: v.public_ref,

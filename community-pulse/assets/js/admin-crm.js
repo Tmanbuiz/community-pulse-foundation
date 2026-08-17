@@ -41,6 +41,82 @@
 
   var ENQUIRY_STATUSES = ['NEW', 'REVIEWED', 'RESPONDED', 'CLOSED', 'ARCHIVED'];
 
+  // Status changes the person can usefully be told about. These mirror the
+  // server's own lists - the server is the authority and will refuse anything
+  // else, this just avoids offering a checkbox that would be ignored.
+  var NOTIFIABLE = ['CONTACTED', 'APPROVED', 'ACTIVE', 'DECLINED'];
+  var ENQUIRY_NOTIFIABLE = ['REVIEWED', 'RESPONDED', 'CLOSED'];
+
+  // What the recipient will actually be told, so the admin is never guessing
+  // at what they are about to send on the organisation's behalf.
+  var NOTIFY_SUMMARY = {
+    CONTACTED: 'that their application has been reviewed and someone is reaching out.',
+    APPROVED: 'that their application has been approved and details will follow.',
+    ACTIVE: 'a warm welcome to the team.',
+    DECLINED: 'that you are not moving forward, kindly worded, with the door left open.',
+    REVIEWED: 'that you have read their message and what happens next.',
+    RESPONDED: 'that a reply has been sent, and to check spam if they cannot find it.',
+    CLOSED: 'a thank-you and that the matter is now closed.'
+  };
+
+  /** Notify controls, shared by both detail screens. */
+  function notifyBlock() {
+    return '<div id="notifyBlock" hidden style="margin-bottom:12px">' +
+        '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">' +
+          '<input type="checkbox" id="notifyPerson" style="margin-top:3px" />' +
+          '<span>Email them about this change</span>' +
+        '</label>' +
+        '<div id="notifyDetail" hidden style="margin-top:10px">' +
+          '<p class="cell-sub" id="notifySummary" style="margin:0 0 8px"></p>' +
+          '<textarea id="notifyNote" rows="3" placeholder="Optional: add a personal line, e.g. when you can collect, or who will call."></textarea>' +
+          '<p class="cell-sub" style="margin:6px 0 0">Anything you type here appears in the email above our standard wording.</p>' +
+        '</div>' +
+      '</div>';
+  }
+
+  /**
+   * Wire the notify controls to a status <select>.
+   * Hidden entirely for statuses that never send, so the option to email
+   * someone about internal bookkeeping is not even presented.
+   */
+  function wireNotify(selectEl, allowed, currentStatus) {
+    var block = document.getElementById('notifyBlock');
+    var check = document.getElementById('notifyPerson');
+    var detail = document.getElementById('notifyDetail');
+    var summary = document.getElementById('notifySummary');
+    if (!block || !selectEl) return;
+
+    function sync() {
+      var next = selectEl.value;
+      var eligible = allowed.indexOf(next) !== -1 && next !== currentStatus;
+      block.hidden = !eligible;
+      if (!eligible) {
+        check.checked = false;
+        detail.hidden = true;
+        return;
+      }
+      summary.textContent = 'They will be told ' + (NOTIFY_SUMMARY[next] || 'about this change.');
+      detail.hidden = !check.checked;
+    }
+
+    selectEl.addEventListener('change', sync);
+    check.addEventListener('change', function () { detail.hidden = !check.checked; });
+    sync();
+  }
+
+  /** Report the outcome of a notification without overstating it. */
+  function reportNotify(notified) {
+    if (!notified) return;
+    if (notified.sent) return;
+    if (notified.error === 'not_notifiable') {
+      showError('Status saved, but no email was sent',
+        'That status is not one we notify people about.');
+      return;
+    }
+    showError('Status saved, but the email failed',
+      'The change is recorded. The mail server reported: <code>' + esc(notified.error || 'unknown') + '</code>');
+  }
+
   var ENQUIRY_TYPE_LABELS = {
     ITEM_DONATION: 'Item donation',
     FINANCIAL: 'Financial',
@@ -515,6 +591,7 @@
                   }).join('') +
                 '</select>' +
               '</div>' +
+              notifyBlock() +
               '<div class="btn-row">' +
                 '<button class="btn btn-primary btn-sm" id="saveStatus">Update status</button>' +
                 '<button class="btn btn-quiet btn-sm" id="toggleArchive">' + (v.archivedAt ? 'Restore' : 'Archive') + '</button>' +
@@ -571,17 +648,35 @@
       });
     }
 
+    var statusSelect = document.getElementById('statusSelect');
+    if (statusSelect) wireNotify(statusSelect, NOTIFIABLE, v.status);
+
     var saveStatus = document.getElementById('saveStatus');
     if (saveStatus) {
       saveStatus.addEventListener('click', async function () {
         saveStatus.disabled = true;
+        var notifyEl = document.getElementById('notifyPerson');
+        var noteEl = document.getElementById('notifyNote');
+        var wantsNotify = !!(notifyEl && notifyEl.checked);
+
+        if (wantsNotify) saveStatus.textContent = 'Saving and sending…';
+
         try {
-          await api('/volunteers/' + encodeURIComponent(v.id), {
+          var res = await api('/volunteers/' + encodeURIComponent(v.id), {
             method: 'PATCH',
-            body: JSON.stringify({ status: document.getElementById('statusSelect').value })
+            body: JSON.stringify({
+              status: statusSelect.value,
+              notify: wantsNotify,
+              note: wantsNotify && noteEl ? noteEl.value : ''
+            })
           });
+          reportNotify(res.notified);
           renderProfile(ref);
-        } catch (err) { saveStatus.disabled = false; handleApiError(err); }
+        } catch (err) {
+          saveStatus.disabled = false;
+          saveStatus.textContent = 'Update status';
+          handleApiError(err);
+        }
       });
     }
 
@@ -817,6 +912,7 @@
                   }).join('') +
                 '</select>' +
               '</div>' +
+              notifyBlock() +
               '<div class="btn-row">' +
                 '<button class="btn btn-primary btn-sm" id="saveStatus">Update status</button>' +
                 '<button class="btn btn-quiet btn-sm" id="toggleArchive">' + (e.archivedAt ? 'Restore' : 'Archive') + '</button>' +
@@ -828,6 +924,22 @@
           '<div>Status: <span class="mail-' + esc(e.ackStatus) + '">' + esc(e.ackStatus) + '</span></div>' +
           (e.ackError ? '<div class="note-meta">' + esc(e.ackError) + '</div>' : '') +
           '<div class="note-meta">' + esc(e.ackAttempts) + ' attempt' + (e.ackAttempts === 1 ? '' : 's') + '</div>' +
+        '</div></section>' +
+
+        // Everything sent to this person since the acknowledgement, so an
+        // admin can see what they have already been told before telling them
+        // something else.
+        '<section class="panel"><div class="panel-head"><h2>Messages sent</h2></div><div class="panel-body">' +
+          ((data.communications || []).length
+            ? data.communications.map(function (c) {
+                return '<div class="note-item">' +
+                  '<div>' + esc(c.subject || c.type) +
+                    ' <span class="mail-' + esc(c.status) + '">' + esc(c.status) + '</span></div>' +
+                  (c.error ? '<div class="note-meta">' + esc(c.error) + '</div>' : '') +
+                  '<div class="note-meta">' + esc(c.by || 'system') + ' · ' + esc(fmtDate(c.at)) + '</div>' +
+                '</div>';
+              }).join('')
+            : '<p class="cell-sub">Nothing sent beyond the acknowledgement.</p>') +
         '</div></section>' +
 
         '<section class="panel"><div class="panel-head"><h2>Activity</h2></div><div class="panel-body">' +
@@ -859,17 +971,35 @@
       });
     }
 
+    var statusSelect = document.getElementById('statusSelect');
+    if (statusSelect) wireNotify(statusSelect, ENQUIRY_NOTIFIABLE, e.status);
+
     var saveStatus = document.getElementById('saveStatus');
     if (saveStatus) {
       saveStatus.addEventListener('click', async function () {
         saveStatus.disabled = true;
+        var notifyEl = document.getElementById('notifyPerson');
+        var noteEl = document.getElementById('notifyNote');
+        var wantsNotify = !!(notifyEl && notifyEl.checked);
+
+        if (wantsNotify) saveStatus.textContent = 'Saving and sending…';
+
         try {
-          await api('/enquiries/' + encodeURIComponent(e.id), {
+          var res = await api('/enquiries/' + encodeURIComponent(e.id), {
             method: 'PATCH',
-            body: JSON.stringify({ status: document.getElementById('statusSelect').value })
+            body: JSON.stringify({
+              status: statusSelect.value,
+              notify: wantsNotify,
+              note: wantsNotify && noteEl ? noteEl.value : ''
+            })
           });
+          reportNotify(res.notified);
           renderEnquiry(ref);
-        } catch (err) { saveStatus.disabled = false; handleApiError(err); }
+        } catch (err) {
+          saveStatus.disabled = false;
+          saveStatus.textContent = 'Update status';
+          handleApiError(err);
+        }
       });
     }
 

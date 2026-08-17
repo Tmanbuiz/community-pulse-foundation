@@ -16,6 +16,21 @@
 /*.html
   Cache-Control: public, max-age=0, must-revalidate
 
+# The CRM application assets, exempted from the hour-long cache above.
+# These must come after the /assets/* rules so they take precedence.
+#
+# The CRM is a single-page app talking to a versioned API, used by a
+# handful of admins. Caching it saves nothing worth having and costs a
+# great deal: after a deploy the browser keeps running the old app
+# against the new API for up to an hour, without even revalidating, and
+# the symptom is silently missing data rather than an error. That cost
+# us most of an evening's debugging.
+/assets/js/admin-crm.js
+  Cache-Control: no-store, private
+
+/assets/css/admin-crm.css
+  Cache-Control: no-store, private
+
 # The CRM renders volunteer personal data. Nothing here may sit in a
 # shared cache, and it must never be framed or indexed.
 /crm/*

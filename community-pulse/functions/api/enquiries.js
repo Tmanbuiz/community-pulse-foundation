@@ -90,11 +90,6 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: 'server_misconfigured', missing }, 500);
   }
 
-  // Canonical site address, used for links inside emails so an admin
-  // notification always points at the real site rather than at whichever
-  // preview deployment happened to receive the submission.
-  const allowedOrigin = env.APP_BASE_URL || 'https://thecommunitypulsefoundation.ca';
-
   // CSRF guard. This compares against the request's *own* origin, not the
   // canonical one: the form is always served from the same deployment that
   // receives the post, so same-origin is the accurate test and it works
@@ -267,7 +262,11 @@ export async function onRequestPost(context) {
       lastName,
       type,
       submittedAt: now,
-      baseUrl: allowedOrigin
+      // The deployment that received the submission, not the canonical site.
+      // The record lives in this deployment's database, so a canonical link
+      // would send an admin to a CRM that cannot show them the record they
+      // were just emailed about.
+      baseUrl: new URL(request.url).origin
     });
 
     const adminTo = env.ADMIN_NOTIFICATION_TO || 'admin@thecommunitypulsefoundation.ca';

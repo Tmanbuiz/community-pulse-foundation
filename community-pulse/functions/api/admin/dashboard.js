@@ -26,7 +26,7 @@ export async function onRequestGet(context) {
     const staleCutoff = new Date(Date.now() - staleDays * 86400000).toISOString();
 
     const [
-      counts, recent, failedMail, stale, enquiryCounts, recentEnquiries,
+      counts, recent, failedMail, failedMailTotal, stale, enquiryCounts, recentEnquiries,
       upcomingEvents, needsAttendance
     ] = await env.DB.batch([
       // Single pass for the summary cards. Archived records are excluded
@@ -54,14 +54,53 @@ export async function onRequestGet(context) {
 
       // The retry queue. A failed acknowledgement is the one failure a
       // volunteer would actually notice, so it leads the work list.
+      //
+      // Unioned with enquiry_communications: that table exists purely so
+      // enquiry status-update emails can fail and be tracked, but nothing
+      // previously read it here, so a failed enquiry email was invisible to
+      // every admin unless someone thought to query the database directly.
+      // 'kind' tells the UI which profile to link to and, for the fixed-in-
+      // this-round retry.js, which rows retry.js can actually regenerate -
+      // it only knows how to rebuild ACKNOWLEDGEMENT and ADMIN_NOTIFICATION
+      // content from data already on the volunteer row. STATUS_UPDATE and
+      // EVENT_ASSIGNMENT emails carry a specific status transition and an
+      // optional freeform note that are not stored anywhere retrievable, so
+      // they cannot be safely regenerated - those rows are surfaced for
+      // visibility, with a prompt to follow up directly, rather than offered
+      // a Retry button that would fail.
+      // Every column is aliased explicitly. In a compound SELECT, ORDER BY
+      // resolves against the *named* result columns of the first branch, so
+      // an unaliased `c.updated_at` gives "1st ORDER BY term does not match
+      // any column in the result set" - and the same omission would leave
+      // r.updated_at undefined when mapping the rows below.
       env.DB.prepare(
-        `SELECT c.id, c.type, c.to_address, c.attempts, c.error_message, c.updated_at,
-                v.public_ref, v.first_name, v.last_name
+        `SELECT 'volunteer' AS kind, c.id AS id, c.type AS type,
+                c.to_address AS to_address, c.attempts AS attempts,
+                c.error_message AS error_message, c.updated_at AS updated_at,
+                v.public_ref AS reference, (v.first_name || ' ' || v.last_name) AS name
            FROM communications c
            JOIN volunteers v ON v.id = c.volunteer_id
           WHERE c.status = 'FAILED'
-          ORDER BY c.updated_at DESC
+         UNION ALL
+         SELECT 'enquiry' AS kind, ec.id AS id, ec.type AS type,
+                ec.to_address AS to_address, ec.attempts AS attempts,
+                ec.error_message AS error_message, ec.updated_at AS updated_at,
+                e.public_ref AS reference, (e.first_name || ' ' || e.last_name) AS name
+           FROM enquiry_communications ec
+           JOIN enquiries e ON e.id = ec.enquiry_id
+          WHERE ec.status = 'FAILED'
+          ORDER BY updated_at DESC
           LIMIT 20`
+      ),
+
+      // The stat tile needs the true count, not the length of the LIMIT 20
+      // list above - reusing that length silently capped the figure at 20
+      // during exactly the kind of sustained outage where an accurate count
+      // matters most.
+      env.DB.prepare(
+        `SELECT
+           (SELECT COUNT(*) FROM communications WHERE status = 'FAILED') +
+           (SELECT COUNT(*) FROM enquiry_communications WHERE status = 'FAILED') AS total`
       ),
 
       // Sat untouched too long: still NEW, never contacted, past the cutoff.
@@ -130,6 +169,7 @@ export async function onRequestGet(context) {
 
     const c = (counts.results && counts.results[0]) || {};
     const ec = (enquiryCounts.results && enquiryCounts.results[0]) || {};
+    const failedTotal = (failedMailTotal.results && failedMailTotal.results[0] && failedMailTotal.results[0].total) || 0;
 
     return adminJson({
       ok: true,
@@ -176,7 +216,7 @@ export async function onRequestGet(context) {
         active: c.active || 0,
         archived: c.archived || 0,
         total: c.total || 0,
-        failedEmails: (failedMail.results || []).length
+        failedEmails: failedTotal
       },
       recent: (recent.results || []).map((r) => ({
         id: r.id,
@@ -187,14 +227,16 @@ export async function onRequestGet(context) {
         submittedAt: r.created_at
       })),
       actionQueue: {
+        failedEmailsTotal: failedTotal,
         failedEmails: (failedMail.results || []).map((r) => ({
+          kind: r.kind,
           communicationId: r.id,
           type: r.type,
           to: r.to_address,
           attempts: r.attempts,
           error: r.error_message,
-          reference: r.public_ref,
-          name: `${r.first_name} ${r.last_name}`.trim(),
+          reference: r.reference,
+          name: (r.name || '').trim(),
           lastAttemptAt: r.updated_at
         })),
         awaitingReview: (stale.results || []).map((r) => ({

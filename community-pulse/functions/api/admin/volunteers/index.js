@@ -122,13 +122,12 @@ export async function onRequestGet(context) {
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
   try {
-    const countRow = await env.DB
-      .prepare(`SELECT COUNT(*) AS n FROM volunteers v ${whereSql}`)
-      .bind(...binds)
-      .first();
-
-    const rows = await env.DB
-      .prepare(
+    // Independent statements against the same WHERE clause, combined into
+    // one round trip rather than two sequential ones - this is the list
+    // screen an admin loads most often.
+    const [countResult, rows] = await env.DB.batch([
+      env.DB.prepare(`SELECT COUNT(*) AS n FROM volunteers v ${whereSql}`).bind(...binds),
+      env.DB.prepare(
         `SELECT v.id, v.public_ref, v.first_name, v.last_name, v.email, v.phone,
                 v.status, v.created_at, v.last_contact_at, v.archived_at,
                 (SELECT group_concat(interest_code)
@@ -139,11 +138,11 @@ export async function onRequestGet(context) {
            ${whereSql}
           ORDER BY ${orderBy}
           LIMIT ? OFFSET ?`
-      )
-      .bind(...binds, limit, offset)
-      .all();
+      ).bind(...binds, limit, offset)
+    ]);
 
-    const total = (countRow && countRow.n) || 0;
+    const countRow = (countResult.results && countResult.results[0]) || {};
+    const total = countRow.n || 0;
 
     return adminJson({
       ok: true,

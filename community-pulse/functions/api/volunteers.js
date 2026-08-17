@@ -349,20 +349,26 @@ export async function onRequestPost(context) {
     // Both rows are created PENDING first, so an admin can still see that an
     // email was owed even if the isolate dies before delivery completes.
     const queued = await env.DB.batch([
+      // body_preview matches the convention used everywhere else a
+      // communication is queued (status-update and event-assignment emails,
+      // and the enquiry equivalent) - it had been left out here, the one
+      // place nothing populated it. created_by is correctly left NULL: these
+      // two rows are generated from the public, unauthenticated submission
+      // endpoint, so there is no admin actor to attribute them to.
       env.DB
         .prepare(
           `INSERT INTO communications
-             (volunteer_id, type, to_address, subject, status, created_at, updated_at)
-           VALUES (?, 'ACKNOWLEDGEMENT', ?, ?, 'PENDING', ?, ?)`
+             (volunteer_id, type, to_address, subject, body_preview, status, created_at, updated_at)
+           VALUES (?, 'ACKNOWLEDGEMENT', ?, ?, ?, 'PENDING', ?, ?)`
         )
-        .bind(volunteerId, email, ack.subject, now, now),
+        .bind(volunteerId, email, ack.subject, ack.subject.slice(0, 200), now, now),
       env.DB
         .prepare(
           `INSERT INTO communications
-             (volunteer_id, type, to_address, subject, status, created_at, updated_at)
-           VALUES (?, 'ADMIN_NOTIFICATION', ?, ?, 'PENDING', ?, ?)`
+             (volunteer_id, type, to_address, subject, body_preview, status, created_at, updated_at)
+           VALUES (?, 'ADMIN_NOTIFICATION', ?, ?, ?, 'PENDING', ?, ?)`
         )
-        .bind(volunteerId, adminTo, adminNote.subject, now, now)
+        .bind(volunteerId, adminTo, adminNote.subject, adminNote.subject.slice(0, 200), now, now)
     ]);
 
     const ackId = queued[0] && queued[0].meta && queued[0].meta.last_row_id;

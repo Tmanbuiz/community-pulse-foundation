@@ -89,7 +89,9 @@ export async function onRequestGet(context) {
         archivedAt: e.archived_at,
         assignedCount: rows.filter((r) => r.status !== 'CANCELLED').length,
         attendedCount: rows.filter((r) => r.status === 'ATTENDED').length,
-        totalHours: rows.reduce((sum, r) => sum + (r.hours || 0), 0)
+        // Filtered to ATTENDED so this can never disagree with the events-list
+        // total or the volunteer profile's total for the same underlying data.
+        totalHours: rows.reduce((sum, r) => sum + (r.status === 'ATTENDED' ? r.hours || 0 : 0), 0)
       },
       roster: rows.map((r) => ({
         assignmentId: r.id,

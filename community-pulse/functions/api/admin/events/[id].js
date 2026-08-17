@@ -12,7 +12,7 @@
    ========================================================= */
 
 import { requireAdmin, adminJson, denied, recordAudit } from '../../../_lib/admin-auth.js';
-import { eventCancelledEmail, sendMail } from '../../../_lib/zoho.js';
+import { eventCancelledEmail, eventChangedEmail, sendMail } from '../../../_lib/zoho.js';
 
 const STATUSES = ['DRAFT', 'SCHEDULED', 'COMPLETED', 'CANCELLED'];
 const LIMITS = { title: 140, location: 200, description: 2000, note: 1000 };
@@ -260,14 +260,11 @@ export async function onRequestPatch(context) {
       after
     });
 
-    /* ---------------- cancellation notices ---------------- */
+    /* ---------------- outgoing notices ---------------- */
     let notified = null;
 
-    if (after.status === 'CANCELLED' && body.notify === true) {
-      const note = typeof body.note === 'string'
-        ? body.note.trim().slice(0, LIMITS.note)
-        : '';
-
+    /** Everyone still expected at this event, one message each. */
+    const rosterRecipients = async () => {
       const people = await env.DB
         .prepare(
           `SELECT v.first_name, v.email
@@ -277,19 +274,19 @@ export async function onRequestPatch(context) {
         )
         .bind(e.id)
         .all();
+      return people.results || [];
+    };
 
-      const recipients = people.results || [];
+    /**
+     * Sent individually rather than as one message with many recipients, so
+     * volunteers never see each other's addresses. A failure is reported, not
+     * thrown: the change to the event itself has already been committed.
+     */
+    const sendEach = async (recipients, build) => {
       let sent = 0;
       const failures = [];
-
-      // Sent one at a time rather than as a single message with many
-      // recipients: volunteers must never see each other's addresses.
       for (const person of recipients) {
-        const mail = eventCancelledEmail({
-          firstName: person.first_name,
-          event: { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at },
-          note
-        });
+        const mail = build(person);
         try {
           await sendMail(env, { to: person.email, subject: mail.subject, html: mail.html });
           sent += 1;
@@ -297,15 +294,66 @@ export async function onRequestPatch(context) {
           failures.push((mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 120));
         }
       }
+      return { sent, attempted: recipients.length, failures };
+    };
 
-      notified = { sent, attempted: recipients.length, failures };
+    // A time or place change that nobody is told about is worse than no edit
+    // facility at all: volunteers turn up to the wrong place at the wrong hour.
+    const scheduleChanged =
+      after.starts_at !== undefined ||
+      after.ends_at !== undefined ||
+      after.location !== undefined;
+
+    if (scheduleChanged && after.status !== 'CANCELLED' && body.notify === true) {
+      const note = typeof body.note === 'string' ? body.note.trim().slice(0, LIMITS.note) : '';
+      const current = await loadEvent(env, String(e.id));
+
+      notified = await sendEach(await rosterRecipients(), (person) =>
+        eventChangedEmail({
+          firstName: person.first_name,
+          event: {
+            title: current.title,
+            starts_at: current.starts_at,
+            ends_at: current.ends_at,
+            location: current.location
+          },
+          previous: {
+            starts_at: e.starts_at,
+            ends_at: e.ends_at,
+            location: e.location
+          },
+          note
+        })
+      );
+
+      await recordAudit(env, {
+        actor: auth.actor.email,
+        action: 'EVENT_CHANGE_NOTICE',
+        entityType: 'event',
+        entityId: e.id,
+        after: { sent: notified.sent, attempted: notified.attempted }
+      });
+    }
+
+    if (after.status === 'CANCELLED' && body.notify === true) {
+      const note = typeof body.note === 'string'
+        ? body.note.trim().slice(0, LIMITS.note)
+        : '';
+
+      notified = await sendEach(await rosterRecipients(), (person) =>
+        eventCancelledEmail({
+          firstName: person.first_name,
+          event: { title: e.title, starts_at: e.starts_at, ends_at: e.ends_at },
+          note
+        })
+      );
 
       await recordAudit(env, {
         actor: auth.actor.email,
         action: 'EVENT_CANCEL_NOTICE',
         entityType: 'event',
         entityId: e.id,
-        after: { sent, attempted: recipients.length }
+        after: { sent: notified.sent, attempted: notified.attempted }
       });
     }
 

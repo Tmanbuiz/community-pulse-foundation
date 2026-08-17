@@ -1381,6 +1381,50 @@
             '<div class="panel-body"><div class="freetext">' + esc(e.description) + '</div></div></section>'
           : '') +
 
+        (canEdit
+          ? '<section class="panel">' +
+              '<div class="panel-head"><h2>Change details</h2>' +
+                '<button class="btn btn-quiet btn-sm" id="editToggle">Edit</button></div>' +
+              '<div class="panel-body" id="editPanel" hidden>' +
+                '<div class="filters" style="margin-bottom:12px">' +
+                  '<div class="filter-field filter-grow"><label for="edTitle">What is it</label>' +
+                    '<input id="edTitle" type="text" maxlength="140" value="' + esc(e.title) + '" /></div>' +
+                  '<div class="filter-field filter-grow"><label for="edLocation">Where</label>' +
+                    '<input id="edLocation" type="text" maxlength="200" value="' + esc(e.location || '') + '" /></div>' +
+                '</div>' +
+                '<div class="filters" style="margin-bottom:12px">' +
+                  '<div class="filter-field"><label for="edStart">Starts</label>' +
+                    '<input id="edStart" type="datetime-local" value="' + esc(toLocalInput(e.startsAt)) + '" /></div>' +
+                  '<div class="filter-field"><label for="edEnd">Finishes (optional)</label>' +
+                    '<input id="edEnd" type="datetime-local" value="' + esc(toLocalInput(e.endsAt)) + '" /></div>' +
+                  '<div class="filter-field"><label for="edCapacity">People needed (optional)</label>' +
+                    '<input id="edCapacity" type="number" min="1" max="10000" value="' +
+                      (e.capacity === null || e.capacity === undefined ? '' : esc(e.capacity)) + '" /></div>' +
+                '</div>' +
+                '<div class="filter-field filter-grow" style="margin-bottom:12px">' +
+                  '<label for="edDescription">Anything volunteers should know (optional)</label>' +
+                  '<textarea id="edDescription" rows="3" maxlength="2000">' + esc(e.description || '') + '</textarea></div>' +
+
+                // Only offered when the time or place actually moved. Editing a
+                // typo in the description should not email twelve people.
+                '<div id="changeNotice" hidden style="margin-bottom:12px">' +
+                  '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer">' +
+                    '<input type="checkbox" id="notifyChange" checked style="margin-top:3px" />' +
+                    '<span>Email everyone on the roster about the change</span>' +
+                  '</label>' +
+                  '<textarea id="changeNote" rows="2" placeholder="Optional: why it moved, or anything else they should know." style="margin-top:8px"></textarea>' +
+                  '<p class="cell-sub" style="margin:6px 0 0">They will see what changed, and the new details in full.</p>' +
+                '</div>' +
+
+                '<div class="btn-row">' +
+                  '<button class="btn btn-primary btn-sm" id="edSave">Save changes</button>' +
+                  '<button class="btn btn-quiet btn-sm" id="edCancel">Cancel</button>' +
+                '</div>' +
+                '<div class="crm-error" id="edErrors" role="alert" hidden></div>' +
+              '</div>' +
+            '</section>'
+          : '') +
+
         '<section class="panel"><div class="panel-head"><h2>Who is helping</h2>' +
           (isPast && canEdit ? '<span class="cell-sub">Record attendance below</span>' : '') +
         '</div>';
@@ -1501,19 +1545,53 @@
     function collectEntries() {
       return [].slice.call(view.querySelectorAll('tr[data-assignment]')).map(function (tr) {
         var hoursEl = tr.querySelector('.ro-hours');
+        var status = tr.querySelector('.ro-status').value;
+
+        // Hours are only ever sent for someone marked as turned up. The server
+        // refuses hours against any other status and skips the whole row, so
+        // sending a stale value here used to make correcting a mistaken
+        // attendance impossible: the box kept its old number, the row was
+        // rejected, and the person stayed marked as having attended.
+        var hours = status === 'ATTENDED' && hoursEl && hoursEl.value !== ''
+          ? hoursEl.value
+          : null;
+
         return {
           assignment_id: tr.dataset.assignment,
-          status: tr.querySelector('.ro-status').value,
-          hours: hoursEl && hoursEl.value !== '' ? hoursEl.value : null,
+          status: status,
+          hours: hours,
           role: tr.querySelector('.ro-role').value
         };
       });
     }
 
+    // Keep the hours box honest as the status changes, so what is on screen
+    // matches what will be saved.
+    function syncHoursBox(tr) {
+      var status = tr.querySelector('.ro-status').value;
+      var hoursEl = tr.querySelector('.ro-hours');
+      if (!hoursEl) return;
+
+      var attended = status === 'ATTENDED';
+      hoursEl.disabled = !attended;
+      hoursEl.title = attended ? '' : 'Only someone marked as turned up can have hours.';
+      if (!attended) hoursEl.value = '';
+    }
+
+    view.querySelectorAll('tr[data-assignment]').forEach(function (tr) {
+      var sel = tr.querySelector('.ro-status');
+      if (!sel) return;
+      sel.addEventListener('change', function () { syncHoursBox(tr); });
+      syncHoursBox(tr);
+    });
+
     var markAll = document.getElementById('markAllAttended');
     if (markAll) {
       markAll.addEventListener('click', function () {
-        view.querySelectorAll('.ro-status').forEach(function (sel) { sel.value = 'ATTENDED'; });
+        view.querySelectorAll('tr[data-assignment]').forEach(function (tr) {
+          tr.querySelector('.ro-status').value = 'ATTENDED';
+          syncHoursBox(tr);
+        });
       });
     }
 
@@ -1538,6 +1616,92 @@
           saveAtt.disabled = false;
           saveAtt.textContent = 'Save attendance and hours';
           handleApiError(err);
+        }
+      });
+    }
+
+    /* ---- editing the event ---- */
+
+    var editToggle = document.getElementById('editToggle');
+    if (editToggle) {
+      var editPanel = document.getElementById('editPanel');
+      var changeNotice = document.getElementById('changeNotice');
+
+      editToggle.addEventListener('click', function () {
+        editPanel.hidden = !editPanel.hidden;
+        editToggle.textContent = editPanel.hidden ? 'Edit' : 'Close';
+        if (!editPanel.hidden) document.getElementById('edTitle').focus();
+      });
+
+      document.getElementById('edCancel').addEventListener('click', function () {
+        editPanel.hidden = true;
+        editToggle.textContent = 'Edit';
+      });
+
+      // Watch the fields volunteers would need to be told about, and only then
+      // offer to email them.
+      var watched = ['edStart', 'edEnd', 'edLocation'];
+      var originals = {
+        edStart: toLocalInput(e.startsAt),
+        edEnd: toLocalInput(e.endsAt),
+        edLocation: e.location || ''
+      };
+
+      var syncChangeNotice = function () {
+        var moved = watched.some(function (id) {
+          return document.getElementById(id).value !== originals[id];
+        });
+        changeNotice.hidden = !(moved && rosterRows.length && e.status !== 'CANCELLED');
+      };
+
+      watched.forEach(function (id) {
+        document.getElementById(id).addEventListener('input', syncChangeNotice);
+        document.getElementById(id).addEventListener('change', syncChangeNotice);
+      });
+      syncChangeNotice();
+
+      document.getElementById('edSave').addEventListener('click', async function () {
+        var btn = this;
+        var errBox = document.getElementById('edErrors');
+        errBox.hidden = true;
+        btn.disabled = true;
+
+        var notify = !changeNotice.hidden && document.getElementById('notifyChange').checked;
+        btn.textContent = notify ? 'Saving and emailing…' : 'Saving…';
+
+        var payload = {
+          title: document.getElementById('edTitle').value,
+          location: document.getElementById('edLocation').value,
+          starts_at: fromLocalInput(document.getElementById('edStart').value),
+          ends_at: fromLocalInput(document.getElementById('edEnd').value),
+          capacity: document.getElementById('edCapacity').value,
+          description: document.getElementById('edDescription').value,
+          notify: notify,
+          note: notify ? document.getElementById('changeNote').value : ''
+        };
+
+        try {
+          var res = await api('/events/' + encodeURIComponent(e.id), {
+            method: 'PATCH',
+            body: JSON.stringify(payload)
+          });
+          if (res.notified && res.notified.failures && res.notified.failures.length) {
+            showError('Saved, but some emails did not send',
+              esc(res.notified.sent) + ' of ' + esc(res.notified.attempted) +
+              ' went out. Please tell the rest yourself.');
+          }
+          renderEvent(ref);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Save changes';
+          var fields = err.body && err.body.fields;
+          errBox.innerHTML = '<h2>That could not be saved</h2>' +
+            (fields
+              ? '<ul>' + Object.keys(fields).map(function (k) {
+                  return '<li>' + esc(fields[k]) + '</li>';
+                }).join('') + '</ul>'
+              : '<p>' + esc(err.message) + '</p>');
+          errBox.hidden = false;
         }
       });
     }

@@ -703,6 +703,67 @@ export function eventAssignmentEmail({ firstName, event, role, note }) {
 }
 
 /**
+ * Tell a volunteer that an event's details have changed.
+ *
+ * Leads with what is different rather than restating the whole event, because
+ * somebody skim-reading needs to catch the change itself. The new details are
+ * repeated in full underneath so this email can stand alone as the one they
+ * keep.
+ */
+export function eventChangedEmail({ firstName, event, previous, note }) {
+  const name = escapeHtml(firstName);
+  const title = escapeHtml(event.title);
+  const when = escapeHtml(formatEventWhen(event.starts_at, event.ends_at));
+
+  const changes = [];
+  if (previous && previous.starts_at && previous.starts_at !== event.starts_at) {
+    changes.push(
+      `<li>The time has changed. It was <s>${escapeHtml(formatEventWhen(previous.starts_at, previous.ends_at))}</s> ` +
+      `and is now <strong>${when}</strong>.</li>`
+    );
+  }
+  if (previous && previous.location !== undefined && previous.location !== event.location) {
+    changes.push(
+      `<li>The place has changed to <strong>${escapeHtml(event.location || 'somewhere we will confirm')}</strong>.</li>`
+    );
+  }
+
+  const rows =
+    `<tr><td style="padding:10px 16px 4px 0;color:#636e72">What</td>
+         <td style="padding:10px 0 4px"><strong>${title}</strong></td></tr>
+     <tr><td style="padding:4px 16px 4px 0;color:#636e72">When</td>
+         <td>${when}</td></tr>` +
+    (event.location
+      ? `<tr><td style="padding:4px 16px 10px 0;color:#636e72">Where</td>
+             <td style="padding-bottom:10px">${escapeHtml(event.location)}</td></tr>`
+      : '');
+
+  return {
+    subject: `Changed details: ${event.title}`,
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      <p>Something has changed about an event you kindly agreed to help with.</p>
+
+      ${changes.length
+        ? `<ul style="margin:16px 0;padding-left:20px">${changes.join('')}</ul>`
+        : '<p>The details below have been updated.</p>'}
+
+      <table style="border-collapse:collapse;margin:20px 0;background:#f8fafb">
+        ${rows}
+      </table>
+
+      ${noteBlock(note)}
+
+      <p>If the new time no longer works for you, just tell us - we would far
+      rather know now than have you stretch to make it. And apologies for the
+      change of plan.</p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
+/**
  * Tell a volunteer an event they were assigned to is off.
  *
  * Sent for cancellations only, and worth sending even late: someone who turns

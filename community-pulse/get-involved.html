@@ -536,7 +536,9 @@ var cpfDb = window.cpfDb;
             } else if (result.status === 429) {
               showBanner('Too many attempts just now. Please wait a moment and try again.');
             } else {
-              showBanner('Something went wrong on our end and your application was not saved. Please try again, or email info@thecommunitypulsefoundation.ca.');
+              // The detail field only appears while debugging on preview.
+              showBanner('Something went wrong on our end and your application was not saved. Please try again, or email info@thecommunitypulsefoundation.ca.' +
+                (result.body && result.body.detail ? ' [' + result.body.detail + ']' : ''));
             }
           })
           .catch(function () {

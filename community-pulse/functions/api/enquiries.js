@@ -284,10 +284,12 @@ export async function onRequestPost(context) {
 
     return json({ ok: true, reference: publicRef }, 201);
   } catch (err) {
-    console.error('enquiries: create failed', {
-      submission_id: submissionId,
-      message: err && err.message
-    });
-    return json({ ok: false, error: 'server_error' }, 500);
+    const detail = (err && err.message ? err.message : 'unknown').slice(0, 300);
+    console.error('enquiries: create failed', { submission_id: submissionId, detail });
+
+    // TEMPORARY: the database error is echoed to the client so a failure can
+    // be diagnosed without shipping a debug build. Remove before merging to
+    // production - it exposes schema detail to anyone who can POST here.
+    return json({ ok: false, error: 'server_error', detail }, 500);
   }
 }

@@ -1,0 +1,11 @@
+CREATE TABLE IF NOT EXISTS enquiries (id INTEGER PRIMARY KEY AUTOINCREMENT, public_ref TEXT UNIQUE, submission_id TEXT NOT NULL UNIQUE, type TEXT NOT NULL, first_name TEXT NOT NULL, last_name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT, status TEXT NOT NULL DEFAULT 'NEW', item_types TEXT, item_description TEXT, pickup_needed INTEGER, preferred_date TEXT, message TEXT, amount_declared TEXT, funds_received INTEGER NOT NULL DEFAULT 0, amount_received TEXT, received_at TEXT, received_by TEXT, receipt_sent_at TEXT, privacy_consent INTEGER NOT NULL DEFAULT 0, privacy_consent_version TEXT NOT NULL, privacy_consent_at TEXT NOT NULL, source TEXT NOT NULL DEFAULT 'website', last_contact_at TEXT, ack_status TEXT NOT NULL DEFAULT 'PENDING', ack_attempts INTEGER NOT NULL DEFAULT 0, ack_error TEXT, ack_updated_at TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, archived_at TEXT, CHECK (type IN ('ITEM_DONATION','FINANCIAL','QUESTION','OTHER')), CHECK (status IN ('NEW','REVIEWED','RESPONDED','CLOSED','ARCHIVED')), CHECK (ack_status IN ('PENDING','SENT','FAILED','RETRIED')));
+CREATE INDEX IF NOT EXISTS idx_enquiries_funds ON enquiries (funds_received);
+CREATE INDEX IF NOT EXISTS idx_enquiries_status ON enquiries (status);
+CREATE INDEX IF NOT EXISTS idx_enquiries_type ON enquiries (type);
+CREATE INDEX IF NOT EXISTS idx_enquiries_email ON enquiries (email);
+CREATE INDEX IF NOT EXISTS idx_enquiries_created_at ON enquiries (created_at);
+CREATE INDEX IF NOT EXISTS idx_enquiries_ack ON enquiries (ack_status);
+CREATE INDEX IF NOT EXISTS idx_enquiries_archived ON enquiries (archived_at);
+CREATE TABLE IF NOT EXISTS enquiry_notes (id INTEGER PRIMARY KEY AUTOINCREMENT, enquiry_id INTEGER NOT NULL, note TEXT NOT NULL, created_by TEXT NOT NULL, created_at TEXT NOT NULL, FOREIGN KEY (enquiry_id) REFERENCES enquiries(id) ON DELETE CASCADE);
+CREATE INDEX IF NOT EXISTS idx_enquiry_notes ON enquiry_notes (enquiry_id, created_at);
+INSERT OR IGNORE INTO settings (key, value, updated_at) VALUES ('enquiry_ref_prefix', 'CPF-ENQ', datetime('now'));

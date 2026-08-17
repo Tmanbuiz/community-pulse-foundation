@@ -56,13 +56,10 @@
         <p class="involve-intro" data-i18n="involveIntro">Tell us how you would like to help. We will only show questions that are relevant to your selection.</p>
       </div>
 
-      <form class="involve-form" action="https://formsubmit.co/info@thecommunitypulsefoundation.ca" method="POST" id="involveForm">
-        <!-- FormSubmit configuration -->
-        <input type="hidden" name="_subject" value="New Get Involved submission - Community Pulse Foundation" />
-        <input type="hidden" name="_template" value="table" />
-        <input type="hidden" name="_next" id="formNext" value="https://thecommunitypulsefoundation.ca/involved-thank-you.html" />
-        <input type="hidden" name="_autoresponse" value="Thank you for reaching out to The Community Pulse Foundation! We've received your information and a member of our team will follow up where needed." />
-        <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
+      <!-- Every branch now posts to the Foundation's own API. No third-party
+           form relay is involved, so nothing here needs hidden configuration
+           fields, and every submission becomes a record rather than an email. -->
+      <form class="involve-form" id="involveForm" novalidate>
 
         <fieldset class="form-fieldset">
           <legend class="form-legend" data-i18n="involveQ1">How would you like to get involved?</legend>
@@ -124,65 +121,58 @@
             <textarea id="additionalNote" name="additional_note" rows="3" maxlength="1500"></textarea>
           </div>
 
-          <fieldset class="form-group form-subgroup">
-            <legend class="form-label" data-i18n="involveConsentHeading">Consent</legend>
-            <label class="form-checkbox form-consent">
-              <input type="checkbox" id="privacyConsent" name="privacy_consent" />
-              <span data-i18n-html="involveConsentText">I consent to The Community Pulse Foundation collecting and using the information in this form to review and manage my volunteer interest, communicate with me about volunteering, and maintain related administrative records as described in the <a href="privacy.html">Privacy Policy</a>.</span>
-            </label>
-            <p class="field-error" data-error-for="privacy_consent" hidden></p>
-
-            <label class="form-checkbox form-consent">
-              <input type="checkbox" id="updatesConsent" name="updates_consent" />
-              <span data-i18n="involveUpdatesText">Optional: I would also like to receive occasional news and updates about the Foundation's work.</span>
-            </label>
-          </fieldset>
-
-          <div class="form-group">
-            <div id="turnstileContainer"></div>
-            <p class="field-error" data-error-for="turnstile" hidden></p>
-          </div>
+          <label class="form-checkbox form-consent">
+            <input type="checkbox" id="updatesConsent" />
+            <span data-i18n="involveUpdatesText">Optional: I would also like to receive occasional news and updates about the Foundation's work.</span>
+          </label>
         </fieldset>
 
         <fieldset class="form-fieldset branch-panel" data-branch-panel="items">
           <legend class="form-legend" data-i18n="involveItemsHeading">Item donation details</legend>
           <fieldset class="form-group form-subgroup">
             <legend class="form-label" data-i18n="involveItemsType">What would you like to donate?</legend>
-            <div class="form-checkbox-group">
-              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Food" /> <span data-i18n="itemFood">Food</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Clothing" /> <span data-i18n="itemClothing">Clothing</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Hygiene/personal care" /> <span data-i18n="itemHygiene">Hygiene/personal care</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Household items" /> <span data-i18n="itemHousehold">Household items</span></label>
-              <label class="form-checkbox"><input type="checkbox" name="Item type" value="Other" /> <span data-i18n="optOther">Other</span></label>
+            <div class="form-checkbox-group" id="itemTypeGroup">
+              <label class="form-checkbox"><input type="checkbox" name="item_types" value="food" /> <span data-i18n="itemFood">Food</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="item_types" value="clothing" /> <span data-i18n="itemClothing">Clothing</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="item_types" value="hygiene" /> <span data-i18n="itemHygiene">Hygiene/personal care</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="item_types" value="household" /> <span data-i18n="itemHousehold">Household items</span></label>
+              <label class="form-checkbox"><input type="checkbox" name="item_types" value="other" /> <span data-i18n="optOther">Other</span></label>
             </div>
+            <p class="field-error" data-error-for="item_types" hidden></p>
           </fieldset>
           <div class="form-group">
             <label for="itemDesc" class="form-label" data-i18n="involveItemsDesc">Please describe the items and approximate quantity.</label>
-            <textarea id="itemDesc" name="Item description" rows="3"></textarea>
+            <textarea id="itemDesc" name="item_description" rows="3"></textarea>
           </div>
           <fieldset class="form-group form-subgroup">
             <legend class="form-label" data-i18n="involvePickup">Do you need pick-up assistance?</legend>
             <div class="form-radio-group form-radio-group-inline">
-              <label class="form-radio"><input type="radio" name="Pick-up assistance needed" value="Yes" /> <span data-i18n="yesLabel">Yes</span></label>
-              <label class="form-radio"><input type="radio" name="Pick-up assistance needed" value="No" /> <span data-i18n="noLabel">No</span></label>
+              <label class="form-radio"><input type="radio" name="pickup_needed" value="Yes" /> <span data-i18n="yesLabel">Yes</span></label>
+              <label class="form-radio"><input type="radio" name="pickup_needed" value="No" /> <span data-i18n="noLabel">No</span></label>
             </div>
           </fieldset>
           <div class="form-group">
             <label for="pickupDate" class="form-label" data-i18n="involvePickupDate">Preferred drop-off or pick-up date</label>
-            <input type="date" id="pickupDate" name="Preferred date" />
+            <input type="date" id="pickupDate" name="preferred_date" />
           </div>
         </fieldset>
 
         <fieldset class="form-fieldset branch-panel" data-branch-panel="financial">
           <legend class="form-legend" data-i18n="involveFinancialHeading">Financial support</legend>
           <p class="form-note" data-i18n="involveFinancialNote">Thank you for supporting our work. After you submit, we will show you the current Interac e-Transfer instructions and contact details if you need assistance.</p>
+
+          <div class="form-group">
+            <label for="amountDeclared" class="form-label" data-i18n="involveAmount">Amount you plan to give <span class="form-optional" data-i18n="optionalLabel">(optional)</span></label>
+            <input type="text" id="amountDeclared" name="amount_declared" maxlength="40" inputmode="text" />
+            <p class="form-hint" data-i18n="involveAmountHint">Only so we can match your transfer when it arrives. No payment is taken on this website, and you can leave this blank.</p>
+          </div>
         </fieldset>
 
         <fieldset class="form-fieldset branch-panel" data-branch-panel="question">
           <legend class="form-legend" data-i18n="involveQuestionHeading">Your question or idea</legend>
           <div class="form-group">
             <label for="topicMsg" class="form-label" data-i18n="involveQuestionLabel">What would you like to ask or share?</label>
-            <textarea id="topicMsg" name="Community outreach question" rows="3"></textarea>
+            <textarea id="topicMsg" name="message" rows="3"></textarea>
           </div>
         </fieldset>
 
@@ -190,7 +180,7 @@
           <legend class="form-legend" data-i18n="involveOtherHeading">Tell us more</legend>
           <div class="form-group">
             <label for="otherDesc" class="form-label" data-i18n="involveOtherLabel">Please describe how you'd like to get involved.</label>
-            <textarea id="otherDesc" name="Other details" rows="3"></textarea>
+            <textarea id="otherDesc" name="message" rows="3"></textarea>
           </div>
         </fieldset>
 
@@ -221,7 +211,21 @@
           </div>
         </fieldset>
 
-        <p class="form-privacy-note" data-i18n-html="involvePrivacyNote">By submitting this form, you agree to our <a href="privacy.html">Privacy Policy</a>.</p>
+        <!-- Consent and the bot check apply to every branch, so they live
+             outside the branch panels rather than inside the volunteer one. -->
+        <fieldset class="form-fieldset">
+          <legend class="form-legend" data-i18n="involveConsentHeading">Consent</legend>
+          <label class="form-checkbox form-consent">
+            <input type="checkbox" id="privacyConsent" />
+            <span data-i18n-html="involveConsentText">I consent to The Community Pulse Foundation collecting and using the information in this form to review and manage my volunteer interest, communicate with me about volunteering, and maintain related administrative records as described in the <a href="privacy.html">Privacy Policy</a>.</span>
+          </label>
+          <p class="field-error" data-error-for="privacy_consent" hidden></p>
+
+          <div class="form-group">
+            <div id="turnstileContainer"></div>
+            <p class="field-error" data-error-for="turnstile" hidden></p>
+          </div>
+        </fieldset>
 
         <p class="form-banner form-banner-error" id="submitError" role="alert" hidden></p>
 
@@ -233,10 +237,10 @@
            the most prominent thing here. -->
       <div class="involve-success" id="involveSuccess" role="status" hidden>
         <div class="involve-success-icon" aria-hidden="true">✅</div>
-        <h2 data-i18n="successTitle">Thank you — we have your application</h2>
-        <p data-i18n="successBody">A member of our team will review the information you provided and contact you about suitable opportunities or next steps. Submitting this form does not confirm a volunteer placement.</p>
+        <h2 id="successTitle" data-i18n="successTitle">Thank you — we have your application</h2>
+        <p id="successBody" data-i18n="successBody">A member of our team will review the information you provided and contact you about suitable opportunities or next steps. Submitting this form does not confirm a volunteer placement.</p>
         <p class="involve-reference">
-          <span data-i18n="successRefLabel">Your volunteer reference</span>
+          <span id="successRefLabel" data-i18n="successRefLabel">Your reference</span>
           <strong id="successRef"></strong>
         </p>
         <p class="involve-success-note" data-i18n="successNote">Please keep this reference for future correspondence. We have also emailed it to you.</p>
@@ -294,15 +298,15 @@ var cpfDb = window.cpfDb;
       var form = document.getElementById('involveForm');
       var radios = document.querySelectorAll('input[name="How would you like to help"]');
       var panels = document.querySelectorAll('[data-branch-panel]');
-      var nextField = document.getElementById('formNext');
 
-      // Route each branch to its own inbox address (all are aliases of the
-      // same mailbox, but a distinct "To:" makes filtering/sorting easy).
-      var branchTargets = {
-        volunteer: 'volunteers@thecommunitypulsefoundation.ca',
-        financial: 'donations@thecommunitypulsefoundation.ca'
+      // Every branch goes to the Foundation's own API. Volunteers have their
+      // own table and lifecycle; everything else is an enquiry.
+      var ENQUIRY_TYPES = {
+        items: 'ITEM_DONATION',
+        financial: 'FINANCIAL',
+        question: 'QUESTION',
+        other: 'OTHER'
       };
-      var defaultTarget = 'info@thecommunitypulsefoundation.ca';
 
       function showBranch(branch) {
         panels.forEach(function (panel) {
@@ -313,10 +317,6 @@ var cpfDb = window.cpfDb;
             el.disabled = !match;
           });
         });
-        nextField.value = branch === 'financial'
-          ? 'https://thecommunitypulsefoundation.ca/involved-thank-you.html?branch=financial'
-          : 'https://thecommunitypulsefoundation.ca/involved-thank-you.html';
-        form.action = 'https://formsubmit.co/' + (branchTargets[branch] || defaultTarget);
       }
 
       radios.forEach(function (r) {
@@ -375,17 +375,10 @@ var cpfDb = window.cpfDb;
         });
       }
 
-      // Rendered explicitly rather than with the auto class, because the
-      // widget starts inside a hidden panel and would not lay out correctly.
-      window.onTurnstileLoad = function () {
-        if (currentBranch() === 'volunteer') renderTurnstile();
-      };
-
-      radios.forEach(function (r) {
-        r.addEventListener('change', function () {
-          if (r.dataset.branch === 'volunteer') renderTurnstile();
-        });
-      });
+      // Rendered explicitly rather than with the auto class so we control
+      // exactly when it appears. Every branch is verified now, so it renders
+      // as soon as the script loads rather than waiting on a selection.
+      window.onTurnstileLoad = renderTurnstile;
 
       function clearErrors() {
         document.querySelectorAll('.field-error').forEach(function (el) {
@@ -422,10 +415,20 @@ var cpfDb = window.cpfDb;
           .map(function (el) { return el.value; });
       }
 
+      function fieldValue(id) {
+        var el = document.getElementById(id);
+        return el ? el.value : '';
+      }
+
       form.addEventListener('submit', function (event) {
-        if (currentBranch() !== 'volunteer') return;   // let FormSubmit handle it
         event.preventDefault();
         clearErrors();
+
+        var branch = currentBranch();
+        if (!branch) {
+          showBanner('Please choose how you would like to get involved.');
+          return;
+        }
 
         var btn = document.getElementById('submitBtn');
         var token = window.turnstile && turnstileWidgetId !== null
@@ -437,27 +440,51 @@ var cpfDb = window.cpfDb;
           return;
         }
 
+        // Shared across every branch.
         var payload = {
           submission_id: submissionId,
-          first_name: document.getElementById('firstName').value,
-          last_name: document.getElementById('lastName').value,
-          email: document.getElementById('email').value,
-          phone: document.getElementById('phone').value,
-          interests: checkedValues('interests'),
-          availability: checkedValues('availability'),
-          skills_text: document.getElementById('skillsText').value,
-          accommodation_text: document.getElementById('accommodationText').value,
-          additional_note: document.getElementById('additionalNote').value,
+          first_name: fieldValue('firstName'),
+          last_name: fieldValue('lastName'),
+          email: fieldValue('email'),
+          phone: fieldValue('phone'),
           privacy_consent: document.getElementById('privacyConsent').checked,
-          updates_consent: document.getElementById('updatesConsent').checked,
           turnstile_token: token
         };
+
+        var endpoint;
+
+        if (branch === 'volunteer') {
+          endpoint = '/api/volunteers';
+          payload.interests = checkedValues('interests');
+          payload.availability = checkedValues('availability');
+          payload.skills_text = fieldValue('skillsText');
+          payload.accommodation_text = fieldValue('accommodationText');
+          payload.additional_note = fieldValue('additionalNote');
+          payload.updates_consent = document.getElementById('updatesConsent').checked;
+        } else {
+          endpoint = '/api/enquiries';
+          payload.type = ENQUIRY_TYPES[branch];
+
+          if (branch === 'items') {
+            payload.item_types = checkedValues('item_types');
+            payload.item_description = fieldValue('itemDesc');
+            payload.preferred_date = fieldValue('pickupDate');
+            var pickup = document.querySelector('input[name="pickup_needed"]:checked');
+            if (pickup) payload.pickup_needed = pickup.value;
+          } else if (branch === 'financial') {
+            payload.amount_declared = fieldValue('amountDeclared');
+          } else if (branch === 'question') {
+            payload.message = fieldValue('topicMsg');
+          } else {
+            payload.message = fieldValue('otherDesc');
+          }
+        }
 
         btn.disabled = true;
         var originalLabel = btn.textContent;
         btn.textContent = 'Sending…';
 
-        fetch('/api/volunteers', {
+        fetch(endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -470,6 +497,20 @@ var cpfDb = window.cpfDb;
           .then(function (result) {
             if (result.body && result.body.ok) {
               document.getElementById('successRef').textContent = result.body.reference;
+
+              // The volunteer wording ("we will contact you about suitable
+              // opportunities") would be wrong for someone who just asked a
+              // question, so the confirmation matches what they actually did.
+              if (branch !== 'volunteer') {
+                var t = (window.translations || {})[window.currentLang || 'en'] || {};
+                document.getElementById('successTitle').textContent =
+                  t.successTitleEnquiry || 'Thank you — we have your message';
+                document.getElementById('successBody').textContent =
+                  branch === 'financial'
+                    ? (t.successBodyFinancial || 'We have emailed you the transfer details. Once your donation arrives we will confirm it by email.')
+                    : (t.successBodyEnquiry || 'A member of our team will read your message and get back to you.');
+              }
+
               form.hidden = true;
               var panel = document.getElementById('involveSuccess');
               panel.hidden = false;

@@ -256,6 +256,199 @@ export function adminNotificationEmail({ publicRef, firstName, lastName, interes
   };
 }
 
+/* ---------------------------------------------------------
+   Enquiries (item donations, financial support, questions)
+   --------------------------------------------------------- */
+
+const ENQUIRY_INTRO = {
+  ITEM_DONATION: 'Thank you for offering to donate items to The Community Pulse Foundation.',
+  FINANCIAL: 'Thank you for offering to support The Community Pulse Foundation financially.',
+  QUESTION: 'Thank you for getting in touch with The Community Pulse Foundation.',
+  OTHER: 'Thank you for getting in touch with The Community Pulse Foundation.'
+};
+
+const ENQUIRY_NEXT = {
+  ITEM_DONATION:
+    'A member of our team will contact you to arrange drop-off or collection, and to confirm what is most needed at the moment.',
+  FINANCIAL:
+    'Details for sending an Interac e-Transfer are below. If you would prefer another arrangement, simply reply to this email.',
+  QUESTION: 'A member of our team will read your message and reply.',
+  OTHER: 'A member of our team will read your message and reply.'
+};
+
+const ENQUIRY_LABEL = {
+  ITEM_DONATION: 'Item donation',
+  FINANCIAL: 'Financial support',
+  QUESTION: 'Community question',
+  OTHER: 'Other'
+};
+
+export function enquiryAcknowledgementEmail({ firstName, publicRef, type, donationEmail }) {
+  const name = escapeHtml(firstName);
+  const ref = escapeHtml(publicRef);
+
+  // Only the financial branch gets transfer details, and they are shown
+  // after the acknowledgement rather than as the point of the message -
+  // nobody should feel invoiced by a thank-you.
+  const transferBlock =
+    type === 'FINANCIAL' && donationEmail
+      ? `<p style="background:#f8fafb;border-left:4px solid #0d7377;padding:12px 16px;margin:20px 0">
+           <strong>Interac e-Transfer</strong><br />
+           Send to: <a href="mailto:${escapeHtml(donationEmail)}">${escapeHtml(donationEmail)}</a><br />
+           <span style="font-size:13px;color:#636e72">
+             The Community Pulse Foundation Inc. is a non-profit organization. We do not
+             currently issue official charitable donation receipts for income tax purposes.
+           </span>
+         </p>`
+      : '';
+
+  return {
+    subject: 'We have received your message',
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      <p>${escapeHtml(ENQUIRY_INTRO[type] || ENQUIRY_INTRO.OTHER)}</p>
+
+      <p>${escapeHtml(ENQUIRY_NEXT[type] || ENQUIRY_NEXT.OTHER)}</p>
+
+      ${transferBlock}
+
+      <p style="background:#f8fafb;border-left:4px solid #0d7377;padding:12px 16px;margin:20px 0">
+        <strong>Your reference:</strong> ${ref}
+      </p>
+
+      <p>Please keep this reference for future correspondence. You can reply to this
+      email if you need to add anything.</p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
+export function enquiryAdminNotificationEmail({ publicRef, firstName, lastName, type, submittedAt, baseUrl }) {
+  const ref = escapeHtml(publicRef);
+  const name = escapeHtml(`${firstName} ${lastName}`.trim());
+  const label = escapeHtml(ENQUIRY_LABEL[type] || type);
+  const link = `${baseUrl || ''}/crm/#/enquiries/${encodeURIComponent(publicRef)}`;
+
+  return {
+    subject: `New ${label.toLowerCase()} - ${ref}`,
+    html: WRAP(`
+      <p>A new enquiry has been received.</p>
+
+      <table style="border-collapse:collapse;margin:16px 0">
+        <tr><td style="padding:4px 16px 4px 0;color:#636e72">Reference</td><td><strong>${ref}</strong></td></tr>
+        <tr><td style="padding:4px 16px 4px 0;color:#636e72">Type</td><td>${label}</td></tr>
+        <tr><td style="padding:4px 16px 4px 0;color:#636e72">From</td><td>${name}</td></tr>
+        <tr><td style="padding:4px 16px 4px 0;color:#636e72">Received</td><td>${escapeHtml(submittedAt)}</td></tr>
+      </table>
+
+      <p><a href="${escapeHtml(link)}"
+            style="background:#0d7377;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;display:inline-block">
+        View enquiry
+      </a></p>
+
+      <p style="font-size:13px;color:#636e72">Contact details and the full message are on
+      the secure record, not in this email.</p>
+    `)
+  };
+}
+
+/**
+ * Sent by an administrator once a donation has actually arrived.
+ *
+ * Deliberately NOT called a receipt anywhere in the wording. The Foundation
+ * is incorporated but not a registered charity, so it cannot issue official
+ * donation receipts for income tax purposes - and a warm email confirming an
+ * amount is exactly the sort of thing someone might otherwise file as one.
+ * The disclaimer is not fine print; it sits in the body.
+ */
+export function fundsReceivedEmail({ firstName, publicRef, amount }) {
+  const name = escapeHtml(firstName);
+  const ref = escapeHtml(publicRef);
+
+  const amountLine = amount
+    ? `<tr><td style="padding:4px 16px 4px 0;color:#636e72">Amount received</td>
+           <td><strong>${escapeHtml(amount)}</strong></td></tr>`
+    : '';
+
+  return {
+    subject: 'Your donation has been received — thank you',
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      <p>We are writing to confirm that your donation to The Community Pulse
+      Foundation has been received. Thank you.</p>
+
+      <p>Contributions like yours are what let us keep showing up — collecting and
+      delivering essentials to families who need them, running the outreach and
+      conversations that help newcomers find their footing, and creating spaces
+      where people who might never have met end up looking out for one another.
+      Choosing to give away something of your own so that a neighbour has more is
+      a genuinely generous act, and we do not take it lightly.</p>
+
+      <table style="border-collapse:collapse;margin:20px 0;background:#f8fafb">
+        <tr><td style="padding:10px 16px 4px 0;color:#636e72">Reference</td>
+            <td style="padding:10px 0 4px"><strong>${ref}</strong></td></tr>
+        ${amountLine}
+      </table>
+
+      <p style="font-size:13px;color:#636e72;border-left:3px solid #e2e8f0;padding-left:14px">
+        This message confirms that we received your donation. It is not an official
+        receipt for income tax purposes — The Community Pulse Foundation Inc. is a
+        non-profit organization and does not currently issue charitable tax
+        receipts. Please keep this email for your own records.
+      </p>
+
+      <p>With appreciation, and on behalf of everyone your gift reaches.</p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
+/**
+ * Send an enquiry acknowledgement and record the outcome on the enquiry row.
+ *
+ * Enquiries track delivery inline rather than in `communications`, since they
+ * only ever send one automatic message. Never throws, for the same reason as
+ * deliverCommunication: a mail failure must not affect whether the enquiry was
+ * accepted.
+ */
+export async function deliverEnquiryAck(env, enquiryId, { to, subject, html }) {
+  const now = new Date().toISOString();
+
+  try {
+    await sendMail(env, { to, subject, html });
+
+    await env.DB
+      .prepare(
+        `UPDATE enquiries
+            SET ack_status = 'SENT', ack_attempts = ack_attempts + 1,
+                ack_error = NULL, ack_updated_at = ?
+          WHERE id = ?`
+      )
+      .bind(now, enquiryId)
+      .run();
+
+    return { ok: true };
+  } catch (err) {
+    const message = (err && err.message ? err.message : 'unknown_error').slice(0, 300);
+    console.error('zoho: enquiry ack failed', { enquiryId, message });
+
+    await env.DB
+      .prepare(
+        `UPDATE enquiries
+            SET ack_status = 'FAILED', ack_attempts = ack_attempts + 1,
+                ack_error = ?, ack_updated_at = ?
+          WHERE id = ?`
+      )
+      .bind(message, now, enquiryId)
+      .run()
+      .catch(() => { /* already logged */ });
+
+    return { ok: false, error: message };
+  }
+}
+
 /* =========================================================
    Delivery + logging
    ========================================================= */

@@ -90,9 +90,19 @@ export async function onRequestPost(context) {
     return json({ ok: false, error: 'server_misconfigured', missing }, 500);
   }
 
+  // Canonical site address, used for links inside emails so an admin
+  // notification always points at the real site rather than at whichever
+  // preview deployment happened to receive the submission.
   const allowedOrigin = env.APP_BASE_URL || 'https://thecommunitypulsefoundation.ca';
+
+  // CSRF guard. This compares against the request's *own* origin, not the
+  // canonical one: the form is always served from the same deployment that
+  // receives the post, so same-origin is the accurate test and it works
+  // unchanged on production, preview and branch deployments. Comparing to
+  // APP_BASE_URL instead rejected every preview submission before it reached
+  // the database.
   const origin = request.headers.get('Origin');
-  if (origin && origin !== allowedOrigin) {
+  if (origin && origin !== new URL(request.url).origin) {
     return json({ ok: false, error: 'bad_origin' }, 403);
   }
 

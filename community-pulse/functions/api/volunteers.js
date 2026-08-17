@@ -145,10 +145,14 @@ export async function onRequestPost(context) {
     );
   }
 
-  // --- origin check (state-changing request) -------------------------------
+  // Canonical site address, used for links inside emails.
   const allowedOrigin = env.APP_BASE_URL || 'https://thecommunitypulsefoundation.ca';
+
+  // --- origin check (state-changing request) -------------------------------
+  // Compared against the request's own origin rather than the canonical one,
+  // so the guard holds on production, preview and branch deployments alike.
   const origin = request.headers.get('Origin');
-  if (origin && origin !== allowedOrigin) {
+  if (origin && origin !== new URL(request.url).origin) {
     return json({ ok: false, error: 'bad_origin' }, 403);
   }
 

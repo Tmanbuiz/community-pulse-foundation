@@ -1436,13 +1436,23 @@
       html += '<section class="panel"><div class="panel-head"><h2>Add volunteers</h2></div>' +
         '<div class="panel-body">' +
           '<div class="filters">' +
-            '<div class="filter-field filter-grow"><label for="volSearch">Find volunteers</label>' +
-              '<input id="volSearch" type="search" placeholder="Name, or leave blank for all active" /></div>' +
-            '<div class="filter-field"><label for="assignRole">Role for these people <span class="cell-sub">(optional)</span></label>' +
+            '<div class="filter-field filter-grow"><label for="volSearch">Narrow the list</label>' +
+              '<input id="volSearch" type="search" placeholder="Start typing a name" /></div>' +
+            '<div class="filter-field"><label for="assignRole">Role for these people (optional)</label>' +
               '<input id="assignRole" type="text" maxlength="80" placeholder="Driver" /></div>' +
           '</div>' +
-          '<div class="btn-row"><button class="btn btn-quiet btn-sm" id="volSearchBtn">Search</button></div>' +
           '<div id="volResults" style="margin-top:12px"></div>' +
+          // Outside the results box on purpose: the list re-renders on every
+          // keystroke, and anything typed in here must survive that.
+          '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;margin:12px 0">' +
+            '<input type="checkbox" id="notifyAssign" checked style="margin-top:3px" />' +
+            '<span>Email them the date, time and place</span>' +
+          '</label>' +
+          '<textarea id="assignNote" rows="2" placeholder="Optional: anything to add to that email."></textarea>' +
+          '<div class="btn-row" style="margin-top:10px">' +
+            '<button class="btn btn-primary btn-sm" id="assignBtn" disabled>Add selected</button>' +
+            '<span class="cell-sub" id="pickCount">Nobody selected</span>' +
+          '</div>' +
         '</div></section>';
     }
 
@@ -1591,100 +1601,63 @@
 
     /* ---- assigning ---- */
 
-    var searchBtn = document.getElementById('volSearchBtn');
-    if (searchBtn) {
+    var searchInput = document.getElementById('volSearch');
+    if (searchInput) {
       var onRoster = {};
       data.roster.forEach(function (r) {
         if (r.status !== 'CANCELLED') onRoster[r.volunteerId] = true;
       });
 
+      var box = document.getElementById('volResults');
+      var assignBtn = document.getElementById('assignBtn');
+      var pickCount = document.getElementById('pickCount');
+
+      // Ticked boxes are remembered across re-renders, so narrowing the list
+      // after picking somebody does not silently drop them from the batch.
+      var picked = {};
+
+      var syncPicked = function () {
+        var names = Object.keys(picked);
+        assignBtn.disabled = names.length === 0;
+        pickCount.textContent = names.length
+          ? names.length + (names.length === 1 ? ' person selected' : ' people selected')
+          : 'Nobody selected';
+      };
+
       var runSearch = async function () {
-        var box = document.getElementById('volResults');
-        box.innerHTML = '<p class="cell-sub">Searching…</p>';
         var p = new URLSearchParams();
-        var q = document.getElementById('volSearch').value.trim();
+        var q = searchInput.value.trim();
         if (q) p.set('q', q);
         p.set('limit', '50');
+        p.set('sort', 'name');
 
         try {
           var res = await api('/volunteers?' + p.toString());
           var pickable = res.results.filter(function (v) { return !onRoster[v.id]; });
 
           if (!pickable.length) {
-            box.innerHTML = '<p class="cell-sub">Nobody new found. Everyone matching is already on this event.</p>';
+            box.innerHTML = q
+              ? '<p class="cell-sub">No volunteers match that name, or they are already on this event.</p>'
+              : '<p class="cell-sub">Every volunteer is already on this event.</p>';
             return;
           }
 
           box.innerHTML =
             '<div class="table-scroll" style="max-height:18rem;overflow-y:auto"><table class="crm-table"><tbody>' +
             pickable.map(function (v) {
-              return '<tr><td style="width:2rem"><input type="checkbox" class="pick" value="' + esc(v.id) + '" /></td>' +
+              return '<tr><td style="width:2rem"><input type="checkbox" class="pick" value="' + esc(v.id) + '"' +
+                  (picked[v.id] ? ' checked' : '') + ' /></td>' +
                 '<td>' + esc(v.name) + '<span class="cell-sub">' + esc(v.status) + '</span></td>' +
                 '<td><span class="cell-sub">' + esc(v.email) + '</span></td></tr>';
             }).join('') +
-            '</tbody></table></div>' +
-            '<label style="display:flex;gap:8px;align-items:flex-start;cursor:pointer;margin:12px 0">' +
-              '<input type="checkbox" id="notifyAssign" checked style="margin-top:3px" />' +
-              '<span>Email them the date, time and place</span>' +
-            '</label>' +
-            '<textarea id="assignNote" rows="2" placeholder="Optional: anything to add to that email."></textarea>' +
-            '<div class="btn-row" style="margin-top:10px">' +
-              '<button class="btn btn-primary btn-sm" id="assignBtn">Add selected</button>' +
-            '</div>';
+            '</tbody></table></div>';
 
-          document.getElementById('assignBtn').addEventListener('click', async function () {
-            var btn = this;
-            var ids = [].slice.call(box.querySelectorAll('.pick:checked')).map(function (c) { return Number(c.value); });
-            if (!ids.length) return;
-
-            btn.disabled = true;
-            btn.textContent = 'Adding…';
-
-            var send = async function (allowOver) {
-              return api('/events/' + encodeURIComponent(e.id) + '/assignments', {
-                method: 'POST',
-                body: JSON.stringify({
-                  volunteer_ids: ids,
-                  role: document.getElementById('assignRole').value,
-                  notify: document.getElementById('notifyAssign').checked,
-                  note: document.getElementById('assignNote').value,
-                  allow_over_capacity: allowOver
-                })
-              });
-            };
-
-            try {
-              var res;
-              try {
-                res = await send(false);
-              } catch (capErr) {
-                // Capacity is a guard, not a wall: confirm and continue.
-                if (capErr.body && capErr.body.error === 'over_capacity') {
-                  var b = capErr.body;
-                  var go = window.confirm(
-                    'This event asks for ' + b.capacity + ' people and ' + b.assigned +
-                    ' are already down, so there ' + (b.remaining === 1 ? 'is' : 'are') + ' only ' +
-                    b.remaining + ' place' + (b.remaining === 1 ? '' : 's') + ' left. ' +
-                    'Add all ' + b.requested + ' anyway?'
-                  );
-                  if (!go) { btn.disabled = false; btn.textContent = 'Add selected'; return; }
-                  res = await send(true);
-                } else {
-                  throw capErr;
-                }
-              }
-
-              if (res.notified && res.notified.failures && res.notified.failures.length) {
-                showError('Added, but some emails did not send',
-                  res.notified.failures.map(function (f) { return esc(f.name); }).join(', ') +
-                  ' were not emailed. Please contact them directly.');
-              }
-              renderEvent(ref);
-            } catch (err) {
-              btn.disabled = false;
-              btn.textContent = 'Add selected';
-              handleApiError(err);
-            }
+          box.querySelectorAll('.pick').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+              if (cb.checked) picked[cb.value] = true;
+              else delete picked[cb.value];
+              syncPicked();
+            });
           });
         } catch (err) {
           box.innerHTML = '';
@@ -1692,10 +1665,75 @@
         }
       };
 
-      searchBtn.addEventListener('click', runSearch);
-      document.getElementById('volSearch').addEventListener('keydown', function (ev) {
-        if (ev.key === 'Enter') { ev.preventDefault(); runSearch(); }
+      assignBtn.addEventListener('click', async function () {
+        var btn = this;
+        var ids = Object.keys(picked).map(Number);
+        if (!ids.length) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Adding…';
+
+        var send = function (allowOver) {
+          return api('/events/' + encodeURIComponent(e.id) + '/assignments', {
+            method: 'POST',
+            body: JSON.stringify({
+              volunteer_ids: ids,
+              role: document.getElementById('assignRole').value,
+              notify: document.getElementById('notifyAssign').checked,
+              note: document.getElementById('assignNote').value,
+              allow_over_capacity: allowOver
+            })
+          });
+        };
+
+        try {
+          var res;
+          try {
+            res = await send(false);
+          } catch (capErr) {
+            // Capacity is a guard, not a wall: confirm and continue.
+            if (capErr.body && capErr.body.error === 'over_capacity') {
+              var b = capErr.body;
+              var go = window.confirm(
+                'This event asks for ' + b.capacity + ' people and ' + b.assigned +
+                ' are already down, so there ' + (b.remaining === 1 ? 'is' : 'are') + ' only ' +
+                b.remaining + ' place' + (b.remaining === 1 ? '' : 's') + ' left. ' +
+                'Add all ' + b.requested + ' anyway?'
+              );
+              if (!go) { btn.disabled = false; btn.textContent = 'Add selected'; return; }
+              res = await send(true);
+            } else {
+              throw capErr;
+            }
+          }
+
+          if (res.notified && res.notified.failures && res.notified.failures.length) {
+            showError('Added, but some emails did not send',
+              res.notified.failures.map(function (f) { return esc(f.name); }).join(', ') +
+              ' were not emailed. Please contact them directly.');
+          }
+          renderEvent(ref);
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = 'Add selected';
+          handleApiError(err);
+        }
       });
+
+      // The list loads straight away rather than waiting for a search: the
+      // common case is picking two or three people you already have in mind,
+      // and making someone type before they can see any names is friction for
+      // no benefit. Typing then narrows it.
+      var debounce = null;
+      searchInput.addEventListener('input', function () {
+        clearTimeout(debounce);
+        debounce = setTimeout(runSearch, 250);
+      });
+      searchInput.addEventListener('keydown', function (ev) {
+        if (ev.key === 'Enter') { ev.preventDefault(); clearTimeout(debounce); runSearch(); }
+      });
+
+      runSearch();
     }
   }
 

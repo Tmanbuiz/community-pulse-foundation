@@ -39,6 +39,23 @@
 
   var STATUSES = ['NEW', 'REVIEWED', 'CONTACTED', 'APPROVED', 'ACTIVE', 'INACTIVE', 'DECLINED', 'ARCHIVED'];
 
+  var ENQUIRY_STATUSES = ['NEW', 'REVIEWED', 'RESPONDED', 'CLOSED', 'ARCHIVED'];
+
+  var ENQUIRY_TYPE_LABELS = {
+    ITEM_DONATION: 'Item donation',
+    FINANCIAL: 'Financial',
+    QUESTION: 'Question',
+    OTHER: 'Other'
+  };
+
+  var ITEM_LABELS = {
+    food: 'Food',
+    clothing: 'Clothing',
+    hygiene: 'Hygiene / personal care',
+    household: 'Household items',
+    other: 'Other'
+  };
+
   /* ---------------- helpers ---------------- */
 
   function esc(value) {
@@ -230,6 +247,48 @@
         '</tbody></table></div></section>';
     }
 
+    // Enquiries get their own row of cards rather than being merged into the
+    // volunteer counts. They are different work, and an unreconciled donation
+    // needs a different response than an unreviewed volunteer.
+    var enq = data.enquiries;
+    if (enq) {
+      html += '<h2 style="font-size:1rem;margin:26px 0 12px;color:var(--muted)">Enquiries</h2>' +
+        '<div class="stat-grid">' +
+          statCard('#/enquiries?status=NEW', enq.unanswered, 'Unanswered') +
+          (enq.awaitingFunds
+            ? '<a class="stat stat-alert" href="#/enquiries?funds=awaiting"><div class="stat-value">' + esc(enq.awaitingFunds) +
+              '</div><div class="stat-label">Awaiting funds</div></a>'
+            : statCard('#/enquiries?funds=awaiting', 0, 'Awaiting funds')) +
+          statCard('#/enquiries', enq.openTotal, 'Open enquiries') +
+          (enq.failedAcks
+            ? '<div class="stat stat-alert"><div class="stat-value">' + esc(enq.failedAcks) +
+              '</div><div class="stat-label">Failed acknowledgements</div></div>'
+            : '') +
+        '</div>';
+
+      if (enq.recent.length) {
+        html += '<section class="panel"><div class="panel-head"><h2>Recent enquiries</h2>' +
+          '<a class="btn btn-quiet btn-sm" href="#/enquiries">View all</a></div>' +
+          '<div class="table-scroll"><table class="crm-table"><thead><tr>' +
+          '<th>Reference</th><th>From</th><th>Type</th><th>Amount</th><th>Status</th>' +
+          '</tr></thead><tbody>' +
+          enq.recent.map(function (r) {
+            return '<tr>' +
+              '<td><a class="ref-link" href="#/enquiries/' + encodeURIComponent(r.reference) + '">' + esc(r.reference) + '</a></td>' +
+              '<td>' + esc(r.name) + '</td>' +
+              '<td><span class="chip">' + esc(ENQUIRY_TYPE_LABELS[r.type] || r.type) + '</span></td>' +
+              '<td>' + (r.type === 'FINANCIAL'
+                ? esc(r.amount || '—') + (r.fundsReceived ? '' : '<span class="cell-sub">pledged</span>')
+                : '<span class="cell-sub">—</span>') + '</td>' +
+              '<td>' + badge(r.status) + '</td>' +
+              '</tr>';
+          }).join('') +
+          '</tbody></table></div></section>';
+      }
+
+      html += '<h2 style="font-size:1rem;margin:26px 0 12px;color:var(--muted)">Volunteers</h2>';
+    }
+
     html += '<section class="panel"><div class="panel-head"><h2>Recent submissions</h2>' +
       '<a class="btn btn-quiet btn-sm" href="#/volunteers">View all</a></div>';
 
@@ -372,11 +431,11 @@
       '</select></div>';
   }
 
-  function pageLink(params, page, label, disabled) {
+  function pageLink(params, page, label, disabled, basePath) {
     if (disabled) return '<span class="btn btn-quiet btn-sm" aria-disabled="true" style="opacity:.5">' + esc(label) + '</span>';
     var next = new URLSearchParams(params.toString());
     next.set('page', page);
-    return '<a class="btn btn-quiet btn-sm" href="#/volunteers?' + next.toString() + '">' + esc(label) + '</a>';
+    return '<a class="btn btn-quiet btn-sm" href="' + (basePath || '#/volunteers') + '?' + next.toString() + '">' + esc(label) + '</a>';
   }
 
   /* ---------------- profile ---------------- */
@@ -550,6 +609,313 @@
       '<div class="panel-body"><div class="freetext">' + esc(text) + '</div></div></section>';
   }
 
+  /* ---------------- enquiries ---------------- */
+
+  async function renderEnquiries(query) {
+    setNav('enquiries');
+    setLoading(true);
+
+    var params = new URLSearchParams(query || '');
+    var data;
+    try { data = await api('/enquiries?' + params.toString()); }
+    catch (err) { view.innerHTML = ''; return handleApiError(err); }
+
+    setActor(data.actor);
+    setLoading(false);
+
+    var html =
+      '<h1 class="crm-page-title">Enquiries</h1>' +
+      '<p class="crm-page-sub">' + esc(data.total) + ' record' + (data.total === 1 ? '' : 's') +
+      ' — item donations, financial support, questions and anything else.</p>' +
+
+      '<section class="panel"><div class="panel-body">' +
+      '<form class="filters" id="filterForm">' +
+        '<div class="filter-field filter-grow"><label for="fq">Search</label>' +
+          '<input id="fq" name="q" type="search" placeholder="Name, email, phone or reference" value="' + esc(params.get('q') || '') + '" /></div>' +
+        selectField('type', 'Type', Object.keys(ENQUIRY_TYPE_LABELS), params.get('type'), ENQUIRY_TYPE_LABELS) +
+        selectField('status', 'Status', ENQUIRY_STATUSES, params.get('status')) +
+        '<div class="filter-field"><label for="ffunds">Donations</label>' +
+          '<select id="ffunds" name="funds">' +
+            '<option value="">Any</option>' +
+            '<option value="awaiting"' + (params.get('funds') === 'awaiting' ? ' selected' : '') + '>Awaiting funds</option>' +
+            '<option value="received"' + (params.get('funds') === 'received' ? ' selected' : '') + '>Funds received</option>' +
+          '</select></div>' +
+        '<div class="btn-row">' +
+          '<button type="submit" class="btn btn-primary">Apply</button>' +
+          '<a class="btn btn-quiet" href="#/enquiries">Reset</a>' +
+        '</div>' +
+      '</form></div></section>';
+
+    html += '<section class="panel">';
+    if (!data.results.length) {
+      html += '<div class="panel-empty">No enquiries match these filters.</div>';
+    } else {
+      html += '<div class="table-scroll"><table class="crm-table"><thead><tr>' +
+        '<th>Reference</th><th>From</th><th>Type</th><th>Amount</th>' +
+        '<th>Received</th><th>Status</th>' +
+        '</tr></thead><tbody>' +
+        data.results.map(function (r) {
+          // Only financial rows carry money, so the amount and funds columns
+          // stay blank rather than showing a misleading dash for everything.
+          var money = r.type === 'FINANCIAL'
+            ? esc(r.amountReceived || r.amountDeclared || '—') +
+              (r.amountReceived ? '' : '<span class="cell-sub">pledged</span>')
+            : '<span class="cell-sub">—</span>';
+
+          var funds = r.type !== 'FINANCIAL'
+            ? '<span class="cell-sub">—</span>'
+            : (r.fundsReceived
+                ? '<span class="mail-SENT">Received</span>'
+                : '<span class="mail-PENDING">Awaiting</span>');
+
+          return '<tr>' +
+            '<td><a class="ref-link" href="#/enquiries/' + encodeURIComponent(r.reference) + '">' + esc(r.reference) + '</a></td>' +
+            '<td>' + esc(r.name) + '<span class="cell-sub">' + esc(r.email) + '</span></td>' +
+            '<td><span class="chip">' + esc(ENQUIRY_TYPE_LABELS[r.type] || r.type) + '</span></td>' +
+            '<td>' + money + '</td>' +
+            '<td>' + funds + '</td>' +
+            '<td>' + badge(r.status) + '</td>' +
+            '</tr>';
+        }).join('') +
+        '</tbody></table></div>';
+
+      if (data.pages > 1) {
+        html += '<div class="pagination">' +
+          pageLink(params, data.page - 1, '← Previous', data.page <= 1, '#/enquiries') +
+          '<span>Page ' + esc(data.page) + ' of ' + esc(data.pages) + '</span>' +
+          pageLink(params, data.page + 1, 'Next →', data.page >= data.pages, '#/enquiries') +
+          '</div>';
+      }
+    }
+    html += '</section>';
+
+    view.innerHTML = html;
+
+    document.getElementById('filterForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      var fd = new FormData(e.target);
+      var next = new URLSearchParams();
+      fd.forEach(function (value, key) { if (value) next.set(key, value); });
+      location.hash = '#/enquiries' + (next.toString() ? '?' + next.toString() : '');
+    });
+  }
+
+  async function renderEnquiry(ref) {
+    setNav('enquiries');
+    setLoading(true);
+
+    var data;
+    try { data = await api('/enquiries/' + encodeURIComponent(ref)); }
+    catch (err) { view.innerHTML = ''; return handleApiError(err); }
+
+    setActor(data.actor);
+    setLoading(false);
+
+    var e = data.enquiry;
+    var canEdit = ['COORDINATOR', 'ADMIN', 'OWNER'].indexOf(data.actor.role) !== -1;
+    var canConfirmFunds = ['ADMIN', 'OWNER'].indexOf(data.actor.role) !== -1;
+
+    var typeSpecific = '';
+    if (e.type === 'ITEM_DONATION') {
+      typeSpecific =
+        '<section class="panel"><div class="panel-head"><h2>Items offered</h2></div><div class="panel-body">' +
+        '<dl class="kv">' +
+          row('Categories', labelChips(e.itemTypes, ITEM_LABELS)) +
+          row('Pick-up needed', e.pickupNeeded === null ? '—' : (e.pickupNeeded ? 'Yes' : 'No')) +
+          row('Preferred date', esc(fmtDateShort(e.preferredDate))) +
+        '</dl>' +
+        (e.itemDescription
+          ? '<div style="margin-top:14px"><div class="cell-sub">Description</div><div class="freetext">' + esc(e.itemDescription) + '</div></div>'
+          : '') +
+        '</div></section>';
+    } else if (e.message) {
+      typeSpecific = textPanel('Message', e.message);
+    }
+
+    var moneyPanel = '';
+    if (e.type === 'FINANCIAL') {
+      moneyPanel =
+        '<section class="panel"><div class="panel-head"><h2>Donation</h2></div><div class="panel-body">' +
+        '<dl class="kv">' +
+          row('Pledged', e.amountDeclared ? esc(e.amountDeclared) : '<span class="cell-sub">not stated</span>') +
+          row('Received', e.fundsReceived
+            ? '<strong>' + esc(e.amountReceived || 'confirmed') + '</strong>'
+            : '<span class="mail-PENDING">Not yet confirmed</span>') +
+          (e.fundsReceived
+            ? row('Confirmed by', esc(e.receivedBy) + '<span class="cell-sub">' + esc(fmtDate(e.receivedAt)) + '</span>')
+            : '') +
+          (e.receiptSentAt ? row('Thank-you sent', esc(fmtDate(e.receiptSentAt))) : '') +
+        '</dl>' +
+
+        (!e.fundsReceived && canConfirmFunds
+          ? '<div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">' +
+              '<div class="filter-field" style="margin-bottom:10px">' +
+                '<label for="amountReceived">Amount actually received</label>' +
+                '<input id="amountReceived" type="text" maxlength="40" value="' + esc(e.amountDeclared || '') + '" />' +
+              '</div>' +
+              '<label class="form-checkbox" style="display:flex;gap:8px;align-items:center;margin-bottom:10px">' +
+                '<input type="checkbox" id="sendThanks" checked /> <span>Send the donor a thank-you email</span>' +
+              '</label>' +
+              '<button class="btn btn-primary btn-sm" id="confirmFunds">Confirm funds received</button>' +
+              '<p class="cell-sub" style="margin-top:10px">Records that you have checked the account and the money arrived. ' +
+              'The email thanks them and states plainly that it is not a tax receipt.</p>' +
+            '</div>'
+          : '') +
+
+        (!e.fundsReceived && !canConfirmFunds
+          ? '<p class="cell-sub" style="margin-top:12px">Confirming a donation requires an Admin or Owner role.</p>'
+          : '') +
+
+        '</div></section>';
+    }
+
+    var html =
+      '<p><a href="#/enquiries">← Back to enquiries</a></p>' +
+      '<h1 class="crm-page-title">' + esc(e.name) + ' ' + badge(e.status) + '</h1>' +
+      '<p class="crm-page-sub"><span class="ref-link">' + esc(e.reference) + '</span> · ' +
+        esc(ENQUIRY_TYPE_LABELS[e.type] || e.type) + ' · received ' + esc(fmtDate(e.submittedAt)) + '</p>' +
+
+      '<div class="profile-grid"><div>' +
+
+        '<section class="panel"><div class="panel-head"><h2>Details</h2></div><div class="panel-body">' +
+          '<dl class="kv">' +
+            row('Email', '<a href="mailto:' + esc(e.email) + '">' + esc(e.email) + '</a>') +
+            row('Phone', e.phone ? esc(e.phone) : '—') +
+            row('Last contact', esc(fmtDateShort(e.lastContactAt))) +
+            row('Consent', esc(e.privacyConsentVersion) + '<span class="cell-sub">' + esc(fmtDateShort(e.privacyConsentAt)) + '</span>') +
+          '</dl>' +
+        '</div></section>' +
+
+        typeSpecific +
+
+        '<section class="panel"><div class="panel-head"><h2>Notes</h2></div><div class="panel-body">' +
+          (canEdit
+            ? '<form id="noteForm" style="margin-bottom:16px">' +
+                '<textarea id="noteText" class="crm-textarea" rows="3" maxlength="2000" required placeholder="Add a note…"></textarea>' +
+                '<div class="btn-row" style="margin-top:8px"><button class="btn btn-primary btn-sm" type="submit">Save note</button></div>' +
+              '</form>'
+            : '') +
+          (data.notes.length
+            ? data.notes.map(function (n) {
+                return '<div class="note-item"><div class="freetext">' + esc(n.note) + '</div>' +
+                  '<div class="note-meta">' + esc(n.by) + ' · ' + esc(fmtDate(n.at)) + '</div></div>';
+              }).join('')
+            : '<p class="cell-sub">No notes yet.</p>') +
+        '</div></section>' +
+
+      '</div><div>' +
+
+        moneyPanel +
+
+        (canEdit
+          ? '<section class="panel"><div class="panel-head"><h2>Actions</h2></div><div class="panel-body">' +
+              '<div class="filter-field" style="margin-bottom:12px">' +
+                '<label for="statusSelect">Status</label>' +
+                '<select id="statusSelect">' +
+                  ENQUIRY_STATUSES.map(function (s) {
+                    return '<option value="' + esc(s) + '"' + (s === e.status ? ' selected' : '') + '>' + esc(s) + '</option>';
+                  }).join('') +
+                '</select>' +
+              '</div>' +
+              '<div class="btn-row">' +
+                '<button class="btn btn-primary btn-sm" id="saveStatus">Update status</button>' +
+                '<button class="btn btn-quiet btn-sm" id="toggleArchive">' + (e.archivedAt ? 'Restore' : 'Archive') + '</button>' +
+              '</div>' +
+            '</div></section>'
+          : '') +
+
+        '<section class="panel"><div class="panel-head"><h2>Acknowledgement</h2></div><div class="panel-body">' +
+          '<div>Status: <span class="mail-' + esc(e.ackStatus) + '">' + esc(e.ackStatus) + '</span></div>' +
+          (e.ackError ? '<div class="note-meta">' + esc(e.ackError) + '</div>' : '') +
+          '<div class="note-meta">' + esc(e.ackAttempts) + ' attempt' + (e.ackAttempts === 1 ? '' : 's') + '</div>' +
+        '</div></section>' +
+
+        '<section class="panel"><div class="panel-head"><h2>Activity</h2></div><div class="panel-body">' +
+          (data.activity.length
+            ? data.activity.map(function (a) {
+                return '<div class="note-item"><div>' + esc(a.action) + '</div>' +
+                  '<div class="note-meta">' + esc(a.actor) + ' · ' + esc(fmtDate(a.at)) + '</div></div>';
+              }).join('')
+            : '<p class="cell-sub">No recorded activity.</p>') +
+        '</div></section>' +
+
+      '</div></div>';
+
+    view.innerHTML = html;
+
+    var noteForm = document.getElementById('noteForm');
+    if (noteForm) {
+      noteForm.addEventListener('submit', async function (ev) {
+        ev.preventDefault();
+        var text = document.getElementById('noteText').value.trim();
+        if (!text) return;
+        try {
+          await api('/enquiries/' + encodeURIComponent(e.id) + '/notes', {
+            method: 'POST',
+            body: JSON.stringify({ note: text })
+          });
+          renderEnquiry(ref);
+        } catch (err) { handleApiError(err); }
+      });
+    }
+
+    var saveStatus = document.getElementById('saveStatus');
+    if (saveStatus) {
+      saveStatus.addEventListener('click', async function () {
+        saveStatus.disabled = true;
+        try {
+          await api('/enquiries/' + encodeURIComponent(e.id), {
+            method: 'PATCH',
+            body: JSON.stringify({ status: document.getElementById('statusSelect').value })
+          });
+          renderEnquiry(ref);
+        } catch (err) { saveStatus.disabled = false; handleApiError(err); }
+      });
+    }
+
+    var toggleArchive = document.getElementById('toggleArchive');
+    if (toggleArchive) {
+      toggleArchive.addEventListener('click', async function () {
+        toggleArchive.disabled = true;
+        try {
+          await api('/enquiries/' + encodeURIComponent(e.id), {
+            method: 'PATCH',
+            body: JSON.stringify({ archived: !e.archivedAt })
+          });
+          renderEnquiry(ref);
+        } catch (err) { toggleArchive.disabled = false; handleApiError(err); }
+      });
+    }
+
+    var confirmFunds = document.getElementById('confirmFunds');
+    if (confirmFunds) {
+      confirmFunds.addEventListener('click', async function () {
+        confirmFunds.disabled = true;
+        confirmFunds.textContent = 'Confirming…';
+        try {
+          var result = await api('/enquiries/' + encodeURIComponent(e.id) + '/confirm-funds', {
+            method: 'POST',
+            body: JSON.stringify({
+              amount_received: document.getElementById('amountReceived').value,
+              send_thanks: document.getElementById('sendThanks').checked
+            })
+          });
+          // The confirmation stands even if the email failed, so say which
+          // happened rather than implying both worked.
+          if (result.enquiry && result.enquiry.thanksError) {
+            showError('Donation confirmed, but the thank-you email failed',
+              'The record is updated. The email reported: <code>' + esc(result.enquiry.thanksError) + '</code>');
+          }
+          renderEnquiry(ref);
+        } catch (err) {
+          confirmFunds.disabled = false;
+          confirmFunds.textContent = 'Confirm funds received';
+          handleApiError(err);
+        }
+      });
+    }
+  }
+
   /* ---------------- routing ---------------- */
 
   function route() {
@@ -558,10 +924,13 @@
     var path = qIndex === -1 ? hash : hash.slice(0, qIndex);
     var query = qIndex === -1 ? '' : hash.slice(qIndex + 1);
 
-    var profileMatch = path.match(/^\/volunteers\/(.+)$/);
+    var volunteerMatch = path.match(/^\/volunteers\/(.+)$/);
+    var enquiryMatch = path.match(/^\/enquiries\/(.+)$/);
 
-    if (profileMatch) return renderProfile(decodeURIComponent(profileMatch[1]));
+    if (volunteerMatch) return renderProfile(decodeURIComponent(volunteerMatch[1]));
+    if (enquiryMatch) return renderEnquiry(decodeURIComponent(enquiryMatch[1]));
     if (path === '/volunteers') return renderDirectory(query);
+    if (path === '/enquiries') return renderEnquiries(query);
     return renderDashboard();
   }
 

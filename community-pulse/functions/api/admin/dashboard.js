@@ -25,7 +25,7 @@ export async function onRequestGet(context) {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
     const staleCutoff = new Date(Date.now() - staleDays * 86400000).toISOString();
 
-    const [counts, recent, failedMail, stale] = await env.DB.batch([
+    const [counts, recent, failedMail, stale, enquiryCounts, recentEnquiries] = await env.DB.batch([
       // Single pass for the summary cards. Archived records are excluded
       // everywhere except their own count.
       env.DB.prepare(
@@ -71,14 +71,51 @@ export async function onRequestGet(context) {
             AND created_at < ?1
           ORDER BY created_at ASC
           LIMIT 20`
-      ).bind(staleCutoff)
+      ).bind(staleCutoff),
+
+      // Enquiries. `awaitingFunds` is the one that costs real money if it is
+      // missed: someone said they would give, and nobody has reconciled it.
+      env.DB.prepare(
+        `SELECT
+           SUM(CASE WHEN status = 'NEW' AND archived_at IS NULL THEN 1 ELSE 0 END) AS unanswered,
+           SUM(CASE WHEN type = 'FINANCIAL' AND funds_received = 0 AND archived_at IS NULL THEN 1 ELSE 0 END) AS awaiting_funds,
+           SUM(CASE WHEN ack_status = 'FAILED' THEN 1 ELSE 0 END) AS failed_acks,
+           SUM(CASE WHEN archived_at IS NULL THEN 1 ELSE 0 END) AS open_total
+         FROM enquiries`
+      ),
+
+      env.DB.prepare(
+        `SELECT id, public_ref, type, first_name, last_name, status, created_at,
+                amount_declared, amount_received, funds_received
+           FROM enquiries
+          WHERE archived_at IS NULL
+          ORDER BY created_at DESC
+          LIMIT 6`
+      )
     ]);
 
     const c = (counts.results && counts.results[0]) || {};
+    const ec = (enquiryCounts.results && enquiryCounts.results[0]) || {};
 
     return adminJson({
       ok: true,
       actor: auth.actor,
+      enquiries: {
+        unanswered: ec.unanswered || 0,
+        awaitingFunds: ec.awaiting_funds || 0,
+        failedAcks: ec.failed_acks || 0,
+        openTotal: ec.open_total || 0,
+        recent: (recentEnquiries.results || []).map((r) => ({
+          id: r.id,
+          reference: r.public_ref,
+          type: r.type,
+          name: `${r.first_name} ${r.last_name}`.trim(),
+          status: r.status,
+          submittedAt: r.created_at,
+          amount: r.amount_received || r.amount_declared,
+          fundsReceived: !!r.funds_received
+        }))
+      },
       counts: {
         new7d: c.new_7d || 0,
         pendingReview: c.pending_review || 0,

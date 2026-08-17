@@ -152,6 +152,14 @@ a { color: var(--primary); }
 .badge-DECLINED   { background: #fdecea; color: #a93226; }
 .badge-ARCHIVED   { background: #e9e9ee; color: #55566b; }
 
+/* Event statuses. SCHEDULED shares ACTIVE's green because both mean
+   "this is really happening"; DRAFT stays grey so an event nobody has
+   been told about never looks confirmed at a glance. */
+.badge-DRAFT      { background: #eceff1; color: #566; }
+.badge-SCHEDULED  { background: #d8f0e0; color: #14663a; }
+.badge-COMPLETED  { background: #eef4f4; color: #0a5c5f; }
+.badge-CANCELLED  { background: #fdecea; color: #a93226; }
+
 .mail-SENT    { color: #1a7f43; font-weight: 600; }
 .mail-FAILED  { color: #c0392b; font-weight: 600; }
 .mail-PENDING { color: #8a4b00; font-weight: 600; }
@@ -161,10 +169,19 @@ a { color: var(--primary); }
 .filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
 .filter-field { display: flex; flex-direction: column; gap: 4px; }
 .filter-field label { font-size: .74rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
-.filter-field input, .filter-field select {
+.filter-field input, .filter-field select, .filter-field textarea {
   font-family: inherit; font-size: .88rem; padding: 8px 10px;
   border: 1px solid var(--border); border-radius: 7px; background: #fff; color: var(--text);
   min-width: 150px;
+}
+.filter-field textarea { resize: vertical; width: 100%; }
+
+/* Roster rows carry their own inputs, which must stay compact enough that
+   the attendance table still reads as a table rather than a form. */
+.crm-table input[type="number"], .crm-table input[type="text"], .crm-table select {
+  font-family: inherit; font-size: .85rem; padding: 5px 7px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: #fff; color: var(--text); min-width: 0;
 }
 .filter-grow { flex: 1; min-width: 220px; }
 .filter-grow input { width: 100%; }

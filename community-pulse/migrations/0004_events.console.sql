@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS events (id INTEGER PRIMARY KEY AUTOINCREMENT, public_ref TEXT UNIQUE, title TEXT NOT NULL, description TEXT, location TEXT, starts_at TEXT NOT NULL, ends_at TEXT, capacity INTEGER, status TEXT NOT NULL DEFAULT 'DRAFT', created_by TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, archived_at TEXT, CHECK (status IN ('DRAFT','SCHEDULED','COMPLETED','CANCELLED')));
+CREATE INDEX IF NOT EXISTS idx_events_starts ON events (starts_at);
+CREATE INDEX IF NOT EXISTS idx_events_status ON events (status);
+CREATE TABLE IF NOT EXISTS event_assignments (id INTEGER PRIMARY KEY AUTOINCREMENT, event_id INTEGER NOT NULL, volunteer_id INTEGER NOT NULL, role TEXT, status TEXT NOT NULL DEFAULT 'ASSIGNED', hours REAL, notes TEXT, notified_at TEXT, created_by TEXT NOT NULL, created_at TEXT NOT NULL, updated_at TEXT NOT NULL, UNIQUE (event_id, volunteer_id), FOREIGN KEY (event_id) REFERENCES events(id) ON DELETE CASCADE, FOREIGN KEY (volunteer_id) REFERENCES volunteers(id) ON DELETE CASCADE, CHECK (status IN ('ASSIGNED','CONFIRMED','ATTENDED','NO_SHOW','CANCELLED')), CHECK (hours IS NULL OR (hours >= 0 AND hours <= 24)));
+CREATE INDEX IF NOT EXISTS idx_assign_event ON event_assignments (event_id);
+CREATE INDEX IF NOT EXISTS idx_assign_volunteer ON event_assignments (volunteer_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_assign_status ON event_assignments (status);

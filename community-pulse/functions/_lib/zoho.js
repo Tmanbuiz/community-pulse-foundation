@@ -612,6 +612,124 @@ export async function deliverEnquiryAck(env, enquiryId, { to, subject, html }) {
   }
 }
 
+/**
+ * Format an event's date and time for a human reading an email.
+ *
+ * Times are stored in UTC and shown in Atlantic time, because that is where
+ * the volunteer is standing. Sending someone a UTC timestamp for a shift they
+ * have to physically attend is how people miss shifts.
+ */
+export function formatEventWhen(startsAt, endsAt) {
+  const tz = 'America/Moncton';
+  const start = new Date(startsAt);
+  if (isNaN(start)) return '';
+
+  const day = start.toLocaleDateString('en-CA', {
+    timeZone: tz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
+  const from = start.toLocaleTimeString('en-CA', {
+    timeZone: tz, hour: 'numeric', minute: '2-digit'
+  });
+
+  if (!endsAt) return `${day} from ${from}`;
+
+  const end = new Date(endsAt);
+  if (isNaN(end)) return `${day} from ${from}`;
+
+  const to = end.toLocaleTimeString('en-CA', {
+    timeZone: tz, hour: 'numeric', minute: '2-digit'
+  });
+
+  // A shift that runs past midnight needs the finish date spelled out.
+  const endDay = end.toLocaleDateString('en-CA', {
+    timeZone: tz, weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
+  });
+  if (endDay !== day) return `${day}, ${from} until ${endDay}, ${to}`;
+
+  return `${day}, ${from} to ${to}`;
+}
+
+/**
+ * Tell a volunteer they have been put down for an event.
+ *
+ * Deliberately not phrased as a summons. The volunteer never agreed to this
+ * specific date - an admin assigned them - so the email asks them to confirm
+ * and makes saying no easy. Anything else would be presumptuous towards
+ * someone donating their time.
+ */
+export function eventAssignmentEmail({ firstName, event, role, note }) {
+  const name = escapeHtml(firstName);
+  const title = escapeHtml(event.title);
+  const when = escapeHtml(formatEventWhen(event.starts_at, event.ends_at));
+  const where = event.location ? escapeHtml(event.location) : '';
+
+  const rows =
+    `<tr><td style="padding:10px 16px 4px 0;color:#636e72">What</td>
+         <td style="padding:10px 0 4px"><strong>${title}</strong></td></tr>
+     <tr><td style="padding:4px 16px 4px 0;color:#636e72">When</td>
+         <td>${when}</td></tr>` +
+    (where
+      ? `<tr><td style="padding:4px 16px 4px 0;color:#636e72">Where</td><td>${where}</td></tr>`
+      : '') +
+    (role
+      ? `<tr><td style="padding:4px 16px 10px 0;color:#636e72">Your role</td>
+             <td style="padding-bottom:10px">${escapeHtml(role)}</td></tr>`
+      : '');
+
+  return {
+    subject: `You are down to help: ${event.title}`,
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      <p>We have put you down to help with the following. Nothing is fixed yet -
+      please have a look and let us know whether it works for you.</p>
+
+      <table style="border-collapse:collapse;margin:20px 0;background:#f8fafb">
+        ${rows}
+      </table>
+
+      ${noteBlock(note)}
+
+      <p>If you can make it, a quick reply saying so is all we need. If you
+      cannot, that is completely fine - just tell us and we will find someone
+      else. We would much rather know early than have you feel obliged.</p>
+
+      ${event.description ? `<p style="color:#636e72;font-size:14px">${escapeHtml(event.description)}</p>` : ''}
+
+      <p>Thank you for giving your time to this.</p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
+/**
+ * Tell a volunteer an event they were assigned to is off.
+ *
+ * Sent for cancellations only, and worth sending even late: someone who turns
+ * up to a cancelled event has given up their afternoon for nothing.
+ */
+export function eventCancelledEmail({ firstName, event, note }) {
+  const name = escapeHtml(firstName);
+  const title = escapeHtml(event.title);
+  const when = escapeHtml(formatEventWhen(event.starts_at, event.ends_at));
+
+  return {
+    subject: `Cancelled: ${event.title}`,
+    html: WRAP(`
+      <p>Hi ${name},</p>
+
+      <p><strong>${title}</strong>, which was scheduled for ${when}, is no longer
+      going ahead. Please do not travel for it.</p>
+
+      ${noteBlock(note)}
+
+      <p>We are sorry for the change of plan, and grateful that you had set the
+      time aside. We will be in touch about what is coming up next.</p>
+      ${SIGNATURE}
+    `)
+  };
+}
+
 /* =========================================================
    Delivery + logging
    ========================================================= */

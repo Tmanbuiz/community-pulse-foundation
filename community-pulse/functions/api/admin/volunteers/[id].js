@@ -52,7 +52,7 @@ export async function onRequestGet(context) {
     const v = await loadVolunteer(env, params.id);
     if (!v) return adminJson({ ok: false, error: 'not_found' }, 404);
 
-    const [interests, availability, notes, comms, activity] = await env.DB.batch([
+    const [interests, availability, notes, comms, activity, events] = await env.DB.batch([
       env.DB.prepare('SELECT interest_code FROM volunteer_interests WHERE volunteer_id = ?').bind(v.id),
       env.DB.prepare('SELECT availability_code FROM volunteer_availability WHERE volunteer_id = ?').bind(v.id),
       env.DB.prepare(
@@ -67,8 +67,19 @@ export async function onRequestGet(context) {
            FROM audit_log
           WHERE entity_type = 'volunteer' AND entity_id = ?
           ORDER BY created_at DESC LIMIT 50`
-      ).bind(String(v.id))
+      ).bind(String(v.id)),
+      env.DB.prepare(
+        `SELECT a.id, a.status, a.hours, a.role,
+                e.id AS event_id, e.public_ref, e.title, e.starts_at
+           FROM event_assignments a
+           JOIN events e ON e.id = a.event_id
+          WHERE a.volunteer_id = ?
+          ORDER BY e.starts_at DESC
+          LIMIT 50`
+      ).bind(v.id)
     ]);
+
+    const eventRows = events.results || [];
 
     return adminJson({
       ok: true,
@@ -99,6 +110,28 @@ export async function onRequestGet(context) {
         updatedAt: v.updated_at,
         lastContactAt: v.last_contact_at,
         archivedAt: v.archived_at
+      },
+      // Hours count only what was actually attended, so the figure can be
+      // quoted to a funder without qualification.
+      service: {
+        eventsAttended: eventRows.filter((r) => r.status === 'ATTENDED').length,
+        totalHours:
+          Math.round(
+            eventRows.reduce((sum, r) => sum + (r.status === 'ATTENDED' ? r.hours || 0 : 0), 0) * 100
+          ) / 100,
+        upcoming: eventRows.filter(
+          (r) => r.starts_at >= new Date().toISOString() && r.status !== 'CANCELLED'
+        ).length,
+        history: eventRows.map((r) => ({
+          assignmentId: r.id,
+          eventId: r.event_id,
+          reference: r.public_ref,
+          title: r.title,
+          startsAt: r.starts_at,
+          role: r.role,
+          status: r.status,
+          hours: r.hours
+        }))
       },
       notes: (notes.results || []).map((n) => ({
         id: n.id, note: n.note, by: n.created_by, at: n.created_at

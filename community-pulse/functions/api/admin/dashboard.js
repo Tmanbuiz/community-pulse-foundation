@@ -25,7 +25,10 @@ export async function onRequestGet(context) {
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400000).toISOString();
     const staleCutoff = new Date(Date.now() - staleDays * 86400000).toISOString();
 
-    const [counts, recent, failedMail, stale, enquiryCounts, recentEnquiries] = await env.DB.batch([
+    const [
+      counts, recent, failedMail, stale, enquiryCounts, recentEnquiries,
+      upcomingEvents, needsAttendance
+    ] = await env.DB.batch([
       // Single pass for the summary cards. Archived records are excluded
       // everywhere except their own count.
       env.DB.prepare(
@@ -91,7 +94,38 @@ export async function onRequestGet(context) {
           WHERE archived_at IS NULL
           ORDER BY created_at DESC
           LIMIT 6`
-      )
+      ),
+
+      // What is coming up, soonest first.
+      env.DB.prepare(
+        `SELECT e.id, e.public_ref, e.title, e.location, e.starts_at, e.capacity, e.status,
+                (SELECT COUNT(*) FROM event_assignments a
+                  WHERE a.event_id = e.id AND a.status != 'CANCELLED') AS assigned
+           FROM events e
+          WHERE e.archived_at IS NULL
+            AND e.status IN ('DRAFT','SCHEDULED')
+            AND e.starts_at >= ?1
+          ORDER BY e.starts_at ASC
+          LIMIT 6`
+      ).bind(new Date().toISOString()),
+
+      // Events that have happened but still have people neither marked as
+      // attended nor as a no-show. This is the queue that quietly rots: the
+      // hours are lost to memory within a fortnight, and hours are what a
+      // funder asks to see.
+      env.DB.prepare(
+        `SELECT e.id, e.public_ref, e.title, e.starts_at,
+                COUNT(a.id) AS unrecorded
+           FROM events e
+           JOIN event_assignments a ON a.event_id = e.id
+          WHERE e.archived_at IS NULL
+            AND e.status != 'CANCELLED'
+            AND e.starts_at < ?1
+            AND a.status IN ('ASSIGNED','CONFIRMED')
+          GROUP BY e.id
+          ORDER BY e.starts_at ASC
+          LIMIT 10`
+      ).bind(new Date().toISOString())
     ]);
 
     const c = (counts.results && counts.results[0]) || {};
@@ -114,6 +148,25 @@ export async function onRequestGet(context) {
           submittedAt: r.created_at,
           amount: r.amount_received || r.amount_declared,
           fundsReceived: !!r.funds_received
+        }))
+      },
+      events: {
+        upcoming: (upcomingEvents.results || []).map((r) => ({
+          id: r.id,
+          reference: r.public_ref,
+          title: r.title,
+          location: r.location,
+          startsAt: r.starts_at,
+          capacity: r.capacity,
+          assigned: r.assigned || 0,
+          status: r.status
+        })),
+        needsAttendance: (needsAttendance.results || []).map((r) => ({
+          id: r.id,
+          reference: r.public_ref,
+          title: r.title,
+          startsAt: r.starts_at,
+          unrecorded: r.unrecorded || 0
         }))
       },
       counts: {

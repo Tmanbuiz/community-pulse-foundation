@@ -22,9 +22,11 @@ function clean(value, max) {
   return value.replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
+/** Requires Z or an offset. See the note in events/index.js for why. */
 function parseWhen(value) {
   if (typeof value !== 'string' || !value.trim()) return null;
-  const d = new Date(value.length === 16 ? `${value}:00Z` : value);
+  if (!/(Z|[+-]\d{2}:?\d{2})$/.test(value.trim())) return null;
+  const d = new Date(value.trim());
   return isNaN(d) ? null : d.toISOString();
 }
 

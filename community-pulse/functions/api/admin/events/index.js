@@ -28,10 +28,19 @@ function clean(value, max) {
   return value.replace(/\s+/g, ' ').trim().slice(0, max);
 }
 
-/** Accepts a full ISO timestamp or the "YYYY-MM-DDTHH:mm" a datetime-local gives. */
+/**
+ * Requires an unambiguous instant: an ISO timestamp carrying Z or an offset.
+ *
+ * A bare "2026-08-20T14:00" from a datetime-local input is deliberately
+ * rejected. The server has no way to know which zone the admin meant, and
+ * guessing UTC would shift every event by three hours in Atlantic Canada -
+ * an admin types 2pm, the volunteer is told 11am, and nobody notices until
+ * somebody turns up to an empty hall. The browser converts before sending.
+ */
 function parseWhen(value) {
   if (typeof value !== 'string' || !value.trim()) return null;
-  const d = new Date(value.length === 16 ? `${value}:00Z` : value);
+  if (!/(Z|[+-]\d{2}:?\d{2})$/.test(value.trim())) return null;
+  const d = new Date(value.trim());
   return isNaN(d) ? null : d.toISOString();
 }
 

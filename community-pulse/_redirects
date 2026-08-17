@@ -1,0 +1,23 @@
+# =========================================================
+# Cloudflare Pages redirects
+# ---------------------------------------------------------
+# Retired pages from the FormSubmit era. Both were "thank you"
+# pages that a third-party form service redirected to after a
+# submission; the site now saves submissions itself and shows
+# the confirmation in place, so neither page had anything
+# linking to it.
+#
+# They are redirected rather than simply removed because the
+# URLs may still exist outside our control - a printed flyer,
+# an old email, a bookmark. A 404 tells such a visitor that
+# the Foundation's site is broken; a redirect puts them where
+# they were trying to get to.
+# =========================================================
+
+/thank-you.html           /get-involved.html?type=financial   301
+/involved-thank-you.html  /get-involved.html                  301
+
+# Same targets without the extension, in case either was ever
+# linked that way.
+/thank-you                /get-involved.html?type=financial   301
+/involved-thank-you       /get-involved.html                  301

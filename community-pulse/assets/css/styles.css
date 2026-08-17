@@ -1588,20 +1588,6 @@ a {
   color: rgba(255, 255, 255, 0.86);
 }
 
-/* On light backgrounds (thank-you page) */
-.thank-you-card .powered-by {
-  color: var(--text-light);
-}
-
-.thank-you-card .powered-by::before,
-.thank-you-card .powered-by::after {
-  background: var(--border);
-}
-
-.thank-you-card .powered-by strong {
-  color: var(--primary-dark);
-}
-
 /* =========================================================
    WELCOME BAND
    ========================================================= */

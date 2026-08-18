@@ -49,10 +49,24 @@ function esc(value) {
     .replace(/'/g, '&#39;');
 }
 
-/** Body text -> a plain-prose description, tags and markdown removed. */
+/**
+ * Body text -> a plain-prose description, tags and markdown removed.
+ *
+ * Leading markdown headings are dropped rather than flattened into the
+ * prose. Keeping them produced descriptions like "How we started The
+ * Community Pulse Foundation was incorporated in..." - the heading running
+ * straight into the first sentence with no punctuation, which is what a
+ * searcher would have seen under the result.
+ */
 function toDescription(body) {
-  const text = String(body || '')
+  const lines = String(body || '')
     .replace(/<[^>]*>/g, ' ')
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line && !/^#{1,6}\s/.test(line));
+
+  const text = lines
+    .join(' ')
     .replace(/[#*_`>[\]]/g, '')
     .replace(/\s+/g, ' ')
     .trim();

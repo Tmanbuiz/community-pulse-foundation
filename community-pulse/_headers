@@ -4,8 +4,14 @@
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 
+# A week, and deliberately not `immutable`. A year with `immutable` is the
+# right rule for content-hashed filenames (logo.a3f9c2.jpg), where a changed
+# image is always a changed URL. These filenames are stable - logo-clean.jpg
+# stays logo-clean.jpg when the picture behind it is replaced - so that rule
+# would strand returning visitors on the old image for a year, with the
+# browser refusing even to revalidate it.
 /assets/images/*
-  Cache-Control: public, max-age=31536000, immutable
+  Cache-Control: public, max-age=604800, must-revalidate
 
 /assets/css/*
   Cache-Control: public, max-age=3600, must-revalidate

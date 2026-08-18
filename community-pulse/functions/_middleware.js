@@ -62,7 +62,15 @@ function toDescription(body) {
   const lines = String(body || '')
     .replace(/<[^>]*>/g, ' ')
     .split(/\r?\n/)
-    .map((line) => line.trim())
+    .map((line) =>
+      line
+        .trim()
+        // Leading list markers are dropped too. Flattened into prose they
+        // read as stray punctuation - "...together. - Community outreach" -
+        // which looks like a typo in a search result.
+        .replace(/^[-*+]\s+/, '')
+        .replace(/^\d+\.\s+/, '')
+    )
     .filter((line) => line && !/^#{1,6}\s/.test(line));
 
   const text = lines

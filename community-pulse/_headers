@@ -23,7 +23,16 @@
   Cache-Control: public, max-age=0, must-revalidate
 
 # The CRM application assets, exempted from the hour-long cache above.
-# These must come after the /assets/* rules so they take precedence.
+#
+# Note on how this actually behaves: Pages MERGES every matching rule
+# rather than letting the most specific or the last one win, so these
+# files are served the union of both rules -
+#   public, max-age=3600, must-revalidate, no-store, private
+# - which is self-contradictory to read but correct in effect: no-store
+# takes precedence per RFC 9111, and Cloudflare reports cf-cache-status
+# BYPASS for them. Do not "tidy" this by deleting the rule below on the
+# assumption that the generic one is being overridden; it is not, and
+# removing it would leave the CRM cached for an hour again.
 #
 # The CRM is a single-page app talking to a versioned API, used by a
 # handful of admins. Caching it saves nothing worth having and costs a

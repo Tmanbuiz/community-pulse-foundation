@@ -10,7 +10,11 @@
    ========================================================= */
 
 import { requireAdmin, adminJson, denied, recordAudit } from '../../../_lib/admin-auth.js';
-import { volunteerStatusUpdateEmail, deliverCommunication } from '../../../_lib/zoho.js';
+import {
+  volunteerStatusUpdateEmail,
+  deliverCommunication,
+  queueVolunteerComm
+} from '../../../_lib/zoho.js';
 
 const STATUSES = [
   'NEW', 'REVIEWED', 'CONTACTED', 'APPROVED',
@@ -266,24 +270,15 @@ export async function onRequestPatch(context) {
 
       if (mail) {
         try {
-          const queued = await env.DB
-            .prepare(
-              `INSERT INTO communications
-                 (volunteer_id, type, to_address, subject, body_preview, status, created_by, created_at, updated_at)
-               VALUES (?, 'STATUS_UPDATE', ?, ?, ?, 'PENDING', ?, ?, ?)`
-            )
-            .bind(
-              v.id,
-              v.email,
-              mail.subject,
-              (personalNote || notifyStatus).slice(0, 200),
-              auth.actor.email,
-              now,
-              now
-            )
-            .run();
-
-          const commId = queued.meta && queued.meta.last_row_id;
+          const commId = await queueVolunteerComm(env, {
+            volunteerId: v.id,
+            type: 'STATUS_UPDATE',
+            to: v.email,
+            subject: mail.subject,
+            preview: personalNote || notifyStatus,
+            createdBy: auth.actor.email,
+            at: now
+          });
 
           const sent = await deliverCommunication(env, commId, {
             to: v.email,

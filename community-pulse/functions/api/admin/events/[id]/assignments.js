@@ -17,9 +17,18 @@
    ========================================================= */
 
 import { requireAdmin, adminJson, denied, recordAudit } from '../../../../_lib/admin-auth.js';
-import { eventAssignmentEmail, deliverCommunication } from '../../../../_lib/zoho.js';
+import {
+  eventAssignmentEmail,
+  deliverCommunication,
+  queueVolunteerComm
+} from '../../../../_lib/zoho.js';
 
 const MAX_BATCH = 100;
+
+// How many assignment emails are in flight at once. Small enough to stay well
+// inside the mail provider's rate limits and the Workers connection budget,
+// large enough that a twenty-person roster no longer takes twenty round trips.
+const NOTIFY_CONCURRENCY = 5;
 const LIMITS = { role: 80, note: 1000 };
 
 export async function onRequestPost(context) {
@@ -172,15 +181,16 @@ export async function onRequestPost(context) {
       let sent = 0;
       const failures = [];
 
-      // Each volunteer's queue-send-mark sequence is independent of every
-      // other's, so they run concurrently rather than one at a time. On a
-      // large roster the sequential form meant the admin's browser sat on
-      // "Adding..." for one Zoho round trip per person; every task here
-      // still resolves rather than rejects, so one failure can never affect
-      // another's outcome or short-circuit the batch.
-      const outcomes = await Promise.all(
-        toAssign.map(async ({ volunteer }) => {
-          const name = `${volunteer.first_name} ${volunteer.last_name}`.trim();
+      /**
+       * One volunteer's queue-send-mark sequence. Everything, including
+       * building the email, sits inside the try: a template that threw
+       * outside it would reject the surrounding batch and fail the whole
+       * request, after other volunteers had already been emailed - which
+       * invites the admin to retry and send those people a second copy.
+       */
+      const notifyOne = async ({ volunteer }) => {
+        const name = `${volunteer.first_name} ${volunteer.last_name}`.trim();
+        try {
           const mail = eventAssignmentEmail({
             firstName: volunteer.first_name,
             event: {
@@ -194,46 +204,50 @@ export async function onRequestPost(context) {
             note
           });
 
-          try {
-            const queued = await env.DB
-              .prepare(
-                `INSERT INTO communications
-                   (volunteer_id, type, to_address, subject, body_preview, status, created_by, created_at, updated_at)
-                 VALUES (?, 'EVENT_ASSIGNMENT', ?, ?, ?, 'PENDING', ?, ?, ?)`
-              )
-              .bind(
-                volunteer.id,
-                volunteer.email,
-                mail.subject,
-                (note || event.title).slice(0, 200),
-                auth.actor.email,
-                now,
-                now
-              )
-              .run();
+          const commId = await queueVolunteerComm(env, {
+            volunteerId: volunteer.id,
+            type: 'EVENT_ASSIGNMENT',
+            to: volunteer.email,
+            subject: mail.subject,
+            preview: note || event.title,
+            createdBy: auth.actor.email,
+            at: now
+          });
 
-            const result = await deliverCommunication(env, queued.meta && queued.meta.last_row_id, {
-              to: volunteer.email,
-              subject: mail.subject,
-              html: mail.html
-            });
+          const result = await deliverCommunication(env, commId, {
+            to: volunteer.email,
+            subject: mail.subject,
+            html: mail.html
+          });
 
-            if (!result.ok) return { ok: false, name, error: result.error };
+          if (!result.ok) return { ok: false, name, error: result.error };
 
-            await env.DB
-              .prepare('UPDATE event_assignments SET notified_at = ? WHERE event_id = ? AND volunteer_id = ?')
-              .bind(now, event.id, volunteer.id)
-              .run();
-            return { ok: true };
-          } catch (mailErr) {
-            return {
-              ok: false,
-              name,
-              error: (mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 120)
-            };
-          }
-        })
-      );
+          await env.DB
+            .prepare('UPDATE event_assignments SET notified_at = ? WHERE event_id = ? AND volunteer_id = ?')
+            .bind(now, event.id, volunteer.id)
+            .run();
+          return { ok: true };
+        } catch (mailErr) {
+          return {
+            ok: false,
+            name,
+            error: (mailErr && mailErr.message ? mailErr.message : 'unknown').slice(0, 120)
+          };
+        }
+      };
+
+      // Sent a few at a time rather than all at once. Fully sequential made
+      // the admin wait one Zoho round trip per person on a large roster;
+      // fully concurrent would fire up to MAX_BATCH (100) simultaneous calls
+      // at the mail API and the Workers connection limit, and the failure
+      // that produces - a rate-limited batch where a dozen volunteers are
+      // never told when to turn up - is far worse than the seconds saved.
+      const outcomes = [];
+      for (let i = 0; i < toAssign.length; i += NOTIFY_CONCURRENCY) {
+        const slice = toAssign.slice(i, i + NOTIFY_CONCURRENCY);
+        const settled = await Promise.all(slice.map(notifyOne));
+        outcomes.push(...settled);
+      }
 
       for (const outcome of outcomes) {
         if (outcome.ok) sent += 1;

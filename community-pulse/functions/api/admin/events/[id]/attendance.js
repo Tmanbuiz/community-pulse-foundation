@@ -157,10 +157,16 @@ export async function onRequestPost(context) {
 
     const totals = await env.DB
       .prepare(
+        // total_hours counts ATTENDED rows only, matching the event detail
+        // endpoint, the events list and the volunteer profile. This was the
+        // last place still summing every non-cancelled row and relying on
+        // the insert-time rule to keep that equivalent - the same implicit
+        // invariant the other three deliberately stopped depending on, which
+        // would have left the audit trail disagreeing with every screen.
         `SELECT COUNT(*) AS roster,
                 SUM(CASE WHEN status = 'ATTENDED' THEN 1 ELSE 0 END) AS attended,
                 SUM(CASE WHEN status = 'NO_SHOW'  THEN 1 ELSE 0 END) AS no_show,
-                COALESCE(SUM(hours), 0) AS total_hours
+                COALESCE(SUM(CASE WHEN status = 'ATTENDED' THEN hours END), 0) AS total_hours
            FROM event_assignments
           WHERE event_id = ? AND status != 'CANCELLED'`
       )

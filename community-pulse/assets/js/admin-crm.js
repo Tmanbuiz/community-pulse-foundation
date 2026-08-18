@@ -339,7 +339,14 @@
         '</tr></thead><tbody>' +
         failed.map(function (f) {
           var profileLink = '#/' + (f.kind === 'enquiry' ? 'enquiries' : 'volunteers') + '/' + encodeURIComponent(f.reference);
-          var action = RETRYABLE_TYPES[f.type]
+
+          // The kind check is not redundant. This list unions two tables whose
+          // ids are separate autoincrement sequences, while the retry endpoint
+          // takes a bare id and only ever looks in `communications`. Without
+          // it, an enquiry row that ever carried a retryable type name would
+          // send that id to the wrong table - where it almost certainly
+          // matches a different person's email - and resend theirs instead.
+          var action = f.kind === 'volunteer' && RETRYABLE_TYPES[f.type]
             ? '<button class="btn btn-quiet btn-sm" data-retry="' + esc(f.communicationId) + '">Retry</button>'
             : '<span class="cell-sub">Cannot auto-resend — contact them directly</span>';
           return '<tr>' +
@@ -1639,20 +1646,29 @@
             method: 'POST',
             body: JSON.stringify({ entries: collectEntries() })
           });
-          // Rejected rows were not saved at all. Hours-dropped rows *were*
-          // saved - the status change went through - only their hours were
-          // set aside, so this is reported as a separate, less alarming
-          // message rather than folded into "not saved".
+          // Two independent outcomes, so both are reported. Rejected rows were
+          // not saved at all; hours-dropped rows *were* saved and only their
+          // hours were set aside. An `else if` here hid the second whenever
+          // the first also occurred, losing exactly the information this
+          // message exists to convey.
+          var parts = [];
           if (res.rejected && res.rejected.length) {
-            showError('Some rows were not saved',
-              '<ul>' + res.rejected.map(function (r) {
+            parts.push('<p><strong>Not saved:</strong></p><ul>' +
+              res.rejected.map(function (r) {
                 return '<li>' + esc(REJECT_REASONS[r.reason] || r.reason) + '</li>';
               }).join('') + '</ul>');
-          } else if (res.hoursDropped && res.hoursDropped.length) {
-            showError('Saved, but some hours were not recorded',
-              'Hours only count against someone marked as turned up. ' +
-              esc(res.hoursDropped.length) + (res.hoursDropped.length === 1 ? ' row had' : ' rows had') +
-              ' hours entered against a different status, so the status change was saved and the hours were left blank.');
+          }
+          if (res.hoursDropped && res.hoursDropped.length) {
+            parts.push('<p><strong>Saved, but hours left blank on ' +
+              esc(res.hoursDropped.length) + (res.hoursDropped.length === 1 ? ' row' : ' rows') +
+              ':</strong> hours only count against someone marked as turned up, ' +
+              'so the status change was saved and the hours were cleared.</p>');
+          }
+          if (parts.length) {
+            showError(
+              res.rejected && res.rejected.length ? 'Some rows need another look' : 'Saved, with a change',
+              parts.join('')
+            );
           }
           renderEvent(ref);
         } catch (err) {

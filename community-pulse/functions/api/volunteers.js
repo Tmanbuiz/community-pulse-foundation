@@ -22,7 +22,8 @@
 import {
   acknowledgementEmail,
   adminNotificationEmail,
-  deliverCommunication
+  deliverCommunication,
+  volunteerCommStatement
 } from '../_lib/zoho.js';
 
 // Controlled category codes. Anything not in these sets is rejected
@@ -348,27 +349,32 @@ export async function onRequestPost(context) {
 
     // Both rows are created PENDING first, so an admin can still see that an
     // email was owed even if the isolate dies before delivery completes.
+    // Built through the shared statement helper rather than hand-written SQL,
+    // so all four places that queue a volunteer communication stay identical.
+    // Still batched: both rows are created in one round trip on the public
+    // submission path.
+    //
+    // No `preview` is passed. body_preview is meant to hold something the
+    // subject does not already say - an admin's note, or the status being
+    // communicated - and these two are fully described by their subject.
+    // Copying the subject into it would be duplication dressed as data.
+    // createdBy is likewise omitted: this endpoint is public and
+    // unauthenticated, so there is no actor to attribute the rows to.
     const queued = await env.DB.batch([
-      // body_preview matches the convention used everywhere else a
-      // communication is queued (status-update and event-assignment emails,
-      // and the enquiry equivalent) - it had been left out here, the one
-      // place nothing populated it. created_by is correctly left NULL: these
-      // two rows are generated from the public, unauthenticated submission
-      // endpoint, so there is no admin actor to attribute them to.
-      env.DB
-        .prepare(
-          `INSERT INTO communications
-             (volunteer_id, type, to_address, subject, body_preview, status, created_at, updated_at)
-           VALUES (?, 'ACKNOWLEDGEMENT', ?, ?, ?, 'PENDING', ?, ?)`
-        )
-        .bind(volunteerId, email, ack.subject, ack.subject.slice(0, 200), now, now),
-      env.DB
-        .prepare(
-          `INSERT INTO communications
-             (volunteer_id, type, to_address, subject, body_preview, status, created_at, updated_at)
-           VALUES (?, 'ADMIN_NOTIFICATION', ?, ?, ?, 'PENDING', ?, ?)`
-        )
-        .bind(volunteerId, adminTo, adminNote.subject, adminNote.subject.slice(0, 200), now, now)
+      volunteerCommStatement(env, {
+        volunteerId,
+        type: 'ACKNOWLEDGEMENT',
+        to: email,
+        subject: ack.subject,
+        at: now
+      }),
+      volunteerCommStatement(env, {
+        volunteerId,
+        type: 'ADMIN_NOTIFICATION',
+        to: adminTo,
+        subject: adminNote.subject,
+        at: now
+      })
     ]);
 
     const ackId = queued[0] && queued[0].meta && queued[0].meta.last_row_id;

@@ -15,6 +15,7 @@ import {
   deliverEnquiryAck,
   sendMail
 } from '../_lib/zoho.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 const TYPES = new Set(['ITEM_DONATION', 'FINANCIAL', 'QUESTION', 'OTHER']);
 
@@ -129,6 +130,21 @@ export async function onRequestPost(context) {
       verdict.codes.includes('timeout-or-duplicate') ||
       verdict.codes.includes('invalid-input-response');
     return json({ ok: false, error: 'turnstile_failed', recoverable }, recoverable ? 400 : 403);
+  }
+
+  /* ---- rate limiting ---- */
+  const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rateLimit = await checkRateLimit(env, clientIp, 'enquiries');
+  if (!rateLimit.allowed) {
+    return json(
+      {
+        ok: false,
+        error: 'rate_limited',
+        resetAt: rateLimit.resetAt,
+        message: `Too many submissions from this IP. Try again after ${new Date(rateLimit.resetAt).toLocaleTimeString()}.`
+      },
+      429
+    );
   }
 
   /* ---------------- validation ---------------- */

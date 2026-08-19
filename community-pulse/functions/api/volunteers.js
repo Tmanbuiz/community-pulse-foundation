@@ -25,6 +25,7 @@ import {
   deliverCommunication,
   volunteerCommStatement
 } from '../_lib/zoho.js';
+import { checkRateLimit } from '../_lib/rate-limit.js';
 
 // Controlled category codes. Anything not in these sets is rejected
 // rather than stored, so the admin filters stay meaningful.
@@ -193,6 +194,23 @@ export async function onRequestPost(context) {
     return json(
       { ok: false, error: 'turnstile_failed', recoverable },
       recoverable ? 400 : 403
+    );
+  }
+
+  // --- rate limiting -------------------------------------------------------
+  // Turnstile prevents automated spam; this prevents a single IP from
+  // overwhelming the system with legitimate-looking submissions.
+  const clientIp = request.headers.get('CF-Connecting-IP') || 'unknown';
+  const rateLimit = await checkRateLimit(env, clientIp, 'volunteers');
+  if (!rateLimit.allowed) {
+    return json(
+      {
+        ok: false,
+        error: 'rate_limited',
+        resetAt: rateLimit.resetAt,
+        message: `Too many submissions from this IP. Try again after ${new Date(rateLimit.resetAt).toLocaleTimeString()}.`
+      },
+      429
     );
   }
 
